@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Микс-шар</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep: #0c0a13;
+    --bg-glow: #1c1330;
+    --glass-1: #362a55;
+    --glass-2: #120e1e;
+    --screen-bg: #100b1c;
+    --accent: #ffb98a;
+    --accent-soft: #ffd9b8;
+    --mint: #7de0c9;
+    --text-muted: #9a90b3;
+    --text-dim: #6a6285;
+  }
+
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+    background: var(--bg-deep);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-muted);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .stage{
+    position: relative;
+    width: 100%; height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 8%, var(--bg-glow) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 50% at 50% 100%, #150e24 0%, transparent 60%),
+      var(--bg-deep);
+    overflow: hidden;
+  }
+
+  /* ambient dust */
+  .motes{ position:absolute; inset:0; pointer-events:none; }
+  .mote{
+    position:absolute; border-radius:50%;
+    background: var(--mint);
+    opacity:.18; filter: blur(1px);
+    animation: drift linear infinite;
+  }
+  @keyframes drift{
+    from{ transform: translateY(0) translateX(0); }
+    to{ transform: translateY(-120px) translateX(20px); }
+  }
+
+  .eyebrow{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 34px;
+    opacity: .8;
+  }
+
+  /* --- the orb --- */
+  .orb-wrap{
+    position: relative;
+    width: 260px; height: 260px;
+    display:flex; align-items:center; justify-content:center;
+    cursor: pointer;
+    transform: translateZ(0);
+  }
+
+  .orb-halo{
+    position:absolute; inset:-40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,185,138,0.12) 0%, rgba(125,224,201,0.06) 45%, transparent 72%);
+    filter: blur(6px);
+    animation: breathe 5.5s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform: scale(1); opacity:.7; }
+    50%{ transform: scale(1.08); opacity:1; }
+  }
+
+  .orb{
+    position: relative;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 22%),
+      radial-gradient(circle at 68% 78%, var(--glass-1) 0%, var(--glass-2) 70%);
+    box-shadow:
+      0 0 60px rgba(90, 60, 140, 0.45),
+      inset 0 -14px 40px rgba(0,0,0,0.55),
+      inset 0 10px 30px rgba(255,255,255,0.06);
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .08s ease-out;
+  }
+
+  .orb.shaking{ animation: wobble .55s ease-in-out; }
+  @keyframes wobble{
+    0%{ transform: rotate(0deg) scale(1); }
+    15%{ transform: rotate(-6deg) scale(1.02); }
+    30%{ transform: rotate(5deg) scale(0.99); }
+    45%{ transform: rotate(-4deg) scale(1.015); }
+    60%{ transform: rotate(3deg) scale(0.995); }
+    75%{ transform: rotate(-2deg) scale(1.005); }
+    100%{ transform: rotate(0deg) scale(1); }
+  }
+
+  .screen{
+    position: relative;
+    width: 176px; height: 176px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, #18122a 0%, var(--screen-bg) 75%);
+    box-shadow: inset 0 0 22px rgba(0,0,0,0.8), inset 0 0 2px rgba(255,255,255,0.08);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  .screen::before{
+    content:'';
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.025) 0px,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    opacity:.5;
+    pointer-events:none;
+  }
+
+  .screen-content{ position:relative; z-index:1; width:100%; }
+
+  .idle-icon{
+    font-size: 30px;
+    margin-bottom: 8px;
+    opacity: .85;
+    filter: drop-shadow(0 0 8px rgba(125,224,201,0.5));
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:.5; transform: scale(1); }
+    50%{ opacity:1; transform: scale(1.08); }
+  }
+
+  .idle-text{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .05em;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .mix-name{
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent-soft);
+    line-height: 1.15;
+    text-shadow: 0 0 18px rgba(255,185,138,0.45);
+    margin-bottom: 8px;
+    opacity: 0;
+  }
+
+  .mix-desc{
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: #c9c2df;
+    opacity: 0;
+  }
+
+  .mix-name.show, .mix-desc.show{
+    animation: reveal .5s ease forwards;
+  }
+  .mix-desc.show{ animation-delay: .12s; }
+  @keyframes reveal{
+    from{ opacity:0; transform: translateY(6px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .hint{
+    margin-top: 40px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 260px;
+    line-height: 1.5;
+  }
+  .hint b{ color: var(--text-muted); font-weight: 500; }
+
+  .permission-btn{
+    margin-top: 22px;
+    padding: 11px 22px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,185,138,0.35);
+    background: rgba(255,185,138,0.08);
+    color: var(--accent-soft);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .01em;
+    cursor: pointer;
+  }
+  .permission-btn:active{ transform: scale(.97); }
+
+  .counter{
+    position:absolute;
+    top: 22px; right: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    letter-spacing: .1em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .orb-halo, .idle-icon, .mote{ animation: none !important; }
+    .orb.shaking{ animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="motes" id="motes"></div>
+
+  <div class="eyebrow">Оракул вкуса</div>
+
+  <div class="orb-wrap" id="orbWrap">
+    <div class="orb-halo"></div>
+    <div class="orb" id="orb">
+      <div class="screen" id="screen">
+        <div class="screen-content" id="screenContent">
+          <div class="idle-icon">◐</div>
+          <div class="idle-text">встряхни<br>телефон</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint" id="hint"><b>Встряхни</b> телефон — шар подберёт вкусовой микс.<br>Не работает встряхивание? Просто коснись шара.</div>
+
+  <div class="counter" id="counter"></div>
+</div>
+
+<script>
+(function(){
+  // ---- Telegram WebApp bootstrap ----
+  var tg = window.Telegram && window.Telegram.WebApp;
+  if(tg){
+    tg.ready();
+    tg.expand();
+    try{ document.body.style.background = 'var(--bg-deep)'; tg.setHeaderColor && tg.setHeaderColor('#0c0a13'); }catch(e){}
+  }
+  function haptic(style){
+    if(tg && tg.HapticFeedback){
+      try{ tg.HapticFeedback.impactOccurred(style || 'medium'); }catch(e){}
+    } else if(navigator.vibrate){
+      navigator.vibrate(style === 'light' ? 12 : 30);
+    }
+  }
+
+  // ---- flavor mixes ----
+  var mixes = [
+    { name: "Тропический шторм", desc: "Манго, маракуйя и капля лайма — солнце в стакане." },
+    { name: "Полуночная мята", desc: "Свежая мята, лёгкая горечь грейпфрута, холодок эвкалипта." },
+    { name: "Малиновый дым", desc: "Малина, дымный чёрный чай и щепотка ванили." },
+    { name: "Кокосовый штиль", desc: "Кокосовое молоко, ананас и нотка мускатного ореха." },
+    { name: "Огненный гранат", desc: "Гранат, апельсиновая цедра и лёгкая перчинка чили." },
+    { name: "Лавандовый туман", desc: "Лаванда, лимон и мёд — мягко и почти невесомо." },
+    { name: "Кофейный оверклок", desc: "Эспрессо, какао-нибс и карамельный подтон." },
+    { name: "Арбузный неон", desc: "Арбуз, базилик и искра розовой соли." },
+    { name: "Имбирный разряд", desc: "Имбирь, лемонграсс и цитрусовая вспышка юдзу." },
+    { name: "Черничный вельвет", desc: "Черника, лаванда и сливочная ваниль." },
+    { name: "Персиковый бархат", desc: "Персик, розмарин и капля коричневого сахара." },
+    { name: "Мохито без границ", desc: "Лайм, мята и содовая — классика без правил." },
+    { name: "Дынный аврора", desc: "Дыня, огурец и мятная свежесть." },
+    { name: "Вишнёвый код", desc: "Вишня, тёмный шоколад и нотка миндаля." },
+    { name: "Ананасовый сигнал", desc: "Ананас, чили и морская соль на кайме." },
+    { name: "Яблочная специя", desc: "Яблоко, корица и звёздчатый анис." },
+    { name: "Цитрусовый прибой", desc: "Апельсин, грейпфрут и веточка розмарина." },
+    { name: "Фиговый закат", desc: "Инжир, апельсин и тёплая нотка гвоздики." },
+    { name: "Клубничный статик", desc: "Клубника, чёрный перец и лёгкая кислинка бальзамика." },
+    { name: "Лимонная гроза", desc: "Лимон, имбирь и мятный разряд." }
+  ];
+  var lastIndex = -1;
+  function pickMix(){
+    var i;
+    do{ i = Math.floor(Math.random() * mixes.length); } while(i === lastIndex && mixes.length > 1);
+    lastIndex = i;
+    return mixes[i];
+  }
+
+  // ---- rendering ----
+  var orb = document.getElementById('orb');
+  var content = document.getElementById('screenContent');
+  var counterEl = document.getElementById('counter');
+  var count = 0;
+  var busy = false;
+
+  function renderMix(mix){
+    content.innerHTML =
+      '<div class="mix-name" id="mn">' + mix.name + '</div>' +
+      '<div class="mix-desc" id="md">' + mix.desc + '</div>';
+    requestAnimationFrame(function(){
+      document.getElementById('mn').classList.add('show');
+      document.getElementById('md').classList.add('show');
+    });
+  }
+
+  function triggerMix(){
+    if(busy) return;
+    busy = true;
+    haptic('medium');
+    orb.classList.remove('shaking');
+    void orb.offsetWidth; // restart animation
+    orb.classList.add('shaking');
+    setTimeout(function(){
+      var mix = pickMix();
+      renderMix(mix);
+      count++;
+      counterEl.textContent = '№ ' + String(count).padStart(3, '0');
+    }, 180);
+    setTimeout(function(){ busy = false; }, 700);
+  }
+
+  // ---- shake detection ----
+  var SHAKE_THRESHOLD = 16; // m/s^2 delta
+  var lastX = null, lastY = null, lastZ = null, lastTime = 0;
+
+  function handleMotion(e){
+    var acc = e.accelerationIncludingGravity || e.acceleration;
+    if(!acc || acc.x === null) return;
+    var now = Date.now();
+    if(now - lastTime < 100) return;
+
+    if(lastX !== null){
+      var dx = Math.abs(acc.x - lastX);
+      var dy = Math.abs(acc.y - lastY);
+      var dz = Math.abs(acc.z - lastZ);
+      if(dx + dy + dz > SHAKE_THRESHOLD){
+        triggerMix();
+      }
+    }
+    lastX = acc.x; lastY = acc.y; lastZ = acc.z; lastTime = now;
+  }
+
+  function attachShake(){
+    window.addEventListener('devicemotion', handleMotion, true);
+  }
+
+  function initMotion(){
+    if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+      // iOS 13+: needs a user gesture
+      var btn = document.createElement('button');
+      btn.className = 'permission-btn';
+      btn.textContent = 'Разрешить встряхивание';
+      btn.onclick = function(){
+        DeviceMotionEvent.requestPermission().then(function(state){
+          if(state === 'granted'){ attachShake(); }
+          btn.remove();
+        }).catch(function(){ btn.remove(); });
+      };
+      document.getElementById('hint').insertAdjacentElement('afterend', btn);
+    } else if(typeof DeviceMotionEvent !== 'undefined'){
+      attachShake();
+    }
+  }
+  initMotion();
+
+  // tap-to-shake fallback (also works alongside real shake)
+  document.getElementById('orbWrap').addEventListener('click', triggerMix);
+
+  // ---- ambient dust motes ----
+  var motesEl = document.getElementById('motes');
+  var colors = ['var(--mint)', 'var(--accent)'];
+  for(var i = 0; i < 22; i++){
+    var m = document.createElement('div');
+    m.className = 'mote';
+    var size = 2 + Math.random() * 3;
+    m.style.width = size + 'px';
+    m.style.height = size + 'px';
+    m.style.left = Math.random() * 100 + '%';
+    m.style.top = 40 + Math.random() * 60 + '%';
+    m.style.background = colors[i % 2];
+    m.style.animationDuration = (6 + Math.random() * 8) + 's';
+    m.style.animationDelay = (Math.random() * 6) + 's';
+    motesEl.appendChild(m);
+  }
+})();
+</script>
+</body>
+</html>
