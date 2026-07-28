@@ -7,17 +7,19 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep: #0c0a13;
+    --bg-deep: #0b0912;
     --bg-glow: #1c1330;
-    --glass-1: #362a55;
-    --glass-2: #120e1e;
-    --screen-bg: #100b1c;
+    --glass-1: #4a3a78;
+    --glass-2: #100c1c;
+    --screen-bg: #0d0919;
+    --neon: #7effe0;
+    --neon-soft: #baffef;
     --accent: #ffb98a;
-    --accent-soft: #ffd9b8;
     --mint: #7de0c9;
+    --violet: #a58bff;
     --text-muted: #9a90b3;
     --text-dim: #6a6285;
   }
@@ -45,12 +47,11 @@
     overflow: hidden;
   }
 
-  /* ambient dust */
   .motes{ position:absolute; inset:0; pointer-events:none; }
   .mote{
     position:absolute; border-radius:50%;
     background: var(--mint);
-    opacity:.18; filter: blur(1px);
+    opacity:.16; filter: blur(1px);
     animation: drift linear infinite;
   }
   @keyframes drift{
@@ -64,66 +65,92 @@
     letter-spacing: .28em;
     text-transform: uppercase;
     color: var(--text-dim);
-    margin-bottom: 34px;
+    margin-bottom: 30px;
     opacity: .8;
   }
 
-  /* --- the orb --- */
+  /* ================= ORB ================= */
   .orb-wrap{
     position: relative;
-    width: 260px; height: 260px;
+    width: 268px; height: 268px;
     display:flex; align-items:center; justify-content:center;
     cursor: pointer;
-    transform: translateZ(0);
+    perspective: 900px;
   }
 
   .orb-halo{
-    position:absolute; inset:-40px;
+    position:absolute; inset:-46px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,185,138,0.12) 0%, rgba(125,224,201,0.06) 45%, transparent 72%);
-    filter: blur(6px);
-    animation: breathe 5.5s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(126,255,224,0.14) 0%, rgba(165,139,255,0.08) 45%, transparent 72%);
+    filter: blur(8px);
+    animation: breathe 6s ease-in-out infinite;
   }
   @keyframes breathe{
-    0%,100%{ transform: scale(1); opacity:.7; }
-    50%{ transform: scale(1.08); opacity:1; }
+    0%,100%{ transform: scale(1); opacity:.65; }
+    50%{ transform: scale(1.1); opacity:1; }
+  }
+
+  .orb-wrap.pulse .orb{ animation: bump .6s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes bump{
+    0%{ transform: scale(1) rotateX(6deg); }
+    30%{ transform: scale(1.07) rotateX(6deg); }
+    55%{ transform: scale(0.97) rotateX(6deg); }
+    75%{ transform: scale(1.03) rotateX(6deg); }
+    100%{ transform: scale(1) rotateX(6deg); }
   }
 
   .orb{
     position: relative;
-    width: 240px; height: 240px;
+    width: 248px; height: 248px;
     border-radius: 50%;
+    transform: rotateX(6deg);
+    transform-style: preserve-3d;
     background:
-      radial-gradient(circle at 32% 26%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 22%),
-      radial-gradient(circle at 68% 78%, var(--glass-1) 0%, var(--glass-2) 70%);
+      radial-gradient(circle at 30% 24%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 26%),
+      radial-gradient(circle at 70% 80%, var(--glass-1) 0%, var(--glass-2) 72%);
     box-shadow:
-      0 0 60px rgba(90, 60, 140, 0.45),
-      inset 0 -14px 40px rgba(0,0,0,0.55),
-      inset 0 10px 30px rgba(255,255,255,0.06);
-    display:flex; align-items:center; justify-content:center;
-    transition: transform .08s ease-out;
+      0 0 70px rgba(126, 90, 220, 0.4),
+      0 18px 50px rgba(0,0,0,0.55),
+      inset 0 -20px 46px rgba(0,0,0,0.6),
+      inset 0 14px 34px rgba(255,255,255,0.07);
+    overflow: hidden;
   }
 
-  .orb.shaking{ animation: wobble .55s ease-in-out; }
-  @keyframes wobble{
-    0%{ transform: rotate(0deg) scale(1); }
-    15%{ transform: rotate(-6deg) scale(1.02); }
-    30%{ transform: rotate(5deg) scale(0.99); }
-    45%{ transform: rotate(-4deg) scale(1.015); }
-    60%{ transform: rotate(3deg) scale(0.995); }
-    75%{ transform: rotate(-2deg) scale(1.005); }
-    100%{ transform: rotate(0deg) scale(1); }
+  /* rotating inner "aurora" shell — the orb visibly spins around its own axis */
+  .orb-spin{
+    position:absolute; inset:-20%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+      rgba(126,255,224,0.5), rgba(165,139,255,0.45), rgba(255,185,138,0.4),
+      rgba(126,255,224,0.5) 100%);
+    mix-blend-mode: soft-light;
+    opacity: .85;
+    animation: spin 16s linear infinite;
+  }
+  .orb-spin.burst{ animation-duration: 2.4s; }
+  @keyframes spin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+  }
+
+  /* static specular highlight — never rotates, keeps the glass feeling 3D */
+  .orb-sheen{
+    position:absolute; inset:0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 28% 22%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 20%),
+      radial-gradient(circle at 78% 85%, rgba(0,0,0,0.35) 0%, transparent 40%);
+    pointer-events: none;
   }
 
   .screen{
     position: relative;
-    width: 176px; height: 176px;
+    width: 178px; height: 178px;
     border-radius: 50%;
-    background: radial-gradient(circle at 50% 40%, #18122a 0%, var(--screen-bg) 75%);
-    box-shadow: inset 0 0 22px rgba(0,0,0,0.8), inset 0 0 2px rgba(255,255,255,0.08);
+    background: radial-gradient(circle at 50% 38%, #16112a 0%, var(--screen-bg) 78%);
+    box-shadow: inset 0 0 24px rgba(0,0,0,0.85), inset 0 0 3px rgba(255,255,255,0.1);
     display:flex; align-items:center; justify-content:center;
     text-align:center;
-    padding: 18px;
     overflow: hidden;
   }
 
@@ -137,65 +164,83 @@
       transparent 1px,
       transparent 3px
     );
-    opacity:.5;
+    opacity:.45;
     pointer-events:none;
   }
 
-  .screen-content{ position:relative; z-index:1; width:100%; }
+  .screen-content{
+    position:relative; z-index:1;
+    width: 148px;
+    padding: 0 4px;
+  }
 
   .idle-icon{
-    font-size: 30px;
-    margin-bottom: 8px;
-    opacity: .85;
-    filter: drop-shadow(0 0 8px rgba(125,224,201,0.5));
-    animation: pulse 2.4s ease-in-out infinite;
+    font-size: 26px;
+    margin-bottom: 7px;
+    color: var(--neon-soft);
+    text-shadow: 0 0 6px var(--neon), 0 0 16px var(--neon), 0 0 32px rgba(126,255,224,0.5);
+    animation: pulse 2.6s ease-in-out infinite;
   }
   @keyframes pulse{
-    0%,100%{ opacity:.5; transform: scale(1); }
+    0%,100%{ opacity:.55; transform: scale(1); }
     50%{ opacity:1; transform: scale(1.08); }
   }
 
   .idle-text{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: .05em;
+    font-size: 10px;
+    letter-spacing: .06em;
     color: var(--text-dim);
     line-height: 1.5;
   }
 
   .mix-name{
     font-family: 'Fraunces', serif;
-    font-size: 22px;
+    font-size: 16.5px;
     font-weight: 600;
-    color: var(--accent-soft);
-    line-height: 1.15;
-    text-shadow: 0 0 18px rgba(255,185,138,0.45);
-    margin-bottom: 8px;
+    color: #fff;
+    line-height: 1.2;
+    text-shadow:
+      0 0 4px #fff,
+      0 0 10px var(--neon),
+      0 0 22px var(--neon),
+      0 0 40px rgba(126,255,224,0.55);
+    margin-bottom: 6px;
     opacity: 0;
+    display:-webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .mix-desc{
-    font-size: 11.5px;
-    line-height: 1.45;
-    color: #c9c2df;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: var(--neon-soft);
+    text-shadow: 0 0 3px rgba(126,255,224,0.5), 0 0 10px rgba(126,255,224,0.3);
     opacity: 0;
+    display:-webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .mix-name.show, .mix-desc.show{
-    animation: reveal .5s ease forwards;
+    animation: reveal .55s ease forwards;
   }
-  .mix-desc.show{ animation-delay: .12s; }
+  .mix-desc.show{ animation-delay: .1s; }
   @keyframes reveal{
-    from{ opacity:0; transform: translateY(6px); }
-    to{ opacity:1; transform: translateY(0); }
+    from{ opacity:0; transform: translateY(5px) scale(.97); filter: blur(3px); }
+    60%{ filter: blur(0); }
+    to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
   }
 
   .hint{
-    margin-top: 40px;
+    margin-top: 38px;
     font-size: 12.5px;
     color: var(--text-dim);
     text-align: center;
-    max-width: 260px;
+    max-width: 270px;
     line-height: 1.5;
   }
   .hint b{ color: var(--text-muted); font-weight: 500; }
@@ -204,13 +249,12 @@
     margin-top: 22px;
     padding: 11px 22px;
     border-radius: 100px;
-    border: 1px solid rgba(255,185,138,0.35);
-    background: rgba(255,185,138,0.08);
-    color: var(--accent-soft);
+    border: 1px solid rgba(126,255,224,0.35);
+    background: rgba(126,255,224,0.08);
+    color: var(--neon-soft);
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 500;
-    letter-spacing: .01em;
     cursor: pointer;
   }
   .permission-btn:active{ transform: scale(.97); }
@@ -225,8 +269,8 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .orb-halo, .idle-icon, .mote{ animation: none !important; }
-    .orb.shaking{ animation: none !important; }
+    .orb-halo, .idle-icon, .mote, .orb-spin{ animation: none !important; }
+    .orb-wrap.pulse .orb{ animation: none !important; }
   }
 </style>
 </head>
@@ -235,11 +279,13 @@
 <div class="stage" id="stage">
   <div class="motes" id="motes"></div>
 
-  <div class="eyebrow">Оракул вкуса</div>
+  <div class="eyebrow">Оракул кальяна</div>
 
   <div class="orb-wrap" id="orbWrap">
     <div class="orb-halo"></div>
     <div class="orb" id="orb">
+      <div class="orb-spin" id="orbSpin"></div>
+      <div class="orb-sheen"></div>
       <div class="screen" id="screen">
         <div class="screen-content" id="screenContent">
           <div class="idle-icon">◐</div>
@@ -249,19 +295,18 @@
     </div>
   </div>
 
-  <div class="hint" id="hint"><b>Встряхни</b> телефон — шар подберёт вкусовой микс.<br>Не работает встряхивание? Просто коснись шара.</div>
+  <div class="hint" id="hint"><b>Встряхни</b> телефон — шар подберёт кальянный микс.<br>Не работает встряхивание? Просто коснись шара.</div>
 
   <div class="counter" id="counter"></div>
 </div>
 
 <script>
 (function(){
-  // ---- Telegram WebApp bootstrap ----
   var tg = window.Telegram && window.Telegram.WebApp;
   if(tg){
     tg.ready();
     tg.expand();
-    try{ document.body.style.background = 'var(--bg-deep)'; tg.setHeaderColor && tg.setHeaderColor('#0c0a13'); }catch(e){}
+    try{ tg.setHeaderColor && tg.setHeaderColor('#0b0912'); }catch(e){}
   }
   function haptic(style){
     if(tg && tg.HapticFeedback){
@@ -271,28 +316,117 @@
     }
   }
 
-  // ---- flavor mixes ----
+  // ---- 100+ реальных кальянных миксов: новинки брендов 2025-2026 + классика индустрии ----
   var mixes = [
-    { name: "Тропический шторм", desc: "Манго, маракуйя и капля лайма — солнце в стакане." },
-    { name: "Полуночная мята", desc: "Свежая мята, лёгкая горечь грейпфрута, холодок эвкалипта." },
-    { name: "Малиновый дым", desc: "Малина, дымный чёрный чай и щепотка ванили." },
-    { name: "Кокосовый штиль", desc: "Кокосовое молоко, ананас и нотка мускатного ореха." },
-    { name: "Огненный гранат", desc: "Гранат, апельсиновая цедра и лёгкая перчинка чили." },
-    { name: "Лавандовый туман", desc: "Лаванда, лимон и мёд — мягко и почти невесомо." },
-    { name: "Кофейный оверклок", desc: "Эспрессо, какао-нибс и карамельный подтон." },
-    { name: "Арбузный неон", desc: "Арбуз, базилик и искра розовой соли." },
-    { name: "Имбирный разряд", desc: "Имбирь, лемонграсс и цитрусовая вспышка юдзу." },
-    { name: "Черничный вельвет", desc: "Черника, лаванда и сливочная ваниль." },
-    { name: "Персиковый бархат", desc: "Персик, розмарин и капля коричневого сахара." },
-    { name: "Мохито без границ", desc: "Лайм, мята и содовая — классика без правил." },
-    { name: "Дынный аврора", desc: "Дыня, огурец и мятная свежесть." },
-    { name: "Вишнёвый код", desc: "Вишня, тёмный шоколад и нотка миндаля." },
-    { name: "Ананасовый сигнал", desc: "Ананас, чили и морская соль на кайме." },
-    { name: "Яблочная специя", desc: "Яблоко, корица и звёздчатый анис." },
-    { name: "Цитрусовый прибой", desc: "Апельсин, грейпфрут и веточка розмарина." },
-    { name: "Фиговый закат", desc: "Инжир, апельсин и тёплая нотка гвоздики." },
-    { name: "Клубничный статик", desc: "Клубника, чёрный перец и лёгкая кислинка бальзамика." },
-    { name: "Лимонная гроза", desc: "Лимон, имбирь и мятный разряд." }
+    { name: "BlackBurn HiT — Cherry Crime", desc: "Вишня, воздушная меренга, спелый персик." },
+    { name: "BlackBurn HiT — Feijoa Drama", desc: "Фейхоа, эвкалиптовый холодок, кислая клюква." },
+    { name: "BlackBurn HiT — Choco Comedy", desc: "Шоколад, бисквит, шипучая нотка газировки." },
+    { name: "BlackBurn HiT — Pear Action", desc: "Груша, персик, лесные ягоды." },
+    { name: "BlackBurn HiT — Peach Fantasy", desc: "Персик, папайя, жвачка." },
+    { name: "DarkSide Shot — Байкальский Краш", desc: "Фисташка, мята, пломбир." },
+    { name: "DarkSide Shot — Азовский Вайб", desc: "Груша, лимон, эстрагон." },
+    { name: "DarkSide Shot — Крымский Вайб", desc: "Дыня, арбуз, персик." },
+    { name: "DarkSide Shot — Куршский Вайб", desc: "Нектарин, фейхоа, лёгкая кактусовая нота." },
+    { name: "DarkSide Shot — Волжский Чилл", desc: "Чизкейк, черника, земляника." },
+    { name: "Duft All-In — Mickey's Mouth", desc: "Морковный фреш, манго, медовый холс, персик, маракуйя." },
+    { name: "Duft All-In — SashaGrey", desc: "Каркаде, гуава, гранат, розовый грейпфрут, клюква." },
+    { name: "Duft All-In — R-Gazm", desc: "Малиновый рафаэлло: кокос, лесной орех, малина." },
+    { name: "Duft All-In — D-Zert", desc: "Малина, черника, мороженое, чизкейк." },
+    { name: "Duft All-In — Syrupia", desc: "Медовый торт-медовик." },
+    { name: "Duft All-In — Pink Princess", desc: "Клубника, кислая личи, грейпфрутовая горчинка." },
+    { name: "MustHave — Ёлка", desc: "Свежая хвоя с морозным холодком." },
+    { name: "MustHave — Lemon Tonic", desc: "Лимонный тоник с бодрящей кислинкой." },
+    { name: "MustHave — Cherry Juice", desc: "Насыщенный вишнёвый сок." },
+    { name: "MustHave — Cream Soda", desc: "Сливочная газировка." },
+    { name: "MustHave — Garnet Grape", desc: "Гранат и виноград." },
+    { name: "MustHave — Passion Plum", desc: "Маракуйя и слива." },
+    { name: "MustHave — Blueberry Yogurt", desc: "Черника с нежным йогуртом." },
+    { name: "MustHave — Raspberry Jam", desc: "Домашнее малиновое варенье." },
+    { name: "MustHave — Mulled Wine", desc: "Терпкий глинтвейн со специями." },
+    { name: "Sarma — Медовик", desc: "Медовый торт с чайной нотой." },
+    { name: "Sarma — Байкал", desc: "Травяной бальзам с пряным послевкусием." },
+    { name: "Sarma — Крюшон", desc: "Пряный фруктовый напиток с вишнёвой косточкой." },
+    { name: "Sarma — Овсяное Печенье", desc: "Сдобная домашняя выпечка." },
+    { name: "Sarma — Ревень", desc: "Кисло-сладкая травянистая нота." },
+    { name: "Sarma — Ромашковое Варенье", desc: "Цветочная ромашка с мягкой сладостью." },
+    { name: "Sarma — Смородиновый Морс", desc: "Кислый смородиновый морс." },
+    { name: "Element — V Element", desc: "Микс топовых вкусов линеек Огонь, Вода, Земля и Воздух." },
+    { name: "Element — Сиберри", desc: "Брусника, клюква, морошка, княженика, черника." },
+    { name: "Element — Пихта", desc: "Свежая хвоя." },
+    { name: "Element — Личи", desc: "Сладкий личи с клубничным послевкусием." },
+    { name: "Element — Смородина", desc: "Насыщенная чёрная смородина." },
+    { name: "Element — Kashmir", desc: "Пряная восточная нота." },
+    { name: "Element — Pomelo & Grapefruit", desc: "Цитрусовый дуэт с горчинкой." },
+    { name: "Sebero — Limoncello", desc: "Лимонный ликёр с мятным холодком в миксе." },
+    { name: "Sebero — Wild Berries", desc: "Черника, ежевика, брусника." },
+    { name: "NAШ — Грейпфрут", desc: "Цитрус с лёгкой приятной горчинкой." },
+    { name: "NAШ — Грут", desc: "Мокрая кора после дождя с можжевельником." },
+    { name: "NAШ — Гуанабана", desc: "Сочный экзотический фрукт." },
+    { name: "NAШ — Персидская Выпечка", desc: "Восточная сдоба со специями." },
+    { name: "NAШ — Арахисовая Паста", desc: "Ореховый десертный вкус." },
+    { name: "NAШ — Юбилейное Печенье", desc: "Сливочное сахарное печенье." },
+    { name: "Overdose — Melon Berry", desc: "Дыня и лесные ягоды." },
+    { name: "Overdose — Orange Soda", desc: "Газировка со вкусом апельсина." },
+    { name: "Overdose — Lotus Berry", desc: "Вишня, земляника, цветок лотоса." },
+    { name: "Overdose — Strawberry Kiwi", desc: "Клубника с кислинкой киви." },
+    { name: "Overdose — Peach Iced Tea", desc: "Холодный персиковый чай." },
+    { name: "Overdose — Masala Tea", desc: "Пряный молочный чай масала." },
+    { name: "Overdose — Wintergreen", desc: "Пряная мята с северной свежестью." },
+    { name: "Overdose — Stellar Grape", desc: "Виноград и тонка в парфюмерной подаче." },
+    { name: "Классика — Двойное яблоко и мята", desc: "Хрустящее яблоко с холодной мятной нотой." },
+    { name: "Классика — Виноград и мята", desc: "Сладкий виноград с прохладным акцентом." },
+    { name: "Классика — Арбуз и мята", desc: "Сочный арбуз с ледяным послевкусием." },
+    { name: "Классика — Кола и лайм", desc: "Газировка с кислой цитрусовой ноткой." },
+    { name: "Классика — Мохито", desc: "Лайм, мята, содовая." },
+    { name: "Классика — Персик и грейпфрут", desc: "Сладость персика с горчинкой грейпфрута." },
+    { name: "Классика — Манго и маракуйя", desc: "Тропический тандем сладкого и кислого." },
+    { name: "Классика — Клубника и базилик", desc: "Ягода с пряной травяной нотой." },
+    { name: "Классика — Апельсин и корица", desc: "Цитрус со специями." },
+    { name: "Классика — Гранат и мята", desc: "Терпкий гранат с холодком." },
+    { name: "Классика — Черника и лаванда", desc: "Ягода с цветочной ноткой." },
+    { name: "Классика — Кокос и ананас", desc: "Тропический дуэт." },
+    { name: "Классика — Малина и ваниль", desc: "Ягодная сладость со сливочным акцентом." },
+    { name: "Классика — Лимон и имбирь", desc: "Бодрящая цитрусовая острота." },
+    { name: "Классика — Дыня и огурец", desc: "Свежий летний дуэт." },
+    { name: "Классика — Вишня и шоколад", desc: "Терпкая ягода с какао." },
+    { name: "Классика — Инжир и апельсин", desc: "Сладкий инжир с цитрусовой цедрой." },
+    { name: "Классика — Ежевика и мята", desc: "Тёмная ягода с прохладой." },
+    { name: "Классика — Груша и розмарин", desc: "Фрукт с хвойно-травяной ноткой." },
+    { name: "Классика — Клюква и апельсин", desc: "Кислая ягода с цитрусом." },
+    { name: "Классика — Личи и роза", desc: "Восточный цветочный десерт." },
+    { name: "Классика — Кофе и карамель", desc: "Бодрящий десертный дуэт." },
+    { name: "Классика — Черёмуха и ваниль", desc: "Терпкая ягода со сливочной нотой." },
+    { name: "Классика — Абрикос и миндаль", desc: "Южный фрукт с ореховой ноткой." },
+    { name: "Классика — Смородина и мята", desc: "Кислая ягода с холодком." },
+    { name: "Классика — Йогурт и манго", desc: "Сливочно-тропический десерт." },
+    { name: "Классика — Каркаде и гранат", desc: "Кисло-терпкий фруктовый чай." },
+    { name: "Классика — Груша и имбирь", desc: "Фрукт с пряной остротой." },
+    { name: "Классика — Апельсин и шоколад", desc: "Цитрус с какао." },
+    { name: "Классика — Мандарин и корица", desc: "Зимний цитрусовый десерт." },
+    { name: "Классика — Земляника и сливки", desc: "Ягода со сливочной нежностью." },
+    { name: "Классика — Виноград и гранат", desc: "Сладко-терпкий фруктовый дуэт." },
+    { name: "Классика — Лимонад и мята", desc: "Освежающая газировка с холодком." },
+    { name: "Классика — Персик и маракуйя", desc: "Тропический фруктовый дуэт." },
+    { name: "Классика — Ананас и чили", desc: "Сладость с лёгкой остротой." },
+    { name: "Классика — Яблоко и корица", desc: "Тёплый десертный дуэт." },
+    { name: "Классика — Малина и личи", desc: "Ягодная кислинка с восточной сладостью." },
+    { name: "Классика — Кактус и груша", desc: "Необычный сочный дуэт." },
+    { name: "Классика — Бузина и лимон", desc: "Цветочная свежесть с цитрусом." },
+    { name: "Классика — Тайская гуава", desc: "Сладко-острая тропическая нота." },
+    { name: "Классика — Черешня и виски", desc: "Терпкий десертный дуэт для вечера." },
+    { name: "Классика — Фисташковый пломбир", desc: "Ореховое мороженое." },
+    { name: "Классика — Красный чай и бергамот", desc: "Эрл грей с фруктовой сладостью." },
+    { name: "Классика — Роза, вишня и мускус", desc: "Парфюмерный акцент с ягодной нотой." },
+    { name: "Классика — Щавель и лесные ягоды", desc: "Травяная кислинка с фруктовой сладостью." },
+    { name: "Классика — Тархун и лайм", desc: "Эстрагоновая газировка с цитрусом." },
+    { name: "Классика — Дыня, арбуз и персик", desc: "Летний фруктовый триколор." },
+    { name: "Классика — Черника, мороженое и чизкейк", desc: "Десертное трио." },
+    { name: "Классика — Гуава, гранат и грейпфрут", desc: "Кисло-сладкий тропический микс." },
+    { name: "Классика — Чизкейк, черника и земляника", desc: "Десертная ягодная тройка." },
+    { name: "Классика — Кокос, лесной орех и малина", desc: "Ореховый десерт с ягодной кислинкой." },
+    { name: "Классика — Персик, папайя и жвачка", desc: "Летний тропический дуэт со сладкой нотой." },
+    { name: "Классика — Груша, персик и лесные ягоды", desc: "Фруктово-ягодное ассорти." },
+    { name: "Классика — Виноград, тонка и ваниль", desc: "Парфюмерно-десертное сочетание." }
   ];
   var lastIndex = -1;
   function pickMix(){
@@ -302,8 +436,8 @@
     return mixes[i];
   }
 
-  // ---- rendering ----
-  var orb = document.getElementById('orb');
+  var orbWrap = document.getElementById('orbWrap');
+  var orbSpin = document.getElementById('orbSpin');
   var content = document.getElementById('screenContent');
   var counterEl = document.getElementById('counter');
   var count = 0;
@@ -323,20 +457,33 @@
     if(busy) return;
     busy = true;
     haptic('medium');
-    orb.classList.remove('shaking');
-    void orb.offsetWidth; // restart animation
-    orb.classList.add('shaking');
+
+    orbWrap.classList.remove('pulse');
+    orbSpin.classList.remove('burst');
+    void orbWrap.offsetWidth;
+    orbWrap.classList.add('pulse');
+    orbSpin.classList.add('burst');
+
+    var mn = document.getElementById('mn');
+    var md = document.getElementById('md');
+    if(mn) mn.classList.remove('show');
+    if(md) md.classList.remove('show');
+
     setTimeout(function(){
       var mix = pickMix();
       renderMix(mix);
       count++;
       counterEl.textContent = '№ ' + String(count).padStart(3, '0');
     }, 180);
-    setTimeout(function(){ busy = false; }, 700);
+
+    setTimeout(function(){
+      orbSpin.classList.remove('burst');
+    }, 1500);
+    setTimeout(function(){ busy = false; }, 750);
   }
 
   // ---- shake detection ----
-  var SHAKE_THRESHOLD = 16; // m/s^2 delta
+  var SHAKE_THRESHOLD = 16;
   var lastX = null, lastY = null, lastZ = null, lastTime = 0;
 
   function handleMotion(e){
@@ -362,7 +509,6 @@
 
   function initMotion(){
     if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
-      // iOS 13+: needs a user gesture
       var btn = document.createElement('button');
       btn.className = 'permission-btn';
       btn.textContent = 'Разрешить встряхивание';
@@ -379,10 +525,8 @@
   }
   initMotion();
 
-  // tap-to-shake fallback (also works alongside real shake)
   document.getElementById('orbWrap').addEventListener('click', triggerMix);
 
-  // ---- ambient dust motes ----
   var motesEl = document.getElementById('motes');
   var colors = ['var(--mint)', 'var(--accent)'];
   for(var i = 0; i < 22; i++){
