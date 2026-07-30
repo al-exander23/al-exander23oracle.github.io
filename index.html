@@ -15,13 +15,15 @@
     --ball-1: #2b2733;
     --ball-2: #030203;
     --screen-bg: #0d0919;
-    --neon: #7effe0;
-    --neon-soft: #baffef;
+    --neon: #ffdba3;
+    --neon-soft: #fff2da;
     --accent: #ffb98a;
     --mint: #7de0c9;
     --violet: #a58bff;
     --text-muted: #9a90b3;
     --text-dim: #6a6285;
+    --gold: #d9b878;
+    --gold-soft: #f3e3bf;
   }
 
   *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -69,78 +71,177 @@
     opacity: .8;
   }
 
-  /* ================= ORB — формат 🎱 ================= */
+  .brand{
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    margin-bottom: 34px;
+    background: linear-gradient(100deg, #cbaa6b 0%, #f6e3b4 30%, #cbaa6b 55%, #8f764a 78%, #f6e3b4 100%);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: brand-sheen 7s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(214, 179, 118, 0.25));
+  }
+  @keyframes brand-sheen{
+    0%, 100%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+  }
+
+  /* ================= ORB — формат левитирующего глобуса ORBO ================= */
   .orb-wrap{
     position: relative;
-    width: 268px; height: 268px;
+    width: 276px; height: 276px;
     display:flex; align-items:center; justify-content:center;
     cursor: pointer;
   }
 
+  /* мягкое световое пятно снизу — как отражение на глянцевой подставке */
+  .orb-puddle{
+    position:absolute;
+    bottom: -34px;
+    width: 210px; height: 46px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(200,190,220,0.22) 0%, rgba(200,190,220,0.08) 45%, transparent 75%);
+    filter: blur(6px);
+    animation: puddle-breathe 5s ease-in-out infinite;
+  }
+  @keyframes puddle-breathe{
+    0%,100%{ transform: scale(1); opacity: .95; }
+    50%{ transform: scale(0.86); opacity: .55; }
+  }
+
   .orb-halo{
     position:absolute;
-    width: 300px; height: 300px;
+    width: 320px; height: 320px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(126,255,224,0.14) 0%, rgba(165,139,255,0.08) 45%, transparent 72%);
-    filter: blur(8px);
+    background:
+      radial-gradient(circle, rgba(255,219,163,0.16) 0%, transparent 50%),
+      radial-gradient(circle, rgba(217,184,120,0.12) 22%, transparent 62%),
+      radial-gradient(circle, rgba(165,139,255,0.06) 42%, transparent 74%);
+    filter: blur(10px);
     animation: breathe 6s ease-in-out infinite;
+    transition: opacity .4s ease;
   }
   @keyframes breathe{
-    0%,100%{ transform: scale(1); opacity:.65; }
-    50%{ transform: scale(1.1); opacity:1; }
+    0%,100%{ transform: scale(1); opacity:.62; }
+    50%{ transform: scale(1.09); opacity:1; }
+  }
+  .orb-wrap.pulse .orb-halo{ opacity: 1; }
+
+  /* тонкая золотая оправа по контуру шара — как у дорогого бильярдного шара в кейсе */
+  .orb-frame{
+    position: relative;
+    width: 258px; height: 258px;
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    animation: levitate 5s ease-in-out infinite;
+  }
+  @keyframes levitate{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-7px); }
+  }
+  .orb-ring{
+    position:absolute; inset:-4px;
+    border-radius: 50%;
+    background: conic-gradient(from 120deg,
+      #8a744c, #f3e3bf, #b6934f, #4a3d28, #f3e3bf, #8a744c);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    opacity: .8;
+    animation: spin 22s linear infinite;
   }
 
-  .orb-wrap.pulse .orb{ animation: spin360 .75s cubic-bezier(.45,.05,.35,1); }
-  @keyframes spin360{
-    0%{ transform: rotate(0deg) scale(1); }
-    35%{ transform: rotate(150deg) scale(1.07); }
-    70%{ transform: rotate(300deg) scale(0.98); }
-    100%{ transform: rotate(360deg) scale(1); }
-  }
-
-  /* чёрная глянцевая сфера, как бильярдный 8-ball */
+  /* чёрная глянцевая сфера-глобус */
   .orb{
     position: relative;
     width: 250px; height: 250px;
     border-radius: 50%;
     display:flex; align-items:center; justify-content:center;
-    background: radial-gradient(circle at 32% 26%, #4c4658 0%, var(--ball-1) 32%, var(--ball-2) 78%);
+    background: radial-gradient(circle at 32% 26%, #565062 0%, var(--ball-1) 34%, var(--ball-2) 80%);
     box-shadow:
-      0 22px 55px rgba(0,0,0,0.65),
-      0 0 60px rgba(126, 90, 220, 0.28),
-      inset 0 -22px 44px rgba(0,0,0,0.75),
-      inset 0 16px 30px rgba(255,255,255,0.06);
-  }
-
-  /* блик, который едет по поверхности шара — так честно выглядит вращение сферы */
-  .orb-spin{
-    position:absolute; inset:0;
-    border-radius: 50%;
+      0 26px 60px rgba(0,0,0,0.7),
+      0 0 50px rgba(126, 90, 220, 0.2),
+      0 0 26px rgba(217, 184, 120, 0.12),
+      inset 0 -26px 48px rgba(0,0,0,0.8),
+      inset 0 16px 32px rgba(255,255,255,0.05);
     overflow: hidden;
-    animation: spin 9s linear infinite;
-    pointer-events: none;
+    transition: transform .18s ease;
   }
-  .orb-spin.burst{ animation-duration: 1.6s; }
-  .orb-spin::before{
-    content:'';
-    position:absolute;
-    top: 4%; left: 50%;
-    width: 46%; height: 30%;
-    transform: translateX(-50%);
-    border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%);
-    filter: blur(3px);
-  }
+  .orb-wrap:active .orb{ transform: scale(0.965); }
+
   @keyframes spin{
     from{ transform: rotate(0deg); }
     to{ transform: rotate(360deg); }
   }
 
-  /* фиксированный верхний блик — держит объём независимо от вращения */
+  /* контейнер поверхности глобуса — материки и меридианы добавляются и позиционируются через JS */
+  .orb-surface{
+    position:absolute; inset:0;
+    border-radius: 50%;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .meridian{
+    position:absolute;
+    top: 5%; bottom: 5%;
+    width: 1.6px;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, transparent 2%, rgba(255,255,255,0.32) 50%, transparent 98%);
+    pointer-events: none;
+  }
+  .continent{
+    position:absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* статичные широтные линии — при вращении вокруг вертикальной оси они не двигаются */
+  .orb-latitude{
+    position:absolute; inset:-2%;
+    border-radius: 50%;
+    background:
+      linear-gradient(to bottom,
+        transparent 21%, rgba(255,255,255,0.05) 22.5%, transparent 24%,
+        transparent 45%, rgba(255,255,255,0.09) 48%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.09) 52%, transparent 55%,
+        transparent 76%, rgba(255,255,255,0.05) 77.5%, transparent 79%);
+    pointer-events: none;
+  }
+
+  /* затемнение по краям — сфера «уходит» от взгляда, это и создаёт ощущение объёма и вращения */
+  .orb-edge-shade{
+    position:absolute; inset:0;
+    border-radius: 50%;
+    background: linear-gradient(to right,
+      rgba(0,0,0,0.6) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+  }
+
+  /* фиксированный блик — физически не крутится вместе с поверхностью, как настоящий отблеск света */
+  .orb-highlight{
+    position:absolute;
+    top: 6%; left: 22%;
+    width: 46%; height: 30%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0) 70%);
+    filter: blur(2.5px);
+    pointer-events: none;
+  }
+  .orb-rim{
+    position:absolute; inset:0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 82% 46%, rgba(200,190,230,0.22) 0%, transparent 30%);
+    pointer-events: none;
+  }
+
+  /* фиксированная теневая моделировка объёма */
   .orb-sheen{
     position:absolute; inset:0;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 78%, rgba(0,0,0,0.4) 0%, transparent 42%);
+    background: radial-gradient(circle at 30% 78%, rgba(0,0,0,0.42) 0%, transparent 42%);
     pointer-events: none;
   }
 
@@ -150,13 +251,23 @@
     border-radius: 50%;
     background: radial-gradient(circle at 50% 38%, #16112a 0%, var(--screen-bg) 78%);
     box-shadow:
-      inset 0 0 0 3px rgba(255,255,255,0.05),
-      inset 0 0 24px rgba(0,0,0,0.85),
+      inset 0 0 0 1px rgba(217,184,120,0.22),
+      inset 0 0 0 3px rgba(255,255,255,0.04),
+      inset 0 0 26px rgba(0,0,0,0.85),
       0 0 0 1px rgba(0,0,0,0.4);
     display:flex; align-items:center; justify-content:center;
     text-align:center;
     overflow: hidden;
     z-index: 2;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1), filter .6s ease;
+  }
+
+  .screen.off{
+    opacity: 0;
+    transform: scale(0.9);
+    filter: brightness(0.15);
   }
 
   .screen::before{
@@ -171,6 +282,21 @@
     );
     opacity:.45;
     pointer-events:none;
+    z-index: 1;
+  }
+
+  .screen::after{
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(115deg, transparent 32%, rgba(255,235,205,0.22) 49%, transparent 64%);
+    transform: translateX(-130%);
+    pointer-events:none;
+    z-index: 2;
+  }
+  .screen.sweep::after{ animation: sweep .9s cubic-bezier(.22,1,.36,1); }
+  @keyframes sweep{
+    from{ transform: translateX(-130%); }
+    to{ transform: translateX(130%); }
   }
 
   .screen-content{
@@ -183,7 +309,7 @@
     font-size: 26px;
     margin-bottom: 7px;
     color: var(--neon-soft);
-    text-shadow: 0 0 6px var(--neon), 0 0 16px var(--neon), 0 0 32px rgba(126,255,224,0.5);
+    text-shadow: 0 0 6px var(--neon), 0 0 16px var(--neon), 0 0 32px rgba(255, 219, 163, 0.45);
     animation: pulse 2.6s ease-in-out infinite;
   }
   @keyframes pulse{
@@ -203,7 +329,7 @@
     font-family: 'Fraunces', serif;
     font-size: 16.5px;
     font-weight: 600;
-    color: #eafffa;
+    color: #fff8ea;
     line-height: 1.25;
     text-decoration: none;
     text-shadow:
@@ -211,35 +337,31 @@
       0 0 4px var(--neon),
       0 0 9px var(--neon);
     margin-bottom: 6px;
-    opacity: 0;
     display:-webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    opacity: 0;
+    transform: translateY(7px);
+    transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
   }
+  .mix-name.in{ opacity: 1; transform: translateY(0); }
 
   .mix-desc{
     font-size: 10.5px;
     line-height: 1.4;
     color: var(--neon-soft);
     text-decoration: none;
-    text-shadow: 0 0 1px #fff, 0 0 3px rgba(126,255,224,0.6), 0 0 7px rgba(126,255,224,0.4);
-    opacity: 0;
+    text-shadow: 0 0 1px #fff, 0 0 3px rgba(255, 219, 163, 0.55), 0 0 7px rgba(255, 219, 163, 0.35);
     display:-webkit-box;
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    opacity: 0;
+    transform: translateY(7px);
+    transition: opacity .6s cubic-bezier(.22,1,.36,1) .09s, transform .6s cubic-bezier(.22,1,.36,1) .09s;
   }
-
-  .mix-name.show, .mix-desc.show{
-    animation: reveal .55s ease forwards;
-  }
-  .mix-desc.show{ animation-delay: .1s; }
-  @keyframes reveal{
-    from{ opacity:0; transform: translateY(5px) scale(.97); filter: blur(3px); }
-    60%{ filter: blur(0); }
-    to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
-  }
+  .mix-desc.in{ opacity: 1; transform: translateY(0); }
 
   .hint{
     margin-top: 38px;
@@ -249,34 +371,40 @@
     max-width: 270px;
     line-height: 1.5;
   }
-  .hint b{ color: var(--text-muted); font-weight: 500; }
+  .hint b{ color: var(--gold-soft); font-weight: 500; }
 
   .permission-btn{
     margin-top: 22px;
-    padding: 11px 22px;
+    padding: 11px 24px;
     border-radius: 100px;
-    border: 1px solid rgba(126,255,224,0.35);
-    background: rgba(126,255,224,0.08);
-    color: var(--neon-soft);
+    border: 1px solid rgba(217,184,120,0.4);
+    background: linear-gradient(180deg, rgba(217,184,120,0.14), rgba(217,184,120,0.05));
+    color: var(--gold-soft);
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 500;
+    letter-spacing: .02em;
     cursor: pointer;
+    transition: transform .2s ease;
   }
-  .permission-btn:active{ transform: scale(.97); }
+  .permission-btn:active{ transform: scale(.96); }
 
   .counter{
     position:absolute;
     top: 22px; right: 22px;
+    padding: 5px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(217,184,120,0.22);
+    background: rgba(217,184,120,0.05);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    color: var(--text-dim);
+    font-size: 10px;
+    color: var(--gold-soft);
     letter-spacing: .1em;
+    opacity: .85;
   }
 
   @media (prefers-reduced-motion: reduce){
-    .orb-halo, .idle-icon, .mote, .orb-spin{ animation: none !important; }
-    .orb-wrap.pulse .orb{ animation: none !important; }
+    .orb-halo, .idle-icon, .mote, .orb-ring{ animation: none !important; }
   }
 </style>
 </head>
@@ -285,23 +413,31 @@
 <div class="stage" id="stage">
   <div class="motes" id="motes"></div>
 
-  <div class="eyebrow">Оракул кальяна</div>
+  <div class="brand">МИКС ОРАКУЛ</div>
 
   <div class="orb-wrap" id="orbWrap">
+    <div class="orb-puddle"></div>
     <div class="orb-halo"></div>
-    <div class="orb" id="orb">
-      <div class="orb-spin" id="orbSpin"></div>
-      <div class="orb-sheen"></div>
-      <div class="screen" id="screen">
-        <div class="screen-content" id="screenContent">
-          <div class="idle-icon">◐</div>
-          <div class="idle-text">встряхни<br>телефон</div>
+    <div class="orb-frame">
+      <div class="orb-ring"></div>
+      <div class="orb" id="orb">
+        <div class="orb-surface" id="orbSurface"></div>
+        <div class="orb-latitude"></div>
+        <div class="orb-edge-shade"></div>
+        <div class="orb-highlight"></div>
+        <div class="orb-rim"></div>
+        <div class="orb-sheen"></div>
+        <div class="screen" id="screen">
+          <div class="screen-content" id="screenContent">
+            <div class="idle-icon">◐</div>
+            <div class="idle-text">встряхни —<br>узнай микс</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="hint" id="hint"><b>Встряхни</b> телефон — шар подберёт кальянный микс.<br>Не работает встряхивание? Просто коснись шара.</div>
+  <div class="hint" id="hint">Встряхни телефон или коснись шара — <b>оракул</b> подберёт для тебя микс.</div>
 
   <div class="counter" id="counter"></div>
 </div>
@@ -324,115 +460,121 @@
 
   // ---- 100+ реальных кальянных миксов: новинки брендов 2025-2026 + классика индустрии ----
   var mixes = [
-    { name: "BlackBurn HiT — Cherry Crime", desc: "Вишня, воздушная меренга, спелый персик." },
-    { name: "BlackBurn HiT — Feijoa Drama", desc: "Фейхоа, эвкалиптовый холодок, кислая клюква." },
-    { name: "BlackBurn HiT — Choco Comedy", desc: "Шоколад, бисквит, шипучая нотка газировки." },
-    { name: "BlackBurn HiT — Pear Action", desc: "Груша, персик, лесные ягоды." },
-    { name: "BlackBurn HiT — Peach Fantasy", desc: "Персик, папайя, жвачка." },
-    { name: "DarkSide Shot — Байкальский Краш", desc: "Фисташка, мята, пломбир." },
-    { name: "DarkSide Shot — Азовский Вайб", desc: "Груша, лимон, эстрагон." },
-    { name: "DarkSide Shot — Крымский Вайб", desc: "Дыня, арбуз, персик." },
-    { name: "DarkSide Shot — Куршский Вайб", desc: "Нектарин, фейхоа, лёгкая кактусовая нота." },
-    { name: "DarkSide Shot — Волжский Чилл", desc: "Чизкейк, черника, земляника." },
-    { name: "Duft All-In — Mickey's Mouth", desc: "Морковный фреш, манго, медовый холс, персик, маракуйя." },
-    { name: "Duft All-In — SashaGrey", desc: "Каркаде, гуава, гранат, розовый грейпфрут, клюква." },
-    { name: "Duft All-In — R-Gazm", desc: "Малиновый рафаэлло: кокос, лесной орех, малина." },
-    { name: "Duft All-In — D-Zert", desc: "Малина, черника, мороженое, чизкейк." },
-    { name: "Duft All-In — Syrupia", desc: "Медовый торт-медовик." },
-    { name: "Duft All-In — Pink Princess", desc: "Клубника, кислая личи, грейпфрутовая горчинка." },
-    { name: "MustHave — Ёлка", desc: "Свежая хвоя с морозным холодком." },
-    { name: "MustHave — Lemon Tonic", desc: "Лимонный тоник с бодрящей кислинкой." },
-    { name: "MustHave — Cherry Juice", desc: "Насыщенный вишнёвый сок." },
-    { name: "MustHave — Cream Soda", desc: "Сливочная газировка." },
-    { name: "MustHave — Garnet Grape", desc: "Гранат и виноград." },
-    { name: "MustHave — Passion Plum", desc: "Маракуйя и слива." },
-    { name: "MustHave — Blueberry Yogurt", desc: "Черника с нежным йогуртом." },
-    { name: "MustHave — Raspberry Jam", desc: "Домашнее малиновое варенье." },
-    { name: "MustHave — Mulled Wine", desc: "Терпкий глинтвейн со специями." },
-    { name: "Sarma — Медовик", desc: "Медовый торт с чайной нотой." },
-    { name: "Sarma — Байкал", desc: "Травяной бальзам с пряным послевкусием." },
-    { name: "Sarma — Крюшон", desc: "Пряный фруктовый напиток с вишнёвой косточкой." },
-    { name: "Sarma — Овсяное Печенье", desc: "Сдобная домашняя выпечка." },
-    { name: "Sarma — Ревень", desc: "Кисло-сладкая травянистая нота." },
-    { name: "Sarma — Ромашковое Варенье", desc: "Цветочная ромашка с мягкой сладостью." },
-    { name: "Sarma — Смородиновый Морс", desc: "Кислый смородиновый морс." },
-    { name: "Element — V Element", desc: "Микс топовых вкусов линеек Огонь, Вода, Земля и Воздух." },
-    { name: "Element — Сиберри", desc: "Брусника, клюква, морошка, княженика, черника." },
-    { name: "Element — Пихта", desc: "Свежая хвоя." },
-    { name: "Element — Личи", desc: "Сладкий личи с клубничным послевкусием." },
-    { name: "Element — Смородина", desc: "Насыщенная чёрная смородина." },
-    { name: "Element — Kashmir", desc: "Пряная восточная нота." },
-    { name: "Element — Pomelo & Grapefruit", desc: "Цитрусовый дуэт с горчинкой." },
-    { name: "Sebero — Limoncello", desc: "Лимонный ликёр с мятным холодком в миксе." },
-    { name: "Sebero — Wild Berries", desc: "Черника, ежевика, брусника." },
-    { name: "NAШ — Грейпфрут", desc: "Цитрус с лёгкой приятной горчинкой." },
-    { name: "NAШ — Грут", desc: "Мокрая кора после дождя с можжевельником." },
-    { name: "NAШ — Гуанабана", desc: "Сочный экзотический фрукт." },
-    { name: "NAШ — Персидская Выпечка", desc: "Восточная сдоба со специями." },
-    { name: "NAШ — Арахисовая Паста", desc: "Ореховый десертный вкус." },
-    { name: "NAШ — Юбилейное Печенье", desc: "Сливочное сахарное печенье." },
-    { name: "Overdose — Melon Berry", desc: "Дыня и лесные ягоды." },
-    { name: "Overdose — Orange Soda", desc: "Газировка со вкусом апельсина." },
-    { name: "Overdose — Lotus Berry", desc: "Вишня, земляника, цветок лотоса." },
-    { name: "Overdose — Strawberry Kiwi", desc: "Клубника с кислинкой киви." },
-    { name: "Overdose — Peach Iced Tea", desc: "Холодный персиковый чай." },
-    { name: "Overdose — Masala Tea", desc: "Пряный молочный чай масала." },
-    { name: "Overdose — Wintergreen", desc: "Пряная мята с северной свежестью." },
-    { name: "Overdose — Stellar Grape", desc: "Виноград и тонка в парфюмерной подаче." },
-    { name: "Двойное яблоко и мята", desc: "Хрустящее яблоко с холодной мятной нотой." },
-    { name: "Виноград и мята", desc: "Сладкий виноград с прохладным акцентом." },
-    { name: "Арбуз и мята", desc: "Сочный арбуз с ледяным послевкусием." },
-    { name: "Кола и лайм", desc: "Газировка с кислой цитрусовой ноткой." },
-    { name: "Мохито", desc: "Лайм, мята, содовая." },
-    { name: "Персик и грейпфрут", desc: "Сладость персика с горчинкой грейпфрута." },
-    { name: "Манго и маракуйя", desc: "Тропический тандем сладкого и кислого." },
-    { name: "Клубника и базилик", desc: "Ягода с пряной травяной нотой." },
-    { name: "Апельсин и корица", desc: "Цитрус со специями." },
-    { name: "Гранат и мята", desc: "Терпкий гранат с холодком." },
-    { name: "Черника и лаванда", desc: "Ягода с цветочной ноткой." },
-    { name: "Кокос и ананас", desc: "Тропический дуэт." },
-    { name: "Малина и ваниль", desc: "Ягодная сладость со сливочным акцентом." },
-    { name: "Лимон и имбирь", desc: "Бодрящая цитрусовая острота." },
-    { name: "Дыня и огурец", desc: "Свежий летний дуэт." },
-    { name: "Вишня и шоколад", desc: "Терпкая ягода с какао." },
-    { name: "Инжир и апельсин", desc: "Сладкий инжир с цитрусовой цедрой." },
-    { name: "Ежевика и мята", desc: "Тёмная ягода с прохладой." },
-    { name: "Груша и розмарин", desc: "Фрукт с хвойно-травяной ноткой." },
-    { name: "Клюква и апельсин", desc: "Кислая ягода с цитрусом." },
-    { name: "Личи и роза", desc: "Восточный цветочный десерт." },
-    { name: "Кофе и карамель", desc: "Бодрящий десертный дуэт." },
-    { name: "Черёмуха и ваниль", desc: "Терпкая ягода со сливочной нотой." },
-    { name: "Абрикос и миндаль", desc: "Южный фрукт с ореховой ноткой." },
-    { name: "Смородина и мята", desc: "Кислая ягода с холодком." },
-    { name: "Йогурт и манго", desc: "Сливочно-тропический десерт." },
-    { name: "Каркаде и гранат", desc: "Кисло-терпкий фруктовый чай." },
-    { name: "Груша и имбирь", desc: "Фрукт с пряной остротой." },
-    { name: "Апельсин и шоколад", desc: "Цитрус с какао." },
-    { name: "Мандарин и корица", desc: "Зимний цитрусовый десерт." },
-    { name: "Земляника и сливки", desc: "Ягода со сливочной нежностью." },
-    { name: "Виноград и гранат", desc: "Сладко-терпкий фруктовый дуэт." },
-    { name: "Лимонад и мята", desc: "Освежающая газировка с холодком." },
-    { name: "Персик и маракуйя", desc: "Тропический фруктовый дуэт." },
-    { name: "Ананас и чили", desc: "Сладость с лёгкой остротой." },
-    { name: "Яблоко и корица", desc: "Тёплый десертный дуэт." },
-    { name: "Малина и личи", desc: "Ягодная кислинка с восточной сладостью." },
-    { name: "Кактус и груша", desc: "Необычный сочный дуэт." },
-    { name: "Бузина и лимон", desc: "Цветочная свежесть с цитрусом." },
-    { name: "Тайская гуава", desc: "Сладко-острая тропическая нота." },
-    { name: "Черешня и виски", desc: "Терпкий десертный дуэт для вечера." },
-    { name: "Фисташковый пломбир", desc: "Ореховое мороженое." },
-    { name: "Красный чай и бергамот", desc: "Эрл грей с фруктовой сладостью." },
-    { name: "Роза, вишня и мускус", desc: "Парфюмерный акцент с ягодной нотой." },
-    { name: "Щавель и лесные ягоды", desc: "Травяная кислинка с фруктовой сладостью." },
-    { name: "Тархун и лайм", desc: "Эстрагоновая газировка с цитрусом." },
-    { name: "Дыня, арбуз и персик", desc: "Летний фруктовый триколор." },
-    { name: "Черника, мороженое и чизкейк", desc: "Десертное трио." },
-    { name: "Гуава, гранат и грейпфрут", desc: "Кисло-сладкий тропический микс." },
-    { name: "Чизкейк, черника и земляника", desc: "Десертная ягодная тройка." },
-    { name: "Кокос, лесной орех и малина", desc: "Ореховый десерт с ягодной кислинкой." },
-    { name: "Персик, папайя и жвачка", desc: "Летний тропический дуэт со сладкой нотой." },
-    { name: "Груша, персик и лесные ягоды", desc: "Фруктово-ягодное ассорти." },
-    { name: "Виноград, тонка и ваниль", desc: "Парфюмерно-десертное сочетание." }
+    { name: "Cherry Crime", desc: "Вишня 50% · Меренга 30% · Персик 20%" },
+    { name: "Feijoa Drama", desc: "Фейхоа 45% · Эвкалипт 35% · Клюква 20%" },
+    { name: "Choco Comedy", desc: "Шоколад 40% · Бисквит 40% · Газировка 20%" },
+    { name: "Pear Action", desc: "Груша 60% · Персик 25% · Лесные ягоды 15%" },
+    { name: "Peach Fantasy", desc: "Персик 35% · Папайя 35% · Жвачка 30%" },
+    { name: "Байкальский Краш", desc: "Фисташка 50% · Мята 25% · Пломбир 25%" },
+    { name: "Азовский Вайб", desc: "Груша 45% · Лимон 30% · Эстрагон 25%" },
+    { name: "Крымский Вайб", desc: "Дыня 40% · Арбуз 35% · Персик 25%" },
+    { name: "Куршский Вайб", desc: "Нектарин 55% · Фейхоа 30% · Кактус 15%" },
+    { name: "Волжский Чилл", desc: "Чизкейк 40% · Черника 30% · Земляника 30%" },
+    { name: "Mickey's Mouth", desc: "Морковь 65% · Манго 20% · Маракуйя 15%" },
+    { name: "SashaGrey", desc: "Каркаде 30% · Гуава 40% · Грейпфрут 30%" },
+    { name: "R-Gazm", desc: "Кокос 50% · Лесной орех 35% · Малина 15%" },
+    { name: "D-Zert", desc: "Малина 45% · Черника 25% · Чизкейк 30%" },
+    { name: "Pink Princess", desc: "Клубника 60% · Личи 20% · Грейпфрут 20%" },
+    { name: "Сиберри", desc: "Брусника 50% · Клюква 30% · Черника 20%" },
+    { name: "V Element", desc: "Личи 45% · Смородина 35% · Кашмир 20%" },
+    { name: "Яблочный Штрудель", desc: "Двойное яблоко 40% · Корица 40% · Ваниль 20%" },
+    { name: "Мохито", desc: "Лайм 60% · Мята 25% · Тростниковый сахар 15%" },
+    { name: "Пина Колада", desc: "Ананас 35% · Кокос 35% · Сливки 30%" },
+    { name: "Лесной Орех С Ягодами", desc: "Фундук 50% · Лесные ягоды 25% · Мята 25%" },
+    { name: "Пряный Гранат", desc: "Гранат 45% · Кардамон 30% · Лайм 25%" },
+    { name: "Медовый Табак", desc: "Табак 40% · Мёд 35% · Курага 25%" },
+    { name: "Черничный Чизкейк", desc: "Черника 55% · Чизкейк 30% · Ваниль 15%" },
+    { name: "Тархун-Лайм", desc: "Тархун 40% · Лайм 30% · Мята 30%" },
+    { name: "Кофе С Коньяком И Вишней", desc: "Кофе 65% · Вишня 20% · Коньяк 15%" },
+    { name: "Азиатский Микс", desc: "Личи 30% · Маракуйя 40% · Жасмин 30%" },
+    { name: "Ягодная Свежесть", desc: "Клубника 50% · Малина 35% · Мята 15%" },
+    { name: "Тропический Коктейль", desc: "Ананас 45% · Манго 25% · Кокос 30%" },
+    { name: "Ягодный Сорбет", desc: "Черника 60% · Ежевика 20% · Мята 20%" },
+    { name: "Цитрусовый Фреш", desc: "Апельсин 50% · Грейпфрут 30% · Лимон 20%" },
+    { name: "Фруктовое Трио", desc: "Апельсин 45% · Персик 35% · Виноград 20%" },
+    { name: "Банановый Бриз", desc: "Банан 40% · Клубника 40% · Мята 20%" },
+    { name: "Арбузный Пунш", desc: "Арбуз 60% · Апельсин 25% · Ваниль 15%" },
+    { name: "Дынная Феерия", desc: "Дыня 35% · Вишня 35% · Ананас 30%" },
+    { name: "Персиковый Сад", desc: "Персик 50% · Гуава 25% · Виноград 25%" },
+    { name: "Манго-Ягодный Микс", desc: "Манго 45% · Лесные ягоды 30% · Вишня 25%" },
+    { name: "Ежевичный Шторм", desc: "Ежевика 40% · Арбуз 35% · Мята 25%" },
+    { name: "Киви-Мятный Взрыв", desc: "Киви 55% · Клубника 30% · Мята 15%" },
+    { name: "Грейпфрутовый Бриз", desc: "Грейпфрут 40% · Лемонграсс 30% · Мята 30%" },
+    { name: "Лимонный Вихрь", desc: "Лимон 65% · Ананас 20% · Мята 15%" },
+    { name: "Мандариновый Холод", desc: "Мандарин 30% · Лайм 40% · Мята 30%" },
+    { name: "Ореховая Карамель", desc: "Карамель 50% · Фисташка 35% · Шоколад 15%" },
+    { name: "Тропический Шоколад", desc: "Шоколад 45% · Кокос 25% · Ваниль 30%" },
+    { name: "Десертное Трио", desc: "Тирамису 60% · Орехи 20% · Чизкейк 20%" },
+    { name: "Ягодный Чизкейк С Холодком", desc: "Черника 50% · Чизкейк 30% · Мята 20%" },
+    { name: "Молочный Шоколад-Банан", desc: "Шоколад 45% · Банан 35% · Лёд 20%" },
+    { name: "Пряный Глинтвейн", desc: "Глинтвейн 40% · Мёд 40% · Тархун 20%" },
+    { name: "Хвойный Чай", desc: "Хвоя 60% · Красный чай 25% · Базилик 15%" },
+    { name: "Восточная Халва", desc: "Халва 35% · Имбирь 35% · Лимон 30%" },
+    { name: "Осенняя Тыква", desc: "Тыква 50% · Персик 25% · Бузина 25%" },
+    { name: "Колючий Тропик", desc: "Кактус 45% · Ананас 30% · Лёд 25%" },
+    { name: "Гуакамоле-Микс", desc: "Авокадо 40% · Лайм 35% · Кинза 25%" },
+    { name: "Огуречный Бриз", desc: "Огурец 55% · Роза 30% · Лайм 15%" },
+    { name: "Пряная Кола", desc: "Кола 40% · Корица 30% · Банан 30%" },
+    { name: "Персиковый Лёд", desc: "Персик 65% · Виноград 20% · Лёд 15%" },
+    { name: "Персиковый Десерт", desc: "Персик 30% · Чизкейк 40% · Кокос 30%" },
+    { name: "Тропический Персик", desc: "Персик 50% · Манго 35% · Маракуйя 15%" },
+    { name: "Тирамису Делюкс", desc: "Тирамису 45% · Орехи 25% · Шоколад 30%" },
+    { name: "Фисташковый Пломбир С Ананасом", desc: "Фисташка 60% · Ананас 20% · Мята 20%" },
+    { name: "Яблочно-Банановый Коктейль", desc: "Яблоко 50% · Банан 30% · Кокос 20%" },
+    { name: "Персиковый Триколор", desc: "Персик 45% · Виноград 35% · Ананас 20%" },
+    { name: "Сливочная Дыня", desc: "Ваниль 40% · Дыня 40% · Банан 20%" },
+    { name: "Гранатовая Вишня", desc: "Вишня 60% · Гранат 25% · Лесные ягоды 15%" },
+    { name: "Зимний Виноград", desc: "Хвоя 35% · Виноград 35% · Чай 30%" },
+    { name: "Малиново-Ежевичный Лёд", desc: "Малина 50% · Ежевика 25% · Лёд 25%" },
+    { name: "Земляничный Холодок", desc: "Малина 45% · Земляника 30% · Холодок 25%" },
+    { name: "Ореховое Печенье С Мятой", desc: "Орех 40% · Печенье 35% · Мята 25%" },
+    { name: "Виноградная Гроздь", desc: "Виноград 55% · Двойное яблоко 30% · Фруктовый микс 15%" },
+    { name: "Яблочно-Персиковый Сад", desc: "Двойное яблоко 40% · Персик 30% · Фруктовый микс 30%" },
+    { name: "Цитрусовое Яблоко", desc: "Апельсин 65% · Двойное яблоко 20% · Фруктовый микс 15%" },
+    { name: "Кокосовая Кола", desc: "Кокос 30% · Кола 40% · Жасмин 30%" },
+    { name: "Яблочный Капучино", desc: "Яблоко 50% · Кола 35% · Капучино 15%" },
+    { name: "Яблочный Капучино С Мятой", desc: "Двойное яблоко 45% · Капучино 25% · Мята 30%" },
+    { name: "Тропический Капучино", desc: "Ананас 60% · Грейпфрут 20% · Капучино 20%" },
+    { name: "Карамельная Земляника", desc: "Карамель 50% · Двойное яблоко 30% · Земляника 20%" },
+    { name: "Вишнёвый Лимонад", desc: "Вишня 45% · Лимон 35% · Мята 20%" },
+    { name: "Ромовый Ананас", desc: "Ананас 40% · Кокос 40% · Ром 20%" },
+    { name: "Апельсиновый Штрудель", desc: "Апельсин 60% · Двойное яблоко 25% · Корица 15%" },
+    { name: "Ягодный Пирог", desc: "Черника 35% · Малина 35% · Выпечка 30%" },
+    { name: "Дынный Мохито", desc: "Дыня 50% · Лайм 25% · Мята 25%" },
+    { name: "Персиковый Мохито", desc: "Персик 45% · Лайм 30% · Мята 25%" },
+    { name: "Гранатовый Чай", desc: "Гранат 40% · Каркаде 35% · Лимон 25%" },
+    { name: "Кокосовый Десерт", desc: "Кокос 55% · Ваниль 30% · Лесной орех 15%" },
+    { name: "Клубничный Крем-Брюле", desc: "Клубника 40% · Карамель 30% · Сливки 30%" },
+    { name: "Малиновый Раффаэлло", desc: "Малина 65% · Кокос 20% · Миндаль 15%" },
+    { name: "Абрикосовый Спайс", desc: "Абрикос 30% · Корица 40% · Мята 30%" },
+    { name: "Грушевый Розмарин", desc: "Груша 50% · Розмарин 35% · Лимон 15%" },
+    { name: "Инжирный Закат", desc: "Инжир 45% · Апельсин 25% · Гвоздика 30%" },
+    { name: "Лавандовый Лимонад", desc: "Лаванда 60% · Лимон 20% · Мёд 20%" },
+    { name: "Розовый Грейпфрут", desc: "Грейпфрут 50% · Роза 30% · Мята 20%" },
+    { name: "Персиковый Улун", desc: "Персик 45% · Улун 35% · Мёд 20%" },
+    { name: "Черносмородиновый Джем", desc: "Смородина 40% · Ежевика 40% · Ваниль 20%" },
+    { name: "Клюквенный Пунш", desc: "Клюква 60% · Апельсин 25% · Корица 15%" },
+    { name: "Медовая Дыня", desc: "Дыня 35% · Мёд 35% · Лимон 30%" },
+    { name: "Ванильный Круассан", desc: "Ваниль 50% · Миндаль 25% · Карамель 25%" },
+    { name: "Йогуртовый Персик", desc: "Персик 45% · Йогурт 30% · Мята 25%" },
+    { name: "Лесная Ежевика", desc: "Ежевика 40% · Черника 35% · Мята 25%" },
+    { name: "Сливовый Пунш", desc: "Слива 55% · Корица 30% · Апельсин 15%" },
+    { name: "Кедровый Орех С Мёдом", desc: "Кедровый орех 40% · Мёд 30% · Ваниль 30%" },
+    { name: "Клубника Со Сливками", desc: "Клубника 65% · Сливки 20% · Ваниль 15%" },
+    { name: "Гранатовый Мохито", desc: "Гранат 30% · Лайм 40% · Мята 30%" },
+    { name: "Апельсиновый Джем", desc: "Апельсин 50% · Имбирь 35% · Мёд 15%" },
+    { name: "Дынный Щербет", desc: "Дыня 45% · Лимон 25% · Мята 30%" },
+    { name: "Персиковый Чай Каркаде", desc: "Персик 60% · Каркаде 20% · Лимон 20%" },
+    { name: "Ежевичный Мохито", desc: "Ежевика 50% · Лайм 30% · Мята 20%" },
+    { name: "Тропическая Маракуйя", desc: "Маракуйя 45% · Ананас 35% · Кокос 20%" },
+    { name: "Вишнёвый Штрудель", desc: "Вишня 40% · Корица 40% · Ваниль 20%" },
+    { name: "Медовый Апельсин", desc: "Апельсин 60% · Мёд 25% · Корица 15%" },
+    { name: "Клубничный Мохито", desc: "Клубника 35% · Лайм 35% · Мята 30%" },
+    { name: "Персиковая Роза", desc: "Персик 50% · Роза 25% · Мята 25%" },
+    { name: "Инжир С Мёдом", desc: "Инжир 45% · Мёд 30% · Грецкий орех 25%" },
+    { name: "Малиновый Лимонад", desc: "Малина 40% · Лимон 35% · Мята 25%" },
+    { name: "Апельсиновый Гранат", desc: "Апельсин 55% · Гранат 30% · Мята 15%" },
+    { name: "Кокосовый Лайм", desc: "Кокос 40% · Лайм 30% · Ваниль 30%" }
   ];
   var lastIndex = -1;
   function pickMix(){
@@ -443,19 +585,125 @@
   }
 
   var orbWrap = document.getElementById('orbWrap');
-  var orbSpin = document.getElementById('orbSpin');
+  var orbSurface = document.getElementById('orbSurface');
+  var screenEl = document.getElementById('screen');
   var content = document.getElementById('screenContent');
   var counterEl = document.getElementById('counter');
   var count = 0;
   var busy = false;
 
+  var FADE_MS = 600;   // длительность выключения/включения экрана
+
+  // ---- непрерывное плавное вращение глобуса вокруг вертикальной оси (без рывков) ----
+  // материки и меридианы честно проецируются как на реальной вращающейся сфере:
+  // едут по синусоиде и сжимаются (scaleX) ближе к краю, а не просто скроллятся плоско
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var IDLE_SPEED = reduceMotion ? 0 : 20;    // градусов в секунду в состоянии покоя
+  var BURST_SPEED = reduceMotion ? 0 : 260;  // градусов в секунду во время ответа
+  var speed = IDLE_SPEED;
+  var targetSpeed = IDLE_SPEED;
+  var angle = 0;
+  var lastTs = null;
+
+  var CENTER = 125, SPHERE_R = 108;
+  function measureSphere(){
+    var w = orbSurface.clientWidth || 250;
+    CENTER = w / 2;
+    SPHERE_R = w / 2 * 0.86;
+  }
+  measureSphere();
+  window.addEventListener('resize', measureSphere);
+
+  var MERIDIAN_COUNT = 9;
+  var meridians = [];
+  for(var mi = 0; mi < MERIDIAN_COUNT; mi++){
+    var mEl = document.createElement('div');
+    mEl.className = 'meridian';
+    orbSurface.appendChild(mEl);
+    meridians.push({ el: mEl, lon: mi * (360 / MERIDIAN_COUNT) });
+  }
+
+  var continents = [
+    { lon: 8,   lat: -0.30, w: 46, h: 30, a: 0.42 },
+    { lon: 52,  lat:  0.12, w: 30, h: 46, a: 0.40 },
+    { lon: 96,  lat: -0.42, w: 26, h: 20, a: 0.34 },
+    { lon: 140, lat:  0.34, w: 36, h: 22, a: 0.36 },
+    { lon: 190, lat: -0.06, w: 22, h: 36, a: 0.30 },
+    { lon: 232, lat:  0.40, w: 26, h: 16, a: 0.28 },
+    { lon: 276, lat: -0.34, w: 20, h: 26, a: 0.30 },
+    { lon: 322, lat:  0.16, w: 32, h: 24, a: 0.34 }
+  ];
+  continents.forEach(function(c){
+    var cEl = document.createElement('div');
+    cEl.className = 'continent';
+    cEl.style.width = c.w + 'px';
+    cEl.style.height = c.h + 'px';
+    cEl.style.background = 'radial-gradient(ellipse, rgba(196,196,208,' + c.a + ') 0%, rgba(196,196,208,0) 75%)';
+    orbSurface.appendChild(cEl);
+    c.el = cEl;
+  });
+
+  function updateSurface(angleDeg){
+    for(var i = 0; i < meridians.length; i++){
+      var m = meridians[i];
+      var rad = (m.lon + angleDeg) * Math.PI / 180;
+      var s = Math.sin(rad), c = Math.cos(rad);
+      var x = CENTER + SPHERE_R * s;
+      var scaleX = Math.max(0.04, Math.abs(c));
+      m.el.style.left = x + 'px';
+      m.el.style.opacity = (Math.max(0, c) * 0.4).toFixed(3);
+      m.el.style.transform = 'translateX(-50%) scaleX(' + scaleX.toFixed(3) + ')';
+    }
+    for(var j = 0; j < continents.length; j++){
+      var cc = continents[j];
+      var rad2 = (cc.lon + angleDeg) * Math.PI / 180;
+      var s2 = Math.sin(rad2), c2 = Math.cos(rad2);
+      var x2 = CENTER + SPHERE_R * s2;
+      var y2 = CENTER + cc.lat * SPHERE_R;
+      var scaleX2 = Math.max(0.06, Math.abs(c2));
+      cc.el.style.left = x2 + 'px';
+      cc.el.style.top = y2 + 'px';
+      cc.el.style.opacity = Math.max(0, c2).toFixed(3);
+      cc.el.style.transform = 'translate(-50%,-50%) scaleX(' + scaleX2.toFixed(3) + ')';
+    }
+  }
+
+  function rotationTick(ts){
+    if(lastTs === null) lastTs = ts;
+    var dt = Math.min(ts - lastTs, 50) / 1000;
+    lastTs = ts;
+    // экспоненциальное сглаживание скорости — ускорение/торможение без единого скачка
+    speed += (targetSpeed - speed) * Math.min(dt * 2.2, 1);
+    angle = (angle + speed * dt) % 360;
+    updateSurface(angle);
+    requestAnimationFrame(rotationTick);
+  }
+  requestAnimationFrame(rotationTick);
+
+  // ---- «оракул пишет ответ» — плавное посимвольное появление названия микса ----
+  function typeText(el, text, onDone){
+    el.textContent = '';
+    var i = 0;
+    (function step(){
+      i++;
+      el.textContent = text.slice(0, i);
+      if(i < text.length){
+        setTimeout(step, 20);
+      } else if(onDone){
+        onDone();
+      }
+    })();
+  }
+
   function renderMix(mix){
     content.innerHTML =
-      '<div class="mix-name" id="mn">' + mix.name + '</div>' +
+      '<div class="mix-name" id="mn"></div>' +
       '<div class="mix-desc" id="md">' + mix.desc + '</div>';
-    requestAnimationFrame(function(){
-      document.getElementById('mn').classList.add('show');
-      document.getElementById('md').classList.add('show');
+    var mn = document.getElementById('mn');
+    var md = document.getElementById('md');
+    mn.classList.add('in');
+    typeText(mn, mix.name, function(){
+      md.classList.add('in');
     });
   }
 
@@ -464,31 +712,34 @@
     busy = true;
     haptic('medium');
 
-    orbWrap.classList.remove('pulse');
-    orbSpin.classList.remove('burst');
-    void orbWrap.offsetWidth;
+    // плавный разгон вращения — без сброса угла, без рывка
+    targetSpeed = BURST_SPEED;
     orbWrap.classList.add('pulse');
-    orbSpin.classList.add('burst');
 
-    var mn = document.getElementById('mn');
-    var md = document.getElementById('md');
-    if(mn) mn.classList.remove('show');
-    if(md) md.classList.remove('show');
+    // экран плавно гаснет
+    screenEl.classList.add('off');
 
     setTimeout(function(){
       var mix = pickMix();
       renderMix(mix);
       count++;
       counterEl.textContent = '№ ' + String(count).padStart(3, '0');
-    }, 180);
+      // и плавно загорается снова с новым миксом
+      screenEl.classList.remove('off');
+      screenEl.classList.remove('sweep');
+      void screenEl.offsetWidth;
+      screenEl.classList.add('sweep');
+    }, FADE_MS);
 
     setTimeout(function(){
-      orbSpin.classList.remove('burst');
-    }, 1500);
-    setTimeout(function(){ busy = false; }, 750);
+      // плавное торможение обратно к спокойному вращению
+      targetSpeed = IDLE_SPEED;
+      orbWrap.classList.remove('pulse');
+      busy = false;
+    }, FADE_MS + 550);
   }
 
-  // ---- shake detection ----
+  // ---- определение встряхивания (проверенная рабочая версия) ----
   var SHAKE_THRESHOLD = 16;
   var lastX = null, lastY = null, lastZ = null, lastTime = 0;
 
