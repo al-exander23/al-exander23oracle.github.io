@@ -7,7 +7,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg-deep: #0b0912;
@@ -72,7 +72,7 @@
   }
 
   .brand{
-    font-family: 'Fraunces', serif;
+    font-family: 'Sora', sans-serif;
     font-size: 15px;
     font-weight: 600;
     letter-spacing: .22em;
@@ -326,16 +326,17 @@
   }
 
   .mix-name{
-    font-family: 'Fraunces', serif;
-    font-size: 16.5px;
+    font-family: 'Lora', serif;
+    font-size: 17px;
     font-weight: 600;
+    letter-spacing: 0;
     color: #fff8ea;
-    line-height: 1.25;
+    line-height: 1.32;
     text-decoration: none;
     text-shadow:
       0 0 1px #fff,
-      0 0 4px var(--neon),
-      0 0 9px var(--neon);
+      0 0 3px var(--neon),
+      0 0 6px var(--neon);
     margin-bottom: 6px;
     display:-webkit-box;
     -webkit-line-clamp: 3;
@@ -348,11 +349,13 @@
   .mix-name.in{ opacity: 1; transform: translateY(0); }
 
   .mix-desc{
+    font-family: 'Inter', sans-serif;
     font-size: 10.5px;
-    line-height: 1.4;
+    font-weight: 500;
+    line-height: 1.45;
     color: var(--neon-soft);
     text-decoration: none;
-    text-shadow: 0 0 1px #fff, 0 0 3px rgba(255, 219, 163, 0.55), 0 0 7px rgba(255, 219, 163, 0.35);
+    text-shadow: 0 0 1px #fff, 0 0 2px rgba(255, 219, 163, 0.5), 0 0 5px rgba(255, 219, 163, 0.3);
     display:-webkit-box;
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
@@ -388,6 +391,27 @@
     transition: transform .2s ease;
   }
   .permission-btn:active{ transform: scale(.96); }
+
+  .lock-btn{
+    margin-top: 18px;
+    padding: 9px 20px;
+    border-radius: 100px;
+    border: 1px solid rgba(217,184,120,0.32);
+    background: rgba(217,184,120,0.06);
+    color: var(--gold-soft);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: transform .2s ease, background .25s ease, border-color .25s ease;
+  }
+  .lock-btn:active{ transform: scale(.96); }
+  .lock-btn.active{
+    border-color: rgba(217,184,120,0.65);
+    background: linear-gradient(180deg, rgba(217,184,120,0.28), rgba(217,184,120,0.12));
+    color: #fff8ea;
+  }
 
   .counter{
     position:absolute;
@@ -438,6 +462,8 @@
   </div>
 
   <div class="hint" id="hint">Встряхни телефон или коснись шара — <b>оракул</b> подберёт для тебя микс.</div>
+
+  <button class="lock-btn" id="lockBtn" style="display:none;">🔒 Закрепить микс</button>
 
   <div class="counter" id="counter"></div>
 </div>
@@ -589,8 +615,10 @@
   var screenEl = document.getElementById('screen');
   var content = document.getElementById('screenContent');
   var counterEl = document.getElementById('counter');
+  var lockBtn = document.getElementById('lockBtn');
   var count = 0;
   var busy = false;
+  var locked = false;
 
   var FADE_MS = 600;   // длительность выключения/включения экрана
 
@@ -708,7 +736,7 @@
   }
 
   function triggerMix(){
-    if(busy) return;
+    if(busy || locked) return;
     busy = true;
     haptic('medium');
 
@@ -729,6 +757,7 @@
       screenEl.classList.remove('sweep');
       void screenEl.offsetWidth;
       screenEl.classList.add('sweep');
+      lockBtn.style.display = 'inline-block';
     }, FADE_MS);
 
     setTimeout(function(){
@@ -739,25 +768,48 @@
     }, FADE_MS + 550);
   }
 
-  // ---- определение встряхивания (проверенная рабочая версия) ----
-  var SHAKE_THRESHOLD = 16;
-  var lastX = null, lastY = null, lastZ = null, lastTime = 0;
+  // ---- определение встряхивания: только реальный рывок, не поворот ----
+  // используем линейное ускорение БЕЗ гравитации — поворот/наклон телефона
+  // меняет вектор гравитации, но не даёт скачка линейного ускорения
+  var SHAKE_THRESHOLD = 15; // м/с² — порог именно резкого движения
+  var SHAKE_COOLDOWN = 700; // мс между срабатываниями
+  var gravity = { x: 0, y: 0, z: 0 };
+  var gravityInit = false;
+  var lastTriggerTs = 0;
+
+  function processLinearAcceleration(x, y, z, now){
+    var magnitude = Math.sqrt(x * x + y * y + z * z);
+    if(magnitude > SHAKE_THRESHOLD && now - lastTriggerTs > SHAKE_COOLDOWN){
+      lastTriggerTs = now;
+      triggerMix();
+    }
+  }
 
   function handleMotion(e){
-    var acc = e.accelerationIncludingGravity || e.acceleration;
-    if(!acc || acc.x === null) return;
     var now = Date.now();
-    if(now - lastTime < 100) return;
 
-    if(lastX !== null){
-      var dx = Math.abs(acc.x - lastX);
-      var dy = Math.abs(acc.y - lastY);
-      var dz = Math.abs(acc.z - lastZ);
-      if(dx + dy + dz > SHAKE_THRESHOLD){
-        triggerMix();
-      }
+    // если браузер даёт готовое линейное ускорение — используем его напрямую
+    var lin = e.acceleration;
+    if(lin && lin.x !== null && lin.x !== undefined){
+      processLinearAcceleration(lin.x, lin.y, lin.z, now);
+      return;
     }
-    lastX = acc.x; lastY = acc.y; lastZ = acc.z; lastTime = now;
+
+    // иначе вычитаем гравитацию сами через плавный low-pass фильтр
+    var raw = e.accelerationIncludingGravity;
+    if(!raw || raw.x === null || raw.x === undefined) return;
+
+    if(!gravityInit){
+      gravity.x = raw.x; gravity.y = raw.y; gravity.z = raw.z;
+      gravityInit = true;
+      return;
+    }
+    var alpha = 0.85;
+    gravity.x = alpha * gravity.x + (1 - alpha) * raw.x;
+    gravity.y = alpha * gravity.y + (1 - alpha) * raw.y;
+    gravity.z = alpha * gravity.z + (1 - alpha) * raw.z;
+
+    processLinearAcceleration(raw.x - gravity.x, raw.y - gravity.y, raw.z - gravity.z, now);
   }
 
   function attachShake(){
@@ -783,6 +835,13 @@
   initMotion();
 
   document.getElementById('orbWrap').addEventListener('click', triggerMix);
+
+  lockBtn.addEventListener('click', function(){
+    locked = !locked;
+    lockBtn.textContent = locked ? '🔓 Открепить микс' : '🔒 Закрепить микс';
+    lockBtn.classList.toggle('active', locked);
+    haptic('light');
+  });
 
   var motesEl = document.getElementById('motes');
   var colors = ['var(--mint)', 'var(--accent)'];
