@@ -1,0 +1,7078 @@
+[
+  {
+    "id": "mix-001",
+    "name": "Cherry Crime",
+    "description": "Вишня — основа, меренга — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 50
+      },
+      {
+        "flavor": "Меренга",
+        "percent": 30
+      },
+      {
+        "flavor": "Персик",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 41,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-002",
+    "name": "Feijoa Drama",
+    "description": "Фейхоа и Эвкалипт — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Фейхоа",
+        "percent": 45
+      },
+      {
+        "flavor": "Эвкалипт",
+        "percent": 35
+      },
+      {
+        "flavor": "Клюква",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 77,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-003",
+    "name": "Choco Comedy",
+    "description": "Шоколад, бисквит и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Шоколад",
+        "percent": 40
+      },
+      {
+        "flavor": "Бисквит",
+        "percent": 40
+      },
+      {
+        "flavor": "Газировка",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 94,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-004",
+    "name": "Pear Action",
+    "description": "Груша — основа, персик — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Груша",
+        "percent": 60
+      },
+      {
+        "flavor": "Персик",
+        "percent": 25
+      },
+      {
+        "flavor": "Лесные ягоды",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 66,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-005",
+    "name": "Peach Fantasy",
+    "description": "Классическое сочетание — Персик и папайя. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 35
+      },
+      {
+        "flavor": "Папайя",
+        "percent": 35
+      },
+      {
+        "flavor": "Жвачка",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 81,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-006",
+    "name": "Байкальский Краш",
+    "description": "Фисташка раскрывается первым, следом проступает мята.",
+    "recipe": [
+      {
+        "flavor": "Фисташка",
+        "percent": 50
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      },
+      {
+        "flavor": "Пломбир",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 85,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-007",
+    "name": "Азовский Вайб",
+    "description": "Груша — основа, лимон — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Груша",
+        "percent": 45
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 30
+      },
+      {
+        "flavor": "Эстрагон",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 58,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-008",
+    "name": "Крымский Вайб",
+    "description": "Простой, но точный расклад: Дыня плюс арбуз.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 40
+      },
+      {
+        "flavor": "Арбуз",
+        "percent": 35
+      },
+      {
+        "flavor": "Персик",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 87,
+    "brands": [],
+    "season": "лето",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-009",
+    "name": "Куршский Вайб",
+    "description": "Классическое сочетание — Нектарин и фейхоа. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Нектарин",
+        "percent": 55
+      },
+      {
+        "flavor": "Фейхоа",
+        "percent": 30
+      },
+      {
+        "flavor": "Кактус",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 65,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-010",
+    "name": "Волжский Чилл",
+    "description": "Чизкейк и Черника держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Чизкейк",
+        "percent": 40
+      },
+      {
+        "flavor": "Черника",
+        "percent": 30
+      },
+      {
+        "flavor": "Земляника",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 52,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-011",
+    "name": "Mickey's Mouth",
+    "description": "Морковь и Манго — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Морковь",
+        "percent": 65
+      },
+      {
+        "flavor": "Манго",
+        "percent": 20
+      },
+      {
+        "flavor": "Маракуйя",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 81,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-012",
+    "name": "SashaGrey",
+    "description": "Каркаде и Гуава держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Каркаде",
+        "percent": 30
+      },
+      {
+        "flavor": "Гуава",
+        "percent": 40
+      },
+      {
+        "flavor": "Грейпфрут",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 69,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-013",
+    "name": "R-Gazm",
+    "description": "Кокос — основа, лесной орех — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 50
+      },
+      {
+        "flavor": "Лесной орех",
+        "percent": 35
+      },
+      {
+        "flavor": "Малина",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 35,
+    "brands": [],
+    "season": "зима",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-014",
+    "name": "D-Zert",
+    "description": "Малина задаёт основной характер, черника добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 45
+      },
+      {
+        "flavor": "Черника",
+        "percent": 25
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 62,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-015",
+    "name": "Pink Princess",
+    "description": "Сбалансированный микс: Клубника на первом плане, личи — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 60
+      },
+      {
+        "flavor": "Личи",
+        "percent": 20
+      },
+      {
+        "flavor": "Грейпфрут",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 83,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-016",
+    "name": "Сиберри",
+    "description": "Классическое сочетание — Брусника и клюква. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Брусника",
+        "percent": 50
+      },
+      {
+        "flavor": "Клюква",
+        "percent": 30
+      },
+      {
+        "flavor": "Черника",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 65,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-017",
+    "name": "V Element",
+    "description": "Классическое сочетание — Личи и смородина. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Личи",
+        "percent": 45
+      },
+      {
+        "flavor": "Смородина",
+        "percent": 35
+      },
+      {
+        "flavor": "Кашмир",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 40,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-018",
+    "name": "Яблочный Штрудель",
+    "description": "Сбалансированный микс: Двойное яблоко на первом плане, корица — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Двойное яблоко",
+        "percent": 40
+      },
+      {
+        "flavor": "Корица",
+        "percent": 40
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 50,
+    "brands": [],
+    "season": "осень",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-019",
+    "name": "Мохито",
+    "description": "Дуэт Лайм и мята: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Лайм",
+        "percent": 60
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      },
+      {
+        "flavor": "Тростниковый сахар",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 39,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-020",
+    "name": "Пина Колада",
+    "description": "Классическое сочетание — Ананас и кокос. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Ананас",
+        "percent": 35
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 35
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 82,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-021",
+    "name": "Лесной Орех С Ягодами",
+    "description": "Дуэт Фундук и лесные ягоды: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Фундук",
+        "percent": 50
+      },
+      {
+        "flavor": "Лесные ягоды",
+        "percent": 25
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 84,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-022",
+    "name": "Пряный Гранат",
+    "description": "Гранат и Кардамон — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 45
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 39,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-023",
+    "name": "Медовый Табак",
+    "description": "Табак раскрывается первым, следом проступает мёд.",
+    "recipe": [
+      {
+        "flavor": "Табак",
+        "percent": 40
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 35
+      },
+      {
+        "flavor": "Курага",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 35,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-024",
+    "name": "Черничный Чизкейк",
+    "description": "Черника, чизкейк и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Черника",
+        "percent": 55
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 72,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-025",
+    "name": "Тархун-Лайм",
+    "description": "Тархун раскрывается первым, следом проступает лайм.",
+    "recipe": [
+      {
+        "flavor": "Тархун",
+        "percent": 40
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 42,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-026",
+    "name": "Кофе С Коньяком И Вишней",
+    "description": "Кофе и Вишня держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Кофе",
+        "percent": 65
+      },
+      {
+        "flavor": "Вишня",
+        "percent": 20
+      },
+      {
+        "flavor": "Коньяк",
+        "percent": 15
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 94,
+    "brands": [],
+    "season": "зима",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-027",
+    "name": "Азиатский Микс",
+    "description": "Личи держит структуру вкуса, маракуйя расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Личи",
+        "percent": 30
+      },
+      {
+        "flavor": "Маракуйя",
+        "percent": 40
+      },
+      {
+        "flavor": "Жасмин",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 64,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-028",
+    "name": "Ягодная Свежесть",
+    "description": "Клубника на старте, малина — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 50
+      },
+      {
+        "flavor": "Малина",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 38,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-029",
+    "name": "Тропический Коктейль",
+    "description": "Ананас на старте, манго — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Ананас",
+        "percent": 45
+      },
+      {
+        "flavor": "Манго",
+        "percent": 25
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 45,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-030",
+    "name": "Ягодный Сорбет",
+    "description": "Классическое сочетание — Черника и ежевика. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Черника",
+        "percent": 60
+      },
+      {
+        "flavor": "Ежевика",
+        "percent": 20
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 78,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-031",
+    "name": "Цитрусовый Фреш",
+    "description": "Апельсин держит структуру вкуса, грейпфрут расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 50
+      },
+      {
+        "flavor": "Грейпфрут",
+        "percent": 30
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 79,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-032",
+    "name": "Фруктовое Трио",
+    "description": "Апельсин раскрывается первым, следом проступает персик.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 45
+      },
+      {
+        "flavor": "Персик",
+        "percent": 35
+      },
+      {
+        "flavor": "Виноград",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 55,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-033",
+    "name": "Банановый Бриз",
+    "description": "Банан — основа, клубника — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Банан",
+        "percent": 40
+      },
+      {
+        "flavor": "Клубника",
+        "percent": 40
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 69,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-034",
+    "name": "Арбузный Пунш",
+    "description": "Арбуз раскрывается первым, следом проступает апельсин.",
+    "recipe": [
+      {
+        "flavor": "Арбуз",
+        "percent": 60
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 25
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 95,
+    "brands": [],
+    "season": "лето",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-035",
+    "name": "Дынная Феерия",
+    "description": "Дыня задаёт основной характер, вишня добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 35
+      },
+      {
+        "flavor": "Вишня",
+        "percent": 35
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 39,
+    "brands": [],
+    "season": "лето",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-036",
+    "name": "Персиковый Сад",
+    "description": "Простой, но точный расклад: Персик плюс гуава.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Гуава",
+        "percent": 25
+      },
+      {
+        "flavor": "Виноград",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 39,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-037",
+    "name": "Манго-Ягодный Микс",
+    "description": "Манго на старте, лесные ягоды — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Манго",
+        "percent": 45
+      },
+      {
+        "flavor": "Лесные ягоды",
+        "percent": 30
+      },
+      {
+        "flavor": "Вишня",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 40,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-038",
+    "name": "Ежевичный Шторм",
+    "description": "Классическое сочетание — Ежевика и арбуз. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Ежевика",
+        "percent": 40
+      },
+      {
+        "flavor": "Арбуз",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 37,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-039",
+    "name": "Киви-Мятный Взрыв",
+    "description": "Дуэт Киви и клубника: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Киви",
+        "percent": 55
+      },
+      {
+        "flavor": "Клубника",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 48,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-040",
+    "name": "Грейпфрутовый Бриз",
+    "description": "Классическое сочетание — Грейпфрут и лемонграсс. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Грейпфрут",
+        "percent": 40
+      },
+      {
+        "flavor": "Лемонграсс",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 64,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-041",
+    "name": "Лимонный Вихрь",
+    "description": "Классическое сочетание — Лимон и ананас. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Лимон",
+        "percent": 65
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 20
+      },
+      {
+        "flavor": "Мята",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 75,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-042",
+    "name": "Мандариновый Холод",
+    "description": "Мандарин на старте, лайм — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Мандарин",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 40
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 81,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-043",
+    "name": "Ореховая Карамель",
+    "description": "Дуэт Карамель и фисташка: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Карамель",
+        "percent": 50
+      },
+      {
+        "flavor": "Фисташка",
+        "percent": 35
+      },
+      {
+        "flavor": "Шоколад",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 73,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-044",
+    "name": "Тропический Шоколад",
+    "description": "Шоколад держит структуру вкуса, кокос расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Шоколад",
+        "percent": 45
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 25
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 60,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-045",
+    "name": "Десертное Трио",
+    "description": "Тирамису раскрывается первым, следом проступает орехи.",
+    "recipe": [
+      {
+        "flavor": "Тирамису",
+        "percent": 60
+      },
+      {
+        "flavor": "Орехи",
+        "percent": 20
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 66,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-046",
+    "name": "Ягодный Чизкейк С Холодком",
+    "description": "Черника держит структуру вкуса, чизкейк расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Черника",
+        "percent": 50
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 95,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-047",
+    "name": "Молочный Шоколад-Банан",
+    "description": "Дуэт Шоколад и банан: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Шоколад",
+        "percent": 45
+      },
+      {
+        "flavor": "Банан",
+        "percent": 35
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 41,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-048",
+    "name": "Пряный Глинтвейн",
+    "description": "Глинтвейн и Мёд — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Глинтвейн",
+        "percent": 40
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 40
+      },
+      {
+        "flavor": "Тархун",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 49,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-049",
+    "name": "Хвойный Чай",
+    "description": "Хвоя раскрывается первым, следом проступает красный чай.",
+    "recipe": [
+      {
+        "flavor": "Хвоя",
+        "percent": 60
+      },
+      {
+        "flavor": "Красный чай",
+        "percent": 25
+      },
+      {
+        "flavor": "Базилик",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 71,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-050",
+    "name": "Восточная Халва",
+    "description": "Халва — основа, имбирь — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Халва",
+        "percent": 35
+      },
+      {
+        "flavor": "Имбирь",
+        "percent": 35
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 30
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 54,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-051",
+    "name": "Осенняя Тыква",
+    "description": "Тыква раскрывается первым, следом проступает персик.",
+    "recipe": [
+      {
+        "flavor": "Тыква",
+        "percent": 50
+      },
+      {
+        "flavor": "Персик",
+        "percent": 25
+      },
+      {
+        "flavor": "Бузина",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 41,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-052",
+    "name": "Колючий Тропик",
+    "description": "Сбалансированный микс: Кактус на первом плане, ананас — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Кактус",
+        "percent": 45
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 30
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 66,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-053",
+    "name": "Гуакамоле-Микс",
+    "description": "Авокадо и Лайм — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Авокадо",
+        "percent": 40
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 35
+      },
+      {
+        "flavor": "Кинза",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 49,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-054",
+    "name": "Огуречный Бриз",
+    "description": "Огурец держит структуру вкуса, роза расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Огурец",
+        "percent": 55
+      },
+      {
+        "flavor": "Роза",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 63,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-055",
+    "name": "Пряная Кола",
+    "description": "Кола и Корица держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Кола",
+        "percent": 40
+      },
+      {
+        "flavor": "Корица",
+        "percent": 30
+      },
+      {
+        "flavor": "Банан",
+        "percent": 30
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 35,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-056",
+    "name": "Персиковый Лёд",
+    "description": "Дуэт Персик и виноград: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 65
+      },
+      {
+        "flavor": "Виноград",
+        "percent": 20
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 92,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-057",
+    "name": "Персиковый Десерт",
+    "description": "Персик и Чизкейк держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 30
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 40
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 94,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-058",
+    "name": "Тропический Персик",
+    "description": "Классическое сочетание — Персик и манго. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Манго",
+        "percent": 35
+      },
+      {
+        "flavor": "Маракуйя",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 80,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-059",
+    "name": "Тирамису Делюкс",
+    "description": "Сбалансированный микс: Тирамису на первом плане, орехи — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Тирамису",
+        "percent": 45
+      },
+      {
+        "flavor": "Орехи",
+        "percent": 25
+      },
+      {
+        "flavor": "Шоколад",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 62,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-060",
+    "name": "Фисташковый Пломбир С Ананасом",
+    "description": "Фисташка, ананас и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Фисташка",
+        "percent": 60
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 20
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 75,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-061",
+    "name": "Яблочно-Банановый Коктейль",
+    "description": "Яблоко держит структуру вкуса, банан расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Яблоко",
+        "percent": 50
+      },
+      {
+        "flavor": "Банан",
+        "percent": 30
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 52,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-062",
+    "name": "Персиковый Триколор",
+    "description": "Персик раскрывается первым, следом проступает виноград.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 45
+      },
+      {
+        "flavor": "Виноград",
+        "percent": 35
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 77,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-063",
+    "name": "Сливочная Дыня",
+    "description": "Ваниль — основа, дыня — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Ваниль",
+        "percent": 40
+      },
+      {
+        "flavor": "Дыня",
+        "percent": 40
+      },
+      {
+        "flavor": "Банан",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 45,
+    "brands": [],
+    "season": "лето",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-064",
+    "name": "Гранатовая Вишня",
+    "description": "Простой, но точный расклад: Вишня плюс гранат.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 60
+      },
+      {
+        "flavor": "Гранат",
+        "percent": 25
+      },
+      {
+        "flavor": "Лесные ягоды",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 91,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-065",
+    "name": "Зимний Виноград",
+    "description": "Хвоя задаёт основной характер, виноград добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Хвоя",
+        "percent": 35
+      },
+      {
+        "flavor": "Виноград",
+        "percent": 35
+      },
+      {
+        "flavor": "Чай",
+        "percent": 30
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 92,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-066",
+    "name": "Малиново-Ежевичный Лёд",
+    "description": "Малина раскрывается первым, следом проступает ежевика.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 50
+      },
+      {
+        "flavor": "Ежевика",
+        "percent": 25
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 84,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-067",
+    "name": "Земляничный Холодок",
+    "description": "Простой, но точный расклад: Малина плюс земляника.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 45
+      },
+      {
+        "flavor": "Земляника",
+        "percent": 30
+      },
+      {
+        "flavor": "Холодок",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 64,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-068",
+    "name": "Ореховое Печенье С Мятой",
+    "description": "Сбалансированный микс: Орех на первом плане, печенье — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Орех",
+        "percent": 40
+      },
+      {
+        "flavor": "Печенье",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 57,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-069",
+    "name": "Виноградная Гроздь",
+    "description": "Виноград задаёт основной характер, двойное яблоко добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Виноград",
+        "percent": 55
+      },
+      {
+        "flavor": "Двойное яблоко",
+        "percent": 30
+      },
+      {
+        "flavor": "Фруктовый микс",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 42,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-070",
+    "name": "Яблочно-Персиковый Сад",
+    "description": "Двойное яблоко и Персик держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Двойное яблоко",
+        "percent": 40
+      },
+      {
+        "flavor": "Персик",
+        "percent": 30
+      },
+      {
+        "flavor": "Фруктовый микс",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 74,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-071",
+    "name": "Цитрусовое Яблоко",
+    "description": "Апельсин и Двойное яблоко — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 65
+      },
+      {
+        "flavor": "Двойное яблоко",
+        "percent": 20
+      },
+      {
+        "flavor": "Фруктовый микс",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 75,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-072",
+    "name": "Кокосовая Кола",
+    "description": "Дуэт Кокос и кола: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 30
+      },
+      {
+        "flavor": "Кола",
+        "percent": 40
+      },
+      {
+        "flavor": "Жасмин",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 50,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-073",
+    "name": "Яблочный Капучино",
+    "description": "Яблоко, кола и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Яблоко",
+        "percent": 50
+      },
+      {
+        "flavor": "Кола",
+        "percent": 35
+      },
+      {
+        "flavor": "Капучино",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 60,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-074",
+    "name": "Яблочный Капучино С Мятой",
+    "description": "Двойное яблоко держит структуру вкуса, капучино расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Двойное яблоко",
+        "percent": 45
+      },
+      {
+        "flavor": "Капучино",
+        "percent": 25
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 75,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-075",
+    "name": "Тропический Капучино",
+    "description": "Простой, но точный расклад: Ананас плюс грейпфрут.",
+    "recipe": [
+      {
+        "flavor": "Ананас",
+        "percent": 60
+      },
+      {
+        "flavor": "Грейпфрут",
+        "percent": 20
+      },
+      {
+        "flavor": "Капучино",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 55,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-076",
+    "name": "Карамельная Земляника",
+    "description": "Карамель раскрывается первым, следом проступает двойное яблоко.",
+    "recipe": [
+      {
+        "flavor": "Карамель",
+        "percent": 50
+      },
+      {
+        "flavor": "Двойное яблоко",
+        "percent": 30
+      },
+      {
+        "flavor": "Земляника",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 89,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-077",
+    "name": "Вишнёвый Лимонад",
+    "description": "Классическое сочетание — Вишня и лимон. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 45
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 68,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-078",
+    "name": "Ромовый Ананас",
+    "description": "Ананас держит структуру вкуса, кокос расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Ананас",
+        "percent": 40
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 40
+      },
+      {
+        "flavor": "Ром",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 37,
+    "brands": [],
+    "season": "зима",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-079",
+    "name": "Апельсиновый Штрудель",
+    "description": "Апельсин и Двойное яблоко держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 60
+      },
+      {
+        "flavor": "Двойное яблоко",
+        "percent": 25
+      },
+      {
+        "flavor": "Корица",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 68,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-080",
+    "name": "Ягодный Пирог",
+    "description": "Сбалансированный микс: Черника на первом плане, малина — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Черника",
+        "percent": 35
+      },
+      {
+        "flavor": "Малина",
+        "percent": 35
+      },
+      {
+        "flavor": "Выпечка",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 65,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-081",
+    "name": "Дынный Мохито",
+    "description": "Дыня — основа, лайм — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 25
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 86,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-082",
+    "name": "Персиковый Мохито",
+    "description": "Персик и Лайм держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 45
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 70,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-083",
+    "name": "Гранатовый Чай",
+    "description": "Гранат держит структуру вкуса, каркаде расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 40
+      },
+      {
+        "flavor": "Каркаде",
+        "percent": 35
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 4,
+    "difficulty": 2,
+    "popularity": 86,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-084",
+    "name": "Кокосовый Десерт",
+    "description": "Кокос задаёт основной характер, ваниль добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 55
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      },
+      {
+        "flavor": "Лесной орех",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 51,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-085",
+    "name": "Клубничный Крем-Брюле",
+    "description": "Клубника и Карамель — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 40
+      },
+      {
+        "flavor": "Карамель",
+        "percent": 30
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 81,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-086",
+    "name": "Малиновый Раффаэлло",
+    "description": "Малина на старте, кокос — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 65
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 20
+      },
+      {
+        "flavor": "Миндаль",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 54,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-087",
+    "name": "Абрикосовый Спайс",
+    "description": "Абрикос задаёт основной характер, корица добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Абрикос",
+        "percent": 30
+      },
+      {
+        "flavor": "Корица",
+        "percent": 40
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 50,
+    "brands": [],
+    "season": "осень",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-088",
+    "name": "Грушевый Розмарин",
+    "description": "Груша, розмарин и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Груша",
+        "percent": 50
+      },
+      {
+        "flavor": "Розмарин",
+        "percent": 35
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 85,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-089",
+    "name": "Инжирный Закат",
+    "description": "Сбалансированный микс: Инжир на первом плане, апельсин — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Инжир",
+        "percent": 45
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 25
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 30
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 54,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-090",
+    "name": "Лавандовый Лимонад",
+    "description": "Лаванда и Лимон держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Лаванда",
+        "percent": 60
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 67,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-091",
+    "name": "Розовый Грейпфрут",
+    "description": "Сбалансированный микс: Грейпфрут на первом плане, роза — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Грейпфрут",
+        "percent": 50
+      },
+      {
+        "flavor": "Роза",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 46,
+    "brands": [],
+    "season": "весна",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-092",
+    "name": "Персиковый Улун",
+    "description": "Персик — основа, улун — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 45
+      },
+      {
+        "flavor": "Улун",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 69,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-093",
+    "name": "Черносмородиновый Джем",
+    "description": "Смородина раскрывается первым, следом проступает ежевика.",
+    "recipe": [
+      {
+        "flavor": "Смородина",
+        "percent": 40
+      },
+      {
+        "flavor": "Ежевика",
+        "percent": 40
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 89,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-094",
+    "name": "Клюквенный Пунш",
+    "description": "Клюква и Апельсин держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Клюква",
+        "percent": 60
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 25
+      },
+      {
+        "flavor": "Корица",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 38,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-095",
+    "name": "Медовая Дыня",
+    "description": "Дыня на старте, мёд — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 35
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 36,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-096",
+    "name": "Ванильный Круассан",
+    "description": "Ваниль раскрывается первым, следом проступает миндаль.",
+    "recipe": [
+      {
+        "flavor": "Ваниль",
+        "percent": 50
+      },
+      {
+        "flavor": "Миндаль",
+        "percent": 25
+      },
+      {
+        "flavor": "Карамель",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 4,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 84,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-097",
+    "name": "Йогуртовый Персик",
+    "description": "Персик на старте, йогурт — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 45
+      },
+      {
+        "flavor": "Йогурт",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 37,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-098",
+    "name": "Лесная Ежевика",
+    "description": "Ежевика — основа, черника — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Ежевика",
+        "percent": 40
+      },
+      {
+        "flavor": "Черника",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 59,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-099",
+    "name": "Сливовый Пунш",
+    "description": "Простой, но точный расклад: Слива плюс корица.",
+    "recipe": [
+      {
+        "flavor": "Слива",
+        "percent": 55
+      },
+      {
+        "flavor": "Корица",
+        "percent": 30
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 90,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-100",
+    "name": "Кедровый Орех С Мёдом",
+    "description": "Дуэт Кедровый орех и мёд: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Кедровый орех",
+        "percent": 40
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 59,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-101",
+    "name": "Клубника Со Сливками",
+    "description": "Сбалансированный микс: Клубника на первом плане, сливки — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 65
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 20
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 90,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-102",
+    "name": "Гранатовый Мохито",
+    "description": "Сбалансированный микс: Гранат на первом плане, лайм — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 40
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 38,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-103",
+    "name": "Апельсиновый Джем",
+    "description": "Сбалансированный микс: Апельсин на первом плане, имбирь — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 50
+      },
+      {
+        "flavor": "Имбирь",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 92,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-104",
+    "name": "Дынный Щербет",
+    "description": "Сбалансированный микс: Дыня на первом плане, лимон — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 45
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 25
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 71,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-105",
+    "name": "Персиковый Чай Каркаде",
+    "description": "Персик — основа, каркаде — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 60
+      },
+      {
+        "flavor": "Каркаде",
+        "percent": 20
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 38,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-106",
+    "name": "Ежевичный Мохито",
+    "description": "Ежевика и Лайм — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Ежевика",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 68,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-107",
+    "name": "Тропическая Маракуйя",
+    "description": "Простой, но точный расклад: Маракуйя плюс ананас.",
+    "recipe": [
+      {
+        "flavor": "Маракуйя",
+        "percent": 45
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 35
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 89,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-108",
+    "name": "Вишнёвый Штрудель",
+    "description": "Вишня и Корица держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 40
+      },
+      {
+        "flavor": "Корица",
+        "percent": 40
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 87,
+    "brands": [],
+    "season": "осень",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-109",
+    "name": "Медовый Апельсин",
+    "description": "Простой, но точный расклад: Апельсин плюс мёд.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 60
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 25
+      },
+      {
+        "flavor": "Корица",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 82,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-110",
+    "name": "Клубничный Мохито",
+    "description": "Клубника задаёт основной характер, лайм добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 35
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 93,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-111",
+    "name": "Персиковая Роза",
+    "description": "Персик, роза и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Роза",
+        "percent": 25
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 81,
+    "brands": [],
+    "season": "весна",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-112",
+    "name": "Инжир С Мёдом",
+    "description": "Инжир — основа, мёд — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Инжир",
+        "percent": 45
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 30
+      },
+      {
+        "flavor": "Грецкий орех",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 82,
+    "brands": [],
+    "season": "зима",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-113",
+    "name": "Малиновый Лимонад",
+    "description": "Малина на старте, лимон — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 40
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 71,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-114",
+    "name": "Апельсиновый Гранат",
+    "description": "Апельсин и Гранат держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 55
+      },
+      {
+        "flavor": "Гранат",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 75,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-115",
+    "name": "Кокосовый Лайм",
+    "description": "Кокос на старте, лайм — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 40
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 71,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-116",
+    "name": "Банановое Печенье",
+    "description": "Печенье и Банан держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Печенье",
+        "percent": 30
+      },
+      {
+        "flavor": "Банан",
+        "percent": 30
+      },
+      {
+        "flavor": "Зефир",
+        "percent": 20
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 37,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-117",
+    "name": "Кокосовая Вишня",
+    "description": "Дуэт Кокос и вишня: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 50
+      },
+      {
+        "flavor": "Вишня",
+        "percent": 35
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 55,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-118",
+    "name": "Кокосовый Грейпфрут Микс",
+    "description": "Сбалансированный микс: Кокос на первом плане, грейпфрут — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 50
+      },
+      {
+        "flavor": "Грейпфрут",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 60,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-119",
+    "name": "Кола Бабл-Гам",
+    "description": "Кола — основа, жвачка — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Кола",
+        "percent": 55
+      },
+      {
+        "flavor": "Жвачка",
+        "percent": 30
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 69,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-120",
+    "name": "Лимонная Ваниль",
+    "description": "Лимон, ваниль и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Лимон",
+        "percent": 45
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 64,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-121",
+    "name": "Яблочно-Коричный Капучино",
+    "description": "Яблоко и Капучино держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Яблоко",
+        "percent": 45
+      },
+      {
+        "flavor": "Капучино",
+        "percent": 35
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 77,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-122",
+    "name": "Тропический Бриз",
+    "description": "Ананас задаёт основной характер, банан добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Ананас",
+        "percent": 50
+      },
+      {
+        "flavor": "Банан",
+        "percent": 30
+      },
+      {
+        "flavor": "Кола",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 53,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-123",
+    "name": "Арбузный Лимонад",
+    "description": "Арбуз — основа, лимон — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Арбуз",
+        "percent": 50
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 64,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-124",
+    "name": "Виноградно-Гранатовый Микс",
+    "description": "Дуэт Виноград и гранат: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Виноград",
+        "percent": 45
+      },
+      {
+        "flavor": "Гранат",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 77,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-125",
+    "name": "Тропический Хит",
+    "description": "Простой, но точный расклад: Ананас плюс манго.",
+    "recipe": [
+      {
+        "flavor": "Ананас",
+        "percent": 40
+      },
+      {
+        "flavor": "Манго",
+        "percent": 35
+      },
+      {
+        "flavor": "Маракуйя",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 60,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-126",
+    "name": "Кофейный Латте",
+    "description": "Кофе и Фундук держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Кофе",
+        "percent": 45
+      },
+      {
+        "flavor": "Фундук",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 35,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-127",
+    "name": "Виноградная Роза",
+    "description": "Классическое сочетание — Виноград и роза. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Виноград",
+        "percent": 55
+      },
+      {
+        "flavor": "Роза",
+        "percent": 35
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 10
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 78,
+    "brands": [],
+    "season": "весна",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-128",
+    "name": "Шоколадная Мята",
+    "description": "Шоколад задаёт основной характер, мята добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Шоколад",
+        "percent": 50
+      },
+      {
+        "flavor": "Мята",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 89,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-129",
+    "name": "Ванильный Тропик",
+    "description": "Классическое сочетание — Ваниль и кокос. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Ваниль",
+        "percent": 40
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 30
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 67,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-130",
+    "name": "Клубничные Сливки",
+    "description": "Дуэт Клубника и ваниль: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 45
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 88,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-131",
+    "name": "Ледяная Кола",
+    "description": "Кола и Лимон — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Кола",
+        "percent": 50
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 63,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-132",
+    "name": "Имбирная Кола",
+    "description": "Сбалансированный микс: Кола на первом плане, имбирь — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Кола",
+        "percent": 55
+      },
+      {
+        "flavor": "Имбирь",
+        "percent": 25
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 87,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-133",
+    "name": "Яблочная Кола",
+    "description": "Кола задаёт основной характер, яблоко добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Кола",
+        "percent": 45
+      },
+      {
+        "flavor": "Яблоко",
+        "percent": 35
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 60,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-134",
+    "name": "Кола Кубата",
+    "description": "Кола, апельсин и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Кола",
+        "percent": 50
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 39,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-135",
+    "name": "Май Тай",
+    "description": "Сбалансированный микс: Вишня на первом плане, ананас — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 40
+      },
+      {
+        "flavor": "Ананас",
+        "percent": 35
+      },
+      {
+        "flavor": "Ром",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 59,
+    "brands": [],
+    "season": "зима",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-136",
+    "name": "Вишня В Шоколаде",
+    "description": "Сбалансированный микс: Вишня на первом плане, шоколад — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 45
+      },
+      {
+        "flavor": "Шоколад",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 47,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-137",
+    "name": "Лимонный Базилик",
+    "description": "Лимон раскрывается первым, следом проступает базилик.",
+    "recipe": [
+      {
+        "flavor": "Лимон",
+        "percent": 50
+      },
+      {
+        "flavor": "Базилик",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 57,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-138",
+    "name": "Арбузный Морс",
+    "description": "Арбуз и Черника держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Арбуз",
+        "percent": 50
+      },
+      {
+        "flavor": "Черника",
+        "percent": 30
+      },
+      {
+        "flavor": "Малина",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 50,
+    "brands": [],
+    "season": "лето",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-139",
+    "name": "Ред Алерт",
+    "description": "Арбуз и Дыня — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Арбуз",
+        "percent": 45
+      },
+      {
+        "flavor": "Дыня",
+        "percent": 40
+      },
+      {
+        "flavor": "Мята",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 67,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-140",
+    "name": "Мелонейд",
+    "description": "Арбуз и Дыня — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Арбуз",
+        "percent": 40
+      },
+      {
+        "flavor": "Дыня",
+        "percent": 35
+      },
+      {
+        "flavor": "Барбарис",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 40,
+    "brands": [],
+    "season": "лето",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-141",
+    "name": "Kashmir Трио",
+    "description": "Вишня кашмир раскрывается первым, следом проступает гуава.",
+    "recipe": [
+      {
+        "flavor": "Вишня кашмир",
+        "percent": 33
+      },
+      {
+        "flavor": "Гуава",
+        "percent": 33
+      },
+      {
+        "flavor": "Персик кашмир",
+        "percent": 34
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 41,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-142",
+    "name": "Ямайка Микс",
+    "description": "Ямайка и Кола держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Ямайка",
+        "percent": 40
+      },
+      {
+        "flavor": "Кола",
+        "percent": 30
+      },
+      {
+        "flavor": "Орчата",
+        "percent": 20
+      },
+      {
+        "flavor": "Мята",
+        "percent": 10
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 77,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-143",
+    "name": "Кашмир Банан",
+    "description": "Сбалансированный микс: Банан на первом плане, кашмир — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Банан",
+        "percent": 60
+      },
+      {
+        "flavor": "Кашмир",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 10
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 86,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-144",
+    "name": "Танж Глинтвейн",
+    "description": "Ледяной лимон на старте, тёмный табак — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Ледяной лимон",
+        "percent": 70
+      },
+      {
+        "flavor": "Тёмный табак",
+        "percent": 20
+      },
+      {
+        "flavor": "Специи",
+        "percent": 10
+      }
+    ],
+    "strength": 5,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 3,
+    "popularity": 41,
+    "brands": [],
+    "season": "осень",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-145",
+    "name": "Анисовый Шот",
+    "description": "Самбука раскрывается первым, следом проступает тростниковая мята.",
+    "recipe": [
+      {
+        "flavor": "Самбука",
+        "percent": 60
+      },
+      {
+        "flavor": "Тростниковая мята",
+        "percent": 30
+      },
+      {
+        "flavor": "Лакрица",
+        "percent": 10
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 58,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-146",
+    "name": "Персиковый Кейн Минт",
+    "description": "Персик и Тростниковая мята держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Тростниковая мята",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 58,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-147",
+    "name": "Мокка Кофе",
+    "description": "Кофе раскрывается первым, следом проступает какао.",
+    "recipe": [
+      {
+        "flavor": "Кофе",
+        "percent": 55
+      },
+      {
+        "flavor": "Какао",
+        "percent": 25
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 86,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-148",
+    "name": "Персиковый Чай С Малиной",
+    "description": "Персиковый чай на старте, малина — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Персиковый чай",
+        "percent": 50
+      },
+      {
+        "flavor": "Малина",
+        "percent": 30
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 49,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-149",
+    "name": "Запретный Плод",
+    "description": "Груша на старте, яблоко — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Груша",
+        "percent": 50
+      },
+      {
+        "flavor": "Яблоко",
+        "percent": 35
+      },
+      {
+        "flavor": "Корица",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 56,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-150",
+    "name": "Мандариновый Лёд",
+    "description": "Простой, но точный расклад: Мандарин плюс апельсин.",
+    "recipe": [
+      {
+        "flavor": "Мандарин",
+        "percent": 50
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 30
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 81,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-151",
+    "name": "Тёмная Вишня Кола",
+    "description": "Вишня раскрывается первым, следом проступает кола.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 50
+      },
+      {
+        "flavor": "Кола",
+        "percent": 35
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 15
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 49,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-152",
+    "name": "Малиновый Щербет",
+    "description": "Малина и Лимон — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 45
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 70,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-153",
+    "name": "Персиковый Джем",
+    "description": "Персик и Мёд — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 30
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 54,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-154",
+    "name": "Апельсиновая Карамель",
+    "description": "Дуэт Апельсин и карамель: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 45
+      },
+      {
+        "flavor": "Карамель",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 47,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-155",
+    "name": "Клубничный Дайкири",
+    "description": "Клубника, лайм и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Ром",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 50,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-156",
+    "name": "Малиновый Дайкири",
+    "description": "Малина, лайм и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Ром",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 69,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-157",
+    "name": "Персиковый Дайкири",
+    "description": "Персик задаёт основной характер, лайм добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Ром",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 80,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-158",
+    "name": "Банановый Дайкири",
+    "description": "Банан задаёт основной характер, лайм добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Банан",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Ром",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 37,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-159",
+    "name": "Вишнёвый Ром",
+    "description": "Дуэт Вишня и ром: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 55
+      },
+      {
+        "flavor": "Ром",
+        "percent": 30
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 78,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-160",
+    "name": "Ромовый Кокос",
+    "description": "Простой, но точный расклад: Кокос плюс ром.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 50
+      },
+      {
+        "flavor": "Ром",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 87,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-161",
+    "name": "Черничный Йогурт",
+    "description": "Черника, йогурт и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Черника",
+        "percent": 50
+      },
+      {
+        "flavor": "Йогурт",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 37,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-162",
+    "name": "Малиновый Йогурт",
+    "description": "Малина, йогурт и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 50
+      },
+      {
+        "flavor": "Йогурт",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 91,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-163",
+    "name": "Клубничный Йогурт",
+    "description": "Клубника раскрывается первым, следом проступает йогурт.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 50
+      },
+      {
+        "flavor": "Йогурт",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 50,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-164",
+    "name": "Гранатовый Йогурт",
+    "description": "Гранат раскрывается первым, следом проступает йогурт.",
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 50
+      },
+      {
+        "flavor": "Йогурт",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 89,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-165",
+    "name": "Дынный Йогурт",
+    "description": "Дыня на старте, йогурт — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 50
+      },
+      {
+        "flavor": "Йогурт",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 94,
+    "brands": [],
+    "season": "лето",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-166",
+    "name": "Апельсиновый Йогурт",
+    "description": "Апельсин — основа, йогурт — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 50
+      },
+      {
+        "flavor": "Йогурт",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 61,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-167",
+    "name": "Персиковая Груша",
+    "description": "Персик раскрывается первым, следом проступает груша.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 45
+      },
+      {
+        "flavor": "Груша",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 64,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-168",
+    "name": "Абрикосовый Персик",
+    "description": "Абрикос — основа, персик — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Абрикос",
+        "percent": 45
+      },
+      {
+        "flavor": "Персик",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 76,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-169",
+    "name": "Гранатовый Лайм",
+    "description": "Классическое сочетание — Гранат и лайм. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 39,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-170",
+    "name": "Малиновый Каркаде",
+    "description": "Малина раскрывается первым, следом проступает каркаде.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 45
+      },
+      {
+        "flavor": "Каркаде",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 52,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-171",
+    "name": "Ежевичный Каркаде",
+    "description": "Ежевика на старте, каркаде — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Ежевика",
+        "percent": 45
+      },
+      {
+        "flavor": "Каркаде",
+        "percent": 35
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 4,
+    "difficulty": 2,
+    "popularity": 63,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-172",
+    "name": "Клюквенный Каркаде",
+    "description": "Клюква задаёт основной характер, каркаде добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Клюква",
+        "percent": 45
+      },
+      {
+        "flavor": "Каркаде",
+        "percent": 35
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 62,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-173",
+    "name": "Смородиновый Каркаде",
+    "description": "Смородина держит структуру вкуса, каркаде расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Смородина",
+        "percent": 45
+      },
+      {
+        "flavor": "Каркаде",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 79,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-174",
+    "name": "Дынный Каркаде",
+    "description": "Дыня и Каркаде держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 45
+      },
+      {
+        "flavor": "Каркаде",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 92,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-175",
+    "name": "Апельсиновая Гвоздика",
+    "description": "Классическое сочетание — Апельсин и гвоздика. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 55
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 25
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 78,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-176",
+    "name": "Мандариновая Гвоздика",
+    "description": "Мандарин раскрывается первым, следом проступает гвоздика.",
+    "recipe": [
+      {
+        "flavor": "Мандарин",
+        "percent": 55
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 25
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 90,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-177",
+    "name": "Яблочная Гвоздика",
+    "description": "Яблоко и Гвоздика держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Яблоко",
+        "percent": 55
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 25
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 52,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-178",
+    "name": "Грушевая Корица",
+    "description": "Груша задаёт основной характер, корица добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Груша",
+        "percent": 55
+      },
+      {
+        "flavor": "Корица",
+        "percent": 25
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 85,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-179",
+    "name": "Айвовый Мёд",
+    "description": "Простой, но точный расклад: Айва плюс мёд.",
+    "recipe": [
+      {
+        "flavor": "Айва",
+        "percent": 50
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 30
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 77,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-180",
+    "name": "Персиковый Кардамон",
+    "description": "Классическое сочетание — Персик и кардамон. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 55
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 25
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 86,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-181",
+    "name": "Апельсиновый Кардамон",
+    "description": "Апельсин, кардамон и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 55
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 25
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 36,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-182",
+    "name": "Ванильный Кардамон",
+    "description": "Ваниль, кардамон и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Ваниль",
+        "percent": 50
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 30
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 84,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-183",
+    "name": "Малиновый Кардамон",
+    "description": "Малина — основа, кардамон — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 50
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 62,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-184",
+    "name": "Черничный Кардамон",
+    "description": "Черника и Кардамон — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Черника",
+        "percent": 50
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 30
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 68,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-185",
+    "name": "Клубничный Базилик",
+    "description": "Дуэт Клубника и базилик: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 50
+      },
+      {
+        "flavor": "Базилик",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 37,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-186",
+    "name": "Малиновый Базилик",
+    "description": "Малина задаёт основной характер, базилик добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 50
+      },
+      {
+        "flavor": "Базилик",
+        "percent": 30
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 63,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-187",
+    "name": "Персиковый Базилик",
+    "description": "Простой, но точный расклад: Персик плюс базилик.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Базилик",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 95,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-188",
+    "name": "Арбузный Базилик",
+    "description": "Простой, но точный расклад: Арбуз плюс базилик.",
+    "recipe": [
+      {
+        "flavor": "Арбуз",
+        "percent": 50
+      },
+      {
+        "flavor": "Базилик",
+        "percent": 30
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 36,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-189",
+    "name": "Огуречный Лайм",
+    "description": "Огурец держит структуру вкуса, лайм расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Огурец",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 4,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 72,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-190",
+    "name": "Дынный Огурец",
+    "description": "Дыня и Огурец — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 50
+      },
+      {
+        "flavor": "Огурец",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 44,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-191",
+    "name": "Арбузный Огурец",
+    "description": "Арбуз задаёт основной характер, огурец добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Арбуз",
+        "percent": 50
+      },
+      {
+        "flavor": "Огурец",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 80,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-192",
+    "name": "Розовый Личи",
+    "description": "Классическое сочетание — Роза и личи. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Роза",
+        "percent": 40
+      },
+      {
+        "flavor": "Личи",
+        "percent": 35
+      },
+      {
+        "flavor": "Малина",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 66,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-193",
+    "name": "Розовая Клубника",
+    "description": "Классическое сочетание — Роза и клубника. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Роза",
+        "percent": 40
+      },
+      {
+        "flavor": "Клубника",
+        "percent": 35
+      },
+      {
+        "flavor": "Малина",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 62,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-194",
+    "name": "Лавандовая Черника",
+    "description": "Сбалансированный микс: Лаванда на первом плане, черника — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Лаванда",
+        "percent": 40
+      },
+      {
+        "flavor": "Черника",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 37,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-195",
+    "name": "Лавандовый Персик",
+    "description": "Лаванда — основа, персик — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Лаванда",
+        "percent": 40
+      },
+      {
+        "flavor": "Персик",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 94,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-196",
+    "name": "Жасминовая Груша",
+    "description": "Жасмин раскрывается первым, следом проступает груша.",
+    "recipe": [
+      {
+        "flavor": "Жасмин",
+        "percent": 40
+      },
+      {
+        "flavor": "Груша",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 76,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-197",
+    "name": "Жасминовый Персик",
+    "description": "Сбалансированный микс: Жасмин на первом плане, персик — лёгкий акцент.",
+    "recipe": [
+      {
+        "flavor": "Жасмин",
+        "percent": 40
+      },
+      {
+        "flavor": "Персик",
+        "percent": 35
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 91,
+    "brands": [],
+    "season": "весна",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-198",
+    "name": "Ромашковый Мёд",
+    "description": "Простой, но точный расклад: Ромашка плюс мёд.",
+    "recipe": [
+      {
+        "flavor": "Ромашка",
+        "percent": 50
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 30
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 40,
+    "brands": [],
+    "season": "зима",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-199",
+    "name": "Ромашковая Груша",
+    "description": "Ромашка и Груша держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Ромашка",
+        "percent": 45
+      },
+      {
+        "flavor": "Груша",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 64,
+    "brands": [],
+    "season": "зима",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-200",
+    "name": "Чайный Бергамот",
+    "description": "Чай раскрывается первым, следом проступает бергамот.",
+    "recipe": [
+      {
+        "flavor": "Чай",
+        "percent": 50
+      },
+      {
+        "flavor": "Бергамот",
+        "percent": 30
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 55,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-201",
+    "name": "Чай Каркаде С Мятой",
+    "description": "Каркаде — основа, мята — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Каркаде",
+        "percent": 50
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 91,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-202",
+    "name": "Зелёный Чай С Жасмином",
+    "description": "Зелёный чай — основа, жасмин — тонкая подсветка сверху.",
+    "recipe": [
+      {
+        "flavor": "Зелёный чай",
+        "percent": 55
+      },
+      {
+        "flavor": "Жасмин",
+        "percent": 25
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 47,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-203",
+    "name": "Молочный Улун",
+    "description": "Улун задаёт основной характер, сливки добавляет нюанс.",
+    "recipe": [
+      {
+        "flavor": "Улун",
+        "percent": 50
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 86,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-204",
+    "name": "Кокосовый Улун",
+    "description": "Улун на старте, кокос — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Улун",
+        "percent": 50
+      },
+      {
+        "flavor": "Кокос",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 95,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-205",
+    "name": "Ледяной Персиковый Чай",
+    "description": "Персик и Улун держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 50
+      },
+      {
+        "flavor": "Улун",
+        "percent": 30
+      },
+      {
+        "flavor": "Лёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 53,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-206",
+    "name": "Малиновый Чизкейк",
+    "description": "Малина, чизкейк и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 45
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 38,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-207",
+    "name": "Тыквенный Чизкейк",
+    "description": "Тыква на старте, чизкейк — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Тыква",
+        "percent": 45
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 35
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 95,
+    "brands": [],
+    "season": "осень",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-208",
+    "name": "Гранатовый Чизкейк",
+    "description": "Гранат, чизкейк и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 45
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 35
+      },
+      {
+        "flavor": "Малина",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 58,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-209",
+    "name": "Кокосовый Чизкейк",
+    "description": "Кокос и Чизкейк — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 45
+      },
+      {
+        "flavor": "Чизкейк",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 43,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-210",
+    "name": "Банановый Пудинг",
+    "description": "Дуэт Банан и ваниль: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Банан",
+        "percent": 50
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      },
+      {
+        "flavor": "Карамель",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 4,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 66,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-211",
+    "name": "Кокосовый Пудинг",
+    "description": "Кокос и Ваниль — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 50
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      },
+      {
+        "flavor": "Карамель",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 4,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 68,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-212",
+    "name": "Тыквенный Пирог",
+    "description": "Тыква и Корица — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Тыква",
+        "percent": 55
+      },
+      {
+        "flavor": "Корица",
+        "percent": 25
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 57,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-213",
+    "name": "Яблочный Пирог С Изюмом",
+    "description": "Яблоко держит структуру вкуса, изюм расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Яблоко",
+        "percent": 55
+      },
+      {
+        "flavor": "Изюм",
+        "percent": 25
+      },
+      {
+        "flavor": "Корица",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 44,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-214",
+    "name": "Черничный Пирог",
+    "description": "Черника и Корица держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Черника",
+        "percent": 55
+      },
+      {
+        "flavor": "Корица",
+        "percent": 25
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 75,
+    "brands": [],
+    "season": "осень",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-215",
+    "name": "Ананасовый Пунш",
+    "description": "Дуэт Ананас и апельсин: ничего лишнего, только баланс.",
+    "recipe": [
+      {
+        "flavor": "Ананас",
+        "percent": 50
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 35
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 86,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-216",
+    "name": "Гранатовый Пунш",
+    "description": "Гранат держит структуру вкуса, апельсин расставляет акценты.",
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 50
+      },
+      {
+        "flavor": "Апельсин",
+        "percent": 35
+      },
+      {
+        "flavor": "Корица",
+        "percent": 15
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 93,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-217",
+    "name": "Клюквенный Глинтвейн",
+    "description": "Клюква и Корица — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Клюква",
+        "percent": 55
+      },
+      {
+        "flavor": "Корица",
+        "percent": 25
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 20
+      }
+    ],
+    "strength": 5,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 3,
+    "popularity": 73,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-218",
+    "name": "Грушевый Глинтвейн",
+    "description": "Классическое сочетание — Груша и корица. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Груша",
+        "percent": 55
+      },
+      {
+        "flavor": "Корица",
+        "percent": 25
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 20
+      }
+    ],
+    "strength": 5,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 89,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-219",
+    "name": "Апельсиновый Глинтвейн",
+    "description": "Апельсин на старте, корица — в послевкусии.",
+    "recipe": [
+      {
+        "flavor": "Апельсин",
+        "percent": 55
+      },
+      {
+        "flavor": "Корица",
+        "percent": 25
+      },
+      {
+        "flavor": "Гвоздика",
+        "percent": 20
+      }
+    ],
+    "strength": 5,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 92,
+    "brands": [],
+    "season": "осень",
+    "mood": "универсальное",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-220",
+    "name": "Мятный Лимонный Щербет",
+    "description": "Лимон, мята и больше ничего не нужно — вот и весь секрет.",
+    "recipe": [
+      {
+        "flavor": "Лимон",
+        "percent": 50
+      },
+      {
+        "flavor": "Мята",
+        "percent": 30
+      },
+      {
+        "flavor": "Сахар",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 57,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-221",
+    "name": "Кокосовый Лайм С Мятой",
+    "description": "Кокос раскрывается первым, следом проступает лайм.",
+    "recipe": [
+      {
+        "flavor": "Кокос",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 35,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-222",
+    "name": "Дынный Лайм",
+    "description": "Дыня и Лайм держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Дыня",
+        "percent": 50
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 30
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 63,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-223",
+    "name": "Персиковый Абрикос С Ванилью",
+    "description": "Персик и Абрикос — выразительный дуэт с чистым послевкусием.",
+    "recipe": [
+      {
+        "flavor": "Персик",
+        "percent": 45
+      },
+      {
+        "flavor": "Абрикос",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 74,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-224",
+    "name": "Черёмуховый Пирог",
+    "description": "Классическое сочетание — Черёмуха и корица. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Черёмуха",
+        "percent": 50
+      },
+      {
+        "flavor": "Корица",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 69,
+    "brands": [],
+    "season": "осень",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-225",
+    "name": "Смородиновый Пломбир",
+    "description": "Смородина раскрывается первым, следом проступает пломбир.",
+    "recipe": [
+      {
+        "flavor": "Смородина",
+        "percent": 45
+      },
+      {
+        "flavor": "Пломбир",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 40,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-226",
+    "name": "Малиновый Пломбир",
+    "description": "Малина и Пломбир держат ровный, узнаваемый профиль без резких переходов.",
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 45
+      },
+      {
+        "flavor": "Пломбир",
+        "percent": 35
+      },
+      {
+        "flavor": "Мята",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 42,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-227",
+    "name": "Клубничный Пломбир",
+    "description": "Классическое сочетание — Клубника и пломбир. Предсказуемо и приятно.",
+    "recipe": [
+      {
+        "flavor": "Клубника",
+        "percent": 45
+      },
+      {
+        "flavor": "Пломбир",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 56,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  },
+  {
+    "id": "mix-228",
+    "name": "Вишнёвый Пломбир",
+    "description": "Вишня раскрывается первым, следом проступает пломбир.",
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 45
+      },
+      {
+        "flavor": "Пломбир",
+        "percent": 35
+      },
+      {
+        "flavor": "Шоколад",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 59,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle"
+  }
+]

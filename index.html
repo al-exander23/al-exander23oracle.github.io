@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ALX Oracle — Микс Оракул</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/orb.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/cards.css">
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="grain"></div>
+  <div class="motes" id="motes"></div>
+
+  <button class="icon-btn" id="favBtnTop" aria-label="Избранное">♡</button>
+  <button class="icon-btn" id="historyBtnTop" aria-label="История">🕐</button>
+  <div class="counter" id="counter"></div>
+
+  <div class="brand">МИКС ОРАКУЛ</div>
+  <div class="brand-divider"></div>
+
+  <div class="orb-wrap" id="orbWrap">
+    <div class="orb-puddle"></div>
+    <div class="orb-halo"></div>
+    <div class="orb-frame">
+      <div class="orb-ring"></div>
+      <div class="orb" id="orb">
+        <div class="orb-surface" id="orbSurface"></div>
+        <div class="orb-latitude"></div>
+        <div class="orb-edge-shade"></div>
+        <div class="orb-smoke" id="orbSmoke"></div>
+        <div class="orb-highlight"></div>
+        <div class="orb-highlight-sharp"></div>
+        <div class="orb-rim"></div>
+        <div class="orb-sheen"></div>
+        <div class="screen" id="screen">
+          <div class="screen-content" id="screenContent">
+            <div class="idle-icon">✦</div>
+            <div class="idle-text">встряхни —<br>узнай микс</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint" id="hint">Встряхни телефон или коснись шара — <b>оракул</b> подберёт для тебя микс.</div>
+
+  <button class="lock-btn" id="lockBtn" style="display:none;">🔒 Закрепить микс</button>
+
+  <div class="mix-card" id="mixCard"></div>
+</div>
+
+<div class="sheet-overlay" id="sheetOverlay">
+  <div class="sheet">
+    <div class="sheet-title" id="sheetTitle">
+      <span></span>
+      <button class="sheet-close" id="sheetClose">Закрыть ✕</button>
+    </div>
+    <div id="sheetList"></div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
