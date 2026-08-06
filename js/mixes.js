@@ -32,6 +32,10 @@ export function getMixes() {
   return cache || [];
 }
 
+export function hasMixes() {
+  return getMixes().length > 0;
+}
+
 export function getMixById(id) {
   return getMixes().find((m) => m.id === id) || null;
 }

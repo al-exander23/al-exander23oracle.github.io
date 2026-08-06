@@ -105,9 +105,20 @@ export function createGlobeRotator(orbSurfaceEl) {
 // Буквы сгруппированы по словам (nowrap), поэтому перенос строки
 // возможен только на пробеле/дефисе, а не посреди слова.
 // ---------------------------------------------------------------
-export function typeText(el, text, onDone) {
+export function typeText(el, text, onDone, signal) {
   el.innerHTML = '';
   const spans = [];
+  const localTimers = [];
+
+  function clearLocalTimers() {
+    localTimers.forEach((id) => clearTimeout(id));
+    localTimers.length = 0;
+  }
+
+  if (signal) {
+    if (signal.aborted) return; // сцену уже отменили — даже не начинаем печатать
+    signal.addEventListener('abort', clearLocalTimers, { once: true });
+  }
 
   function makeCharSpan(ch) {
     const span = document.createElement('span');
@@ -143,19 +154,22 @@ export function typeText(el, text, onDone) {
   function revealChar(target) {
     if (!target) return;
     requestAnimationFrame(() => {
-      if (!target) return;
+      if (!target || (signal && signal.aborted)) return;
       target.classList.add('show');
     });
   }
 
   let idx = 0;
   (function step() {
+    if (signal && signal.aborted) return; // сцена отменена — печать останавливается немедленно
     if (idx < spans.length) {
       revealChar(spans[idx]);
       idx++;
-      setTimeout(step, 30);
+      localTimers.push(setTimeout(step, 30));
     } else if (onDone) {
-      setTimeout(onDone, 200);
+      localTimers.push(setTimeout(() => {
+        if (!signal || !signal.aborted) onDone();
+      }, 200));
     }
   })();
 }

@@ -39,7 +39,7 @@ function renderChips(mix) {
     .join('');
 }
 
-export function renderOrbText(screenContentEl, mix) {
+export function renderOrbText(screenContentEl, mix, signal) {
   screenContentEl.innerHTML =
     '<div class="mix-name" id="mn"></div>' +
     '<div class="mix-desc" id="md"></div>';
@@ -51,16 +51,16 @@ export function renderOrbText(screenContentEl, mix) {
     typeText(mn, mix.name, () => {
       md.classList.add('in');
       resolve();
-    });
+    }, signal);
   });
 }
 
-export function renderOraclePhrase(screenContentEl, phrase) {
+export function renderOraclePhrase(screenContentEl, phrase, signal) {
   screenContentEl.innerHTML = '<div class="oracle-phrase" id="op"></div>';
   const op = document.getElementById('op');
   op.classList.add('in');
   return new Promise((resolve) => {
-    typeText(op, phrase, resolve);
+    typeText(op, phrase, resolve, signal);
   });
 }
 

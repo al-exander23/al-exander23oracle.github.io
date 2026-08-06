@@ -2,7 +2,7 @@
 // effects.js (движение) и profile.js (память), и больше почти ничего
 // не делает сама — задача этого файла - только оркестрация сцены.
 
-import { initMixes } from './mixes.js';
+import { initMixes, hasMixes } from './mixes.js';
 import { oracleChooseMix } from './oracle.js';
 import { createGlobeRotator, spawnSmoke, spawnMotes } from './effects.js';
 import {
@@ -10,21 +10,22 @@ import {
   showToast, openSheet, closeSheet,
 } from './ui.js';
 import { addToHistory, isFavorite } from './profile.js';
+import { scene } from './scene.js';
 
 // ---------------------------------------------------------------
 // Telegram WebApp bootstrap
 // ---------------------------------------------------------------
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) {
-  tg.ready();
-  tg.expand();
-  try { tg.setHeaderColor && tg.setHeaderColor('#0b0912'); } catch (e) {}
+  try { tg.ready(); } catch (e) { console.warn('[ALX Oracle] tg.ready() недоступен:', e); }
+  try { tg.expand(); } catch (e) { console.warn('[ALX Oracle] tg.expand() недоступен:', e); }
+  try { tg.setHeaderColor && tg.setHeaderColor('#0b0912'); } catch (e) { /* безопасный fallback — просто без цвета */ }
 }
 function haptic(style) {
   if (tg && tg.HapticFeedback) {
-    try { tg.HapticFeedback.impactOccurred(style || 'medium'); } catch (e) {}
+    try { tg.HapticFeedback.impactOccurred(style || 'medium'); } catch (e) { /* нет Haptic — просто без вибро-отклика */ }
   } else if (navigator.vibrate) {
-    navigator.vibrate(style === 'light' ? 12 : 30);
+    try { navigator.vibrate(style === 'light' ? 12 : 30); } catch (e) { /* вибрация недоступна — не критично */ }
   }
 }
 
@@ -42,7 +43,6 @@ const mixCardEl = document.getElementById('mixCard');
 const motesEl = document.getElementById('motes');
 
 let count = 0;
-let busy = false;
 let locked = false;
 let currentMix = null;
 
@@ -50,16 +50,20 @@ spawnMotes(motesEl, 22);
 const rotator = createGlobeRotator(orbSurface);
 
 // ---------------------------------------------------------------
-// Сцена «оракул отвечает» — ровно по сценарию:
-// нажатие → свечение → дым → смена подсветки → фраза оракула →
-// ускорение шара → карточка появляется красиво.
-// Всё на неблокирующих таймерах, ни одного synchronous sleep.
+// Сцена «оракул отвечает» — управляется ИСКЛЮЧИТЕЛЬНО через scene.js.
+// Ни один из вызываемых здесь модулей не решает сам, что показывать
+// дальше — это делает только эта функция, шаг за шагом.
 //
-// ВАЖНО: длительность CSS-перехода экрана (.screen) — 480мс.
-// Все паузы ниже опираются именно на это число, чтобы JS никогда
-// не убегал вперёд собственной анимации — раньше фраза оракула
-// успевала стать видимой лишь на ~150мс и тут же гасла, потому что
-// код не дожидался, пока экран реально закончит подсвечиваться.
+// Защита от двойного запуска: scene.beginScene() — синхронная и первая
+// операция функции, до единого await. Если сцена уже идёт — beginScene()
+// вернёт null, и функция немедленно выйдет. Не важно, что именно вызвало
+// повторный триггер — click, touch, devicemotion или Telegram-событие —
+// вторая сцена никогда не запустится поверх первой.
+//
+// Защита от зависаний: каждый этап обёрнут в scene.guard(promise, 3000) —
+// если этап не уложился в 3 секунды, сцена принудительно прерывается
+// (AbortController), typeText() сама остановит все свои таймеры, и
+// приложение гарантированно вернётся в IDLE через finally.
 // ---------------------------------------------------------------
 const FADE = 420;              // должно совпадать с transition в css/orb.css (.screen)
 const T_DIM = FADE + 40;       // ждём, пока экран полностью погаснет
@@ -67,63 +71,99 @@ const T_LIGHT = FADE + 40;     // ждём, пока экран полность
 const PHRASE_HOLD_MIN = 380;   // минимальная пауза на «додумать» после фразы
 const PHRASE_HOLD_MS_PER_CH = 8; // + время на дочитывание, пропорционально длине фразы
 const T_SETTLE = 600;          // шар успокаивается после ответа
+const STAGE_TIMEOUT = 3000;    // защитный таймаут на любой этап
 
-async function revealMix() {
-  if (busy || locked) return;
-  busy = true;
-  haptic('medium');
+async function runScene() {
+  if (locked) return; // микс закреплён — сцена даже не начинается
+  const started = scene.beginScene();
+  if (!started) return; // сцена уже выполняется — повторный триггер игнорируется
+  const { signal } = started;
 
-  // 1. шар начинает светиться + разгоняется + идёт дым
-  orbWrap.classList.add('thinking');
-  rotator.setBurst();
-  const clearSmoke = spawnSmoke(orbSmoke, 5);
+  let clearSmoke = () => {};
 
-  // 2. меняется подсветка экрана — и мы ЖДЁМ, пока переход реально закончится
-  screenEl.classList.add('off');
-  await wait(T_DIM);
+  try {
+    // ---- PREPARING: проверяем, что вообще есть из чего выбирать ----
+    await scene.guard(initMixes(), STAGE_TIMEOUT, 'PREPARING');
+    if (!hasMixes()) {
+      throw new Error('Список миксов пуст или не загрузился');
+    }
 
-  // 3. появляется фраза оракула — печатается по буквам, экран плавно загорается
-  const { mix, phrase } = oracleChooseMix();
-  if (!mix) { busy = false; orbWrap.classList.remove('thinking'); clearSmoke(); return; }
+    haptic('medium');
+    orbWrap.classList.add('thinking');
+    rotator.setBurst();
+    clearSmoke = spawnSmoke(orbSmoke, 5);
 
-  screenEl.classList.remove('off');
-  await renderOraclePhrase(screenContent, phrase);
+    // ---- THINKING: шар светится, экран гаснет ----
+    scene.transition('THINKING');
+    screenEl.classList.add('off');
+    await scene.guard(wait(T_DIM, signal), STAGE_TIMEOUT, 'THINKING: затемнение');
 
-  // время на прочтение — зависит от длины фразы, а не фиксированное число,
-  // чтобы короткая фраза не «висела» зря, а длинная не улетала слишком быстро
-  const holdMs = Math.max(PHRASE_HOLD_MIN, phrase.length * PHRASE_HOLD_MS_PER_CH);
-  await wait(holdMs);
+    // ---- CHOOSING: оракул выбирает микс и фразу (один раз за сцену) ----
+    scene.transition('CHOOSING');
+    const { mix, phrase } = oracleChooseMix();
+    if (!mix) throw new Error('Оракул не смог подобрать микс');
 
-  // короткая смена подсветки перед самим раскрытием — и снова ждём переход целиком
-  screenEl.classList.add('off');
-  await wait(T_DIM);
+    screenEl.classList.remove('off');
+    await scene.guard(renderOraclePhrase(screenContent, phrase, signal), STAGE_TIMEOUT, 'CHOOSING: фраза оракула');
 
-  // 4. раскрываем сам микс — печатаем название, затем описание
-  currentMix = mix;
-  screenEl.classList.remove('off');
-  screenEl.classList.remove('sweep');
-  void screenEl.offsetWidth;
-  screenEl.classList.add('sweep');
+    const holdMs = Math.max(PHRASE_HOLD_MIN, phrase.length * PHRASE_HOLD_MS_PER_CH);
+    await scene.guard(wait(holdMs, signal), STAGE_TIMEOUT, 'CHOOSING: пауза на чтение');
 
-  await wait(T_LIGHT);
-  await renderOrbText(screenContent, mix);
+    screenEl.classList.add('off');
+    await scene.guard(wait(T_DIM, signal), STAGE_TIMEOUT, 'CHOOSING: затемнение перед раскрытием');
 
-  // 5. карточка появляется красиво, оракул успокаивается
-  renderCard(mixCardEl, mix);
-  count++;
-  counterEl.textContent = '№ ' + String(count).padStart(3, '0');
-  lockBtn.style.display = 'inline-block';
-  addToHistory(mix.id);
+    // ---- REVEAL: раскрываем сам микс ----
+    scene.transition('REVEAL');
+    currentMix = mix;
+    screenEl.classList.remove('off');
+    screenEl.classList.remove('sweep');
+    void screenEl.offsetWidth;
+    screenEl.classList.add('sweep');
 
-  await wait(T_SETTLE);
-  rotator.setIdle();
-  orbWrap.classList.remove('thinking');
-  clearSmoke();
-  busy = false;
+    await scene.guard(wait(T_LIGHT, signal), STAGE_TIMEOUT, 'REVEAL: включение экрана');
+    await scene.guard(renderOrbText(screenContent, mix, signal), STAGE_TIMEOUT, 'REVEAL: печать названия');
+
+    // ---- RESULT: карточка появляется красиво ----
+    scene.transition('RESULT');
+    renderCard(mixCardEl, mix);
+    count++;
+    counterEl.textContent = '№ ' + String(count).padStart(3, '0');
+    lockBtn.style.display = 'inline-block';
+    addToHistory(mix.id);
+
+    await scene.guard(wait(T_SETTLE, signal), STAGE_TIMEOUT, 'RESULT: успокоение');
+  } catch (err) {
+    console.error('[ALX Oracle] сцена прервана:', err.message);
+    showToast('Оракул на секунду отвлёкся — попробуй ещё раз');
+  } finally {
+    // Гарантия из пункта 6 ТЗ: что бы ни случилось выше — анимации
+    // останавливаются, блокировки снимаются, состояние возвращается в IDLE.
+    rotator.setIdle();
+    orbWrap.classList.remove('thinking');
+    clearSmoke();
+    scene.endScene();
+  }
 }
 
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+/**
+ * Пауза, которая умеет прерываться сигналом отмены сцены —
+ * если сцену отменили посреди wait(), промис сразу отклоняется,
+ * а не «висит» до истечения полного времени.
+ */
+function wait(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal && signal.aborted) {
+      reject(new DOMException('Сцена отменена', 'AbortError'));
+      return;
+    }
+    const id = setTimeout(resolve, ms);
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(id);
+        reject(new DOMException('Сцена отменена', 'AbortError'));
+      }, { once: true });
+    }
+  });
 }
 
 // ---------------------------------------------------------------
@@ -142,7 +182,7 @@ function processLinearAcceleration(x, y, z, now) {
   const magnitude = Math.sqrt(x * x + y * y + z * z);
   if (magnitude > SHAKE_THRESHOLD && now - lastTriggerTs > SHAKE_COOLDOWN) {
     lastTriggerTs = now;
-    revealMix();
+    runScene();
   }
 }
 
@@ -169,7 +209,10 @@ function handleMotion(e) {
   processLinearAcceleration(raw.x - gravity.x, raw.y - gravity.y, raw.z - gravity.z, now);
 }
 
+let shakeAttached = false;
 function attachShake() {
+  if (shakeAttached) return; // повторная регистрация запрещена
+  shakeAttached = true;
   window.addEventListener('devicemotion', handleMotion, true);
 }
 
@@ -193,7 +236,7 @@ function initMotion() {
 // ---------------------------------------------------------------
 // Остальные обработчики UI
 // ---------------------------------------------------------------
-orbWrap.addEventListener('click', revealMix);
+orbWrap.addEventListener('click', runScene);
 
 lockBtn.addEventListener('click', () => {
   locked = !locked;
