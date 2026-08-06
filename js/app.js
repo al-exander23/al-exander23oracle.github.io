@@ -54,11 +54,19 @@ const rotator = createGlobeRotator(orbSurface);
 // нажатие → свечение → дым → смена подсветки → фраза оракула →
 // ускорение шара → карточка появляется красиво.
 // Всё на неблокирующих таймерах, ни одного synchronous sleep.
+//
+// ВАЖНО: длительность CSS-перехода экрана (.screen) — 480мс.
+// Все паузы ниже опираются именно на это число, чтобы JS никогда
+// не убегал вперёд собственной анимации — раньше фраза оракула
+// успевала стать видимой лишь на ~150мс и тут же гасла, потому что
+// код не дожидался, пока экран реально закончит подсвечиваться.
 // ---------------------------------------------------------------
-const T_DIM = 550;        // экран гаснет, проступает свечение и дым
-const T_PHRASE = 950;     // фраза оракула держится на экране
-const T_PHRASE_OUT = 350; // короткое затемнение перед раскрытием микса
-const T_SETTLE = 650;     // шар успокаивается после ответа
+const FADE = 420;              // должно совпадать с transition в css/orb.css (.screen)
+const T_DIM = FADE + 40;       // ждём, пока экран полностью погаснет
+const T_LIGHT = FADE + 40;     // ждём, пока экран полностью загорится
+const PHRASE_HOLD_MIN = 380;   // минимальная пауза на «додумать» после фразы
+const PHRASE_HOLD_MS_PER_CH = 8; // + время на дочитывание, пропорционально длине фразы
+const T_SETTLE = 600;          // шар успокаивается после ответа
 
 async function revealMix() {
   if (busy || locked) return;
@@ -70,22 +78,25 @@ async function revealMix() {
   rotator.setBurst();
   const clearSmoke = spawnSmoke(orbSmoke, 5);
 
-  // 2. меняется подсветка экрана
+  // 2. меняется подсветка экрана — и мы ЖДЁМ, пока переход реально закончится
   screenEl.classList.add('off');
-
   await wait(T_DIM);
 
-  // 3. появляется фраза оракула
+  // 3. появляется фраза оракула — печатается по буквам, экран плавно загорается
   const { mix, phrase } = oracleChooseMix();
-  if (!mix) { busy = false; orbWrap.classList.remove('thinking'); return; }
-  renderOraclePhrase(screenContent, phrase);
+  if (!mix) { busy = false; orbWrap.classList.remove('thinking'); clearSmoke(); return; }
+
   screenEl.classList.remove('off');
+  await renderOraclePhrase(screenContent, phrase);
 
-  await wait(T_PHRASE);
+  // время на прочтение — зависит от длины фразы, а не фиксированное число,
+  // чтобы короткая фраза не «висела» зря, а длинная не улетала слишком быстро
+  const holdMs = Math.max(PHRASE_HOLD_MIN, phrase.length * PHRASE_HOLD_MS_PER_CH);
+  await wait(holdMs);
 
-  // короткая смена подсветки перед самим раскрытием
+  // короткая смена подсветки перед самим раскрытием — и снова ждём переход целиком
   screenEl.classList.add('off');
-  await wait(T_PHRASE_OUT);
+  await wait(T_DIM);
 
   // 4. раскрываем сам микс — печатаем название, затем описание
   currentMix = mix;
@@ -94,6 +105,7 @@ async function revealMix() {
   void screenEl.offsetWidth;
   screenEl.classList.add('sweep');
 
+  await wait(T_LIGHT);
   await renderOrbText(screenContent, mix);
 
   // 5. карточка появляется красиво, оракул успокаивается

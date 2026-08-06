@@ -6,7 +6,7 @@ let cache = null;
 let loadPromise = null;
 
 async function loadMixes() {
-  const res = await fetch('./mixes.json');
+  const res = await fetch('data/mixes.json', { cache: 'force-cache' });
   if (!res.ok) throw new Error('Не удалось загрузить data/mixes.json: ' + res.status);
   const data = await res.json();
   if (!Array.isArray(data) || data.length === 0) {

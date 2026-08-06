@@ -191,7 +191,7 @@
   z-index: 2;
   opacity: 1;
   transform: scale(1);
-  transition: opacity .8s cubic-bezier(.25,.1,.25,1), transform .8s cubic-bezier(.25,.1,.25,1), filter .8s ease;
+  transition: opacity .42s cubic-bezier(.25,.1,.25,1), transform .42s cubic-bezier(.25,.1,.25,1), filter .42s ease;
 }
 
 .screen.off{
@@ -251,14 +251,20 @@
   font-family: 'Lora', serif;
   font-style: italic;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   color: var(--gold-soft);
   text-shadow: 0 0 4px rgba(217,184,120,0.5);
-  opacity: 0;
+  opacity: 1;
   transform: translateY(4px);
-  transition: opacity .5s ease, transform .5s ease;
+  transition: transform .5s cubic-bezier(.25,.1,.25,1);
+  display:-webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: normal;
+  overflow-wrap: normal;
 }
-.oracle-phrase.in{ opacity: 1; transform: translateY(0); }
+.oracle-phrase.in{ transform: translateY(0); }
 
 .mix-name{
   font-family: 'Lora', serif;
@@ -285,12 +291,15 @@
 }
 .mix-name.in{ opacity: 1; transform: translateY(0); }
 
-.mix-name .ch{
+/* общий механизм «печати» букв — используется и для мысли оракула, и для названия микса,
+   поэтому оба появления выглядят как одна и та же логика, а не два разных эффекта */
+.ch{
   display: inline-block;
   opacity: 0;
-  transition: opacity .5s ease;
+  transform: translateY(3px);
+  transition: opacity .5s cubic-bezier(.25,.1,.25,1), transform .5s cubic-bezier(.25,.1,.25,1);
 }
-.mix-name .ch.show{ opacity: 1; }
+.ch.show{ opacity: 1; transform: translateY(0); }
 
 .mix-desc{
   font-family: 'Inter', sans-serif;

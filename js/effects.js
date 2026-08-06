@@ -153,9 +153,9 @@ export function typeText(el, text, onDone) {
     if (idx < spans.length) {
       revealChar(spans[idx]);
       idx++;
-      setTimeout(step, 34);
+      setTimeout(step, 30);
     } else if (onDone) {
-      setTimeout(onDone, 220);
+      setTimeout(onDone, 200);
     }
   })();
 }

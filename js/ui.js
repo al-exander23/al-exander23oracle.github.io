@@ -56,9 +56,12 @@ export function renderOrbText(screenContentEl, mix) {
 }
 
 export function renderOraclePhrase(screenContentEl, phrase) {
-  screenContentEl.innerHTML = `<div class="oracle-phrase" id="op">${phrase}</div>`;
+  screenContentEl.innerHTML = '<div class="oracle-phrase" id="op"></div>';
   const op = document.getElementById('op');
-  requestAnimationFrame(() => requestAnimationFrame(() => op.classList.add('in')));
+  op.classList.add('in');
+  return new Promise((resolve) => {
+    typeText(op, phrase, resolve);
+  });
 }
 
 export function renderIdleState(screenContentEl) {
