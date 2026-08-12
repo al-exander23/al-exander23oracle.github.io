@@ -14,93 +14,115 @@ const STAT_FIELDS = [
   { key: 'difficulty', label: 'Сложность' },
 ];
 
-function statDots(value) {
-  let html = '<div class="stat-dots">';
-  for (let i = 1; i <= 5; i++) {
-    html += `<span class="stat-dot${i <= value ? ' filled' : ''}"></span>`;
-  }
-  html += '</div>';
-  return html;
-}
-
-function renderStatGrid(mix) {
-  return STAT_FIELDS.map(
-    (f) => `
-    <div class="stat-row">
-      <span class="stat-label">${f.label}</span>
-      ${statDots(mix[f.key] || 0)}
-    </div>`
-  ).join('');
-}
-
-function renderChips(mix) {
-  return mix.recipe
-    .map((r) => `<span class="recipe-chip">${r.flavor}${r.percent ? ` <b>${r.percent}%</b>` : ''}</span>`)
-    .join('');
-}
-
-export function renderOrbText(screenContentEl, mix, signal) {
-  screenContentEl.innerHTML =
-    '<div class="mix-name" id="mn"></div>' +
-    '<div class="mix-desc" id="md"></div>';
-  const mn = document.getElementById('mn');
-  const md = document.getElementById('md');
-  md.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
-  mn.classList.add('in');
-  return new Promise((resolve) => {
-    typeText(mn, mix.name, () => {
-      md.classList.add('in');
-      resolve();
-    }, signal);
+function buildStatGrid(mix) {
+  const grid = document.createElement('div');
+  grid.className = 'stat-grid';
+  STAT_FIELDS.forEach((f) => {
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+    const label = document.createElement('span');
+    label.className = 'stat-label';
+    label.textContent = f.label;
+    const dots = document.createElement('div');
+    dots.className = 'stat-dots';
+    const value = mix[f.key] || 0;
+    for (let i = 1; i <= 5; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'stat-dot' + (i <= value ? ' filled' : '');
+      dots.appendChild(dot);
+    }
+    row.appendChild(label);
+    row.appendChild(dots);
+    grid.appendChild(row);
   });
+  return grid;
 }
 
-export function renderOraclePhrase(screenContentEl, phrase, signal) {
-  screenContentEl.innerHTML = '<div class="oracle-phrase" id="op"></div>';
-  const op = document.getElementById('op');
-  op.classList.add('in');
-  return new Promise((resolve) => {
-    typeText(op, phrase, resolve, signal);
+function buildChips(mix) {
+  const wrap = document.createElement('div');
+  wrap.className = 'recipe-chips';
+  mix.recipe.forEach((r) => {
+    const chip = document.createElement('span');
+    chip.className = 'recipe-chip';
+    chip.textContent = r.flavor;
+    if (r.percent) {
+      const b = document.createElement('b');
+      b.textContent = ` ${r.percent}%`;
+      chip.appendChild(b);
+    }
+    wrap.appendChild(chip);
   });
+  return wrap;
 }
 
-export function renderIdleState(screenContentEl) {
-  screenContentEl.innerHTML =
-    '<div class="idle-icon">✦</div>' +
-    '<div class="idle-text">встряхни —<br>узнай микс</div>';
-}
-
-function renderRatingLine(mix) {
+function buildRatingLine(mix) {
+  const el = document.createElement('div');
   if (mix.rating != null) {
-    return `<div class="mix-card-rating">★ ${mix.rating.toFixed(1)}</div>`;
+    el.className = 'mix-card-rating';
+    el.textContent = `★ ${mix.rating.toFixed(1)}`;
+  } else {
+    // реальных оценок ещё нет — показываем эвристическую популярность,
+    // а не выдаём её за настоящий рейтинг
+    const pct = Math.max(0, Math.min(100, mix.popularity || 0));
+    el.className = 'mix-card-rating mix-card-rating--new';
+    el.textContent = `🔥 ${pct}% · оценок пока нет`;
   }
-  // реальных оценок ещё нет — показываем эвристическую популярность,
-  // а не выдаём её за настоящий рейтинг
-  const pct = Math.max(0, Math.min(100, mix.popularity || 0));
-  return `<div class="mix-card-rating mix-card-rating--new">🔥 ${pct}% · оценок пока нет</div>`;
+  return el;
 }
 
+// Карточка строится через createElement с прямыми ссылками на узлы —
+// без id, без getElementById. Каждый вызов renderCard() полностью
+// заменяет содержимое cardEl (replaceChildren), поэтому старые
+// обработчики уходят вместе со старыми узлами — без утечек.
 export function renderCard(cardEl, mix) {
   const fav = isFavorite(mix.id);
-  cardEl.innerHTML = `
-    <div class="mix-card-head">
-      <div class="mix-card-title">${mix.name}</div>
-      <button class="fav-btn${fav ? ' active' : ''}" id="favBtn" aria-label="В избранное">${fav ? '♥' : '♡'}</button>
-    </div>
-    ${renderRatingLine(mix)}
-    <div class="mix-card-desc">${mix.description}</div>
-    <div class="mix-card-section-label">Состав</div>
-    <div class="recipe-chips">${renderChips(mix)}</div>
-    <div class="mix-card-section-label">Профиль вкуса</div>
-    <div class="stat-grid">${renderStatGrid(mix)}</div>
-    <div class="mix-card-foot">
-      <span>Автор: ${mix.author || 'ALX Oracle'}</span>
-      <button class="share-btn" id="shareBtn">Поделиться</button>
-    </div>
-  `;
+
+  const head = document.createElement('div');
+  head.className = 'mix-card-head';
+  const title = document.createElement('div');
+  title.className = 'mix-card-title';
+  title.textContent = mix.name;
+  const favBtn = document.createElement('button');
+  favBtn.className = 'fav-btn' + (fav ? ' active' : '');
+  favBtn.setAttribute('aria-label', 'В избранное');
+  favBtn.textContent = fav ? '♥' : '♡';
+  head.appendChild(title);
+  head.appendChild(favBtn);
+
+  const desc = document.createElement('div');
+  desc.className = 'mix-card-desc';
+  desc.textContent = mix.description;
+
+  const compositionLabel = document.createElement('div');
+  compositionLabel.className = 'mix-card-section-label';
+  compositionLabel.textContent = 'Состав';
+
+  const profileLabel = document.createElement('div');
+  profileLabel.className = 'mix-card-section-label';
+  profileLabel.textContent = 'Профиль вкуса';
+
+  const foot = document.createElement('div');
+  foot.className = 'mix-card-foot';
+  const authorSpan = document.createElement('span');
+  authorSpan.textContent = `Автор: ${mix.author || 'ALX Oracle'}`;
+  const shareBtn = document.createElement('button');
+  shareBtn.className = 'share-btn';
+  shareBtn.textContent = 'Поделиться';
+  foot.appendChild(authorSpan);
+  foot.appendChild(shareBtn);
+
+  cardEl.replaceChildren(
+    head,
+    buildRatingLine(mix),
+    desc,
+    compositionLabel,
+    buildChips(mix),
+    profileLabel,
+    buildStatGrid(mix),
+    foot,
+  );
   cardEl.classList.add('show');
 
-  const favBtn = document.getElementById('favBtn');
   favBtn.addEventListener('click', () => {
     const nowFav = toggleFavorite(mix.id);
     favBtn.classList.toggle('active', nowFav);
@@ -111,8 +133,38 @@ export function renderCard(cardEl, mix) {
     showToast(nowFav ? 'Добавлено в избранное' : 'Убрано из избранного');
   });
 
-  const shareBtn = document.getElementById('shareBtn');
   shareBtn.addEventListener('click', () => shareMix(mix));
+}
+
+export async function renderOrbText(screenContentEl, mix, signal) {
+  const nameEl = document.createElement('div');
+  nameEl.className = 'mix-name';
+  const descEl = document.createElement('div');
+  descEl.className = 'mix-desc';
+  descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
+
+  // один вход — один контейнер; старое содержимое полностью удаляется,
+  // прежде чем добавится новое (пункт 9 ТЗ — исключает случайное наложение)
+  screenContentEl.replaceChildren(nameEl, descEl);
+
+  nameEl.classList.add('in');
+  await typeText(nameEl, mix.name, signal);
+  descEl.classList.add('in');
+}
+
+export async function renderOraclePhrase(screenContentEl, phrase, signal) {
+  const phraseEl = document.createElement('div');
+  phraseEl.className = 'oracle-phrase';
+  screenContentEl.replaceChildren(phraseEl);
+
+  phraseEl.classList.add('in');
+  await typeText(phraseEl, phrase, signal);
+}
+
+export function renderIdleState(screenContentEl) {
+  screenContentEl.innerHTML =
+    '<div class="idle-icon">✦</div>' +
+    '<div class="idle-text">встряхни —<br>узнай микс</div>';
 }
 
 export function hideCard(cardEl) {

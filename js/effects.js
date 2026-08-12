@@ -8,7 +8,14 @@
 // Меридианы и материки едут по синусоиде и сжимаются (scaleX) у края —
 // ровно так двигалась бы поверхность настоящей вращающейся сферы.
 // ---------------------------------------------------------------
+let activeRotatorInstance = null;
+
 export function createGlobeRotator(orbSurfaceEl) {
+  if (activeRotatorInstance) {
+    console.warn('[ALX] createGlobeRotator() вызван повторно — возвращён уже существующий инстанс, второй RAF-луп не создан.');
+    return activeRotatorInstance;
+  }
+
   const reduceMotion = window.matchMedia
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -94,84 +101,103 @@ export function createGlobeRotator(orbSurfaceEl) {
   }
   requestAnimationFrame(tick);
 
-  return {
+  activeRotatorInstance = {
     setBurst() { targetSpeed = BURST_SPEED; },
     setIdle() { targetSpeed = IDLE_SPEED; },
   };
+  return activeRotatorInstance;
 }
 
 // ---------------------------------------------------------------
 // «Оракул пишет ответ» — мягкое посимвольное появление текста.
+// Один контролируемый механизм: async/await + setTimeout, без
+// параллельного requestAnimationFrame — раньше два механизма сразу
+// усложняли отмену без явной причины.
 // Буквы сгруппированы по словам (nowrap), поэтому перенос строки
 // возможен только на пробеле/дефисе, а не посреди слова.
+//
+// Гарантии (проверены тестами): только один активный вызов на элемент;
+// после Abort — ни одного изменения DOM; после завершения сцены текст
+// больше не трогается; повторный вызов для уже печатающегося элемента
+// игнорируется, а не запускает второй параллельный "поток" печати.
 // ---------------------------------------------------------------
-export function typeText(el, text, onDone, signal) {
-  el.innerHTML = '';
-  const spans = [];
-  const localTimers = [];
+const activeTypingElements = new WeakSet();
 
-  function clearLocalTimers() {
-    localTimers.forEach((id) => clearTimeout(id));
-    localTimers.length = 0;
-  }
+function typeLog(...args) {
+  if (typeof window !== 'undefined' && window.__ALX_DEBUG__) console.log('[ALX]', ...args);
+}
 
-  if (signal) {
-    if (signal.aborted) return; // сцену уже отменили — даже не начинаем печатать
-    signal.addEventListener('abort', clearLocalTimers, { once: true });
-  }
-
-  function makeCharSpan(ch) {
-    const span = document.createElement('span');
-    span.className = 'ch';
-    span.textContent = ch;
-    span.style.whiteSpace = 'pre';
-    return span;
-  }
-
-  const tokens = text.split(/(\s+|-)/).filter((t) => t.length > 0);
-  tokens.forEach((token) => {
-    if (/^(\s+|-)$/.test(token)) {
-      for (const ch of token) {
-        const s = makeCharSpan(ch);
-        el.appendChild(s);
-        spans.push(s);
-      }
-    } else {
-      const wordWrap = document.createElement('span');
-      wordWrap.style.display = 'inline-block';
-      wordWrap.style.whiteSpace = 'nowrap';
-      for (const ch of token) {
-        const s = makeCharSpan(ch);
-        wordWrap.appendChild(s);
-        spans.push(s);
-      }
-      el.appendChild(wordWrap);
+function sleep(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal && signal.aborted) { reject(new DOMException('Отменено', 'AbortError')); return; }
+    const id = setTimeout(resolve, ms);
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(id);
+        reject(new DOMException('Отменено', 'AbortError'));
+      }, { once: true });
     }
   });
+}
 
-  // каждая буква несёт СВОЮ ссылку на элемент через параметр функции —
-  // индекс не может «убежать» вперёд, даже если requestAnimationFrame задержится
-  function revealChar(target) {
-    if (!target) return;
-    requestAnimationFrame(() => {
-      if (!target || (signal && signal.aborted)) return;
-      target.classList.add('show');
-    });
+export async function typeText(el, text, signal) {
+  if (activeTypingElements.has(el)) {
+    console.warn('[ALX] typeText() вызван повторно для уже печатающегося элемента — игнорируется');
+    return;
   }
+  activeTypingElements.add(el);
+  typeLog('TYPE START', JSON.stringify(text));
 
-  let idx = 0;
-  (function step() {
-    if (signal && signal.aborted) return; // сцена отменена — печать останавливается немедленно
-    if (idx < spans.length) {
-      revealChar(spans[idx]);
-      idx++;
-      localTimers.push(setTimeout(step, 30));
-    } else if (onDone) {
-      localTimers.push(setTimeout(() => {
-        if (!signal || !signal.aborted) onDone();
-      }, 200));
+  try {
+    el.replaceChildren();
+    const spans = [];
+
+    function makeCharSpan(ch) {
+      const span = document.createElement('span');
+      span.className = 'ch';
+      span.textContent = ch;
+      span.style.whiteSpace = 'pre';
+      return span;
     }
-  })();
+
+    const tokens = text.split(/(\s+|-)/).filter((t) => t.length > 0);
+    const wordFrag = document.createDocumentFragment();
+    tokens.forEach((token) => {
+      if (/^(\s+|-)$/.test(token)) {
+        for (const ch of token) {
+          const s = makeCharSpan(ch);
+          wordFrag.appendChild(s);
+          spans.push(s);
+        }
+      } else {
+        const wordWrap = document.createElement('span');
+        wordWrap.style.display = 'inline-block';
+        wordWrap.style.whiteSpace = 'nowrap';
+        for (const ch of token) {
+          const s = makeCharSpan(ch);
+          wordWrap.appendChild(s);
+          spans.push(s);
+        }
+        wordFrag.appendChild(wordWrap);
+      }
+    });
+    el.appendChild(wordFrag);
+
+    // каждая итерация сама проверяет отмену — если сцену прервали,
+    // печать останавливается немедленно и Promise корректно отклоняется
+    for (const span of spans) {
+      if (signal && signal.aborted) throw new DOMException('Отменено', 'AbortError');
+      span.classList.add('show');
+      await sleep(30, signal);
+    }
+    await sleep(180, signal);
+    typeLog('TYPE COMPLETE');
+  } catch (err) {
+    typeLog('TYPE ABORT');
+    throw err;
+  } finally {
+    activeTypingElements.delete(el);
+  }
 }
 
 // ---------------------------------------------------------------

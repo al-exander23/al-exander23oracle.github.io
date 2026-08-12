@@ -1,29 +1,30 @@
-// app.js — точка входа. Собирает вместе oracle.js (мозг), ui.js (вид),
-// effects.js (движение) и profile.js (память), и больше почти ничего
-// не делает сама — задача этого файла - только оркестрация сцены.
+// app.js — точка входа. Только: инициализация приложения, подключение
+// Telegram, регистрация пользовательских событий и запуск SceneController.
+//
+// Вся детальная последовательность сцены (fade/дым/фраза/reveal/карточка)
+// теперь целиком живёт в scene.js — этот файл её не знает и не должна.
 
-import { initMixes, hasMixes } from './mixes.js';
-import { oracleChooseMix } from './oracle.js';
-import { createGlobeRotator, spawnSmoke, spawnMotes } from './effects.js';
-import {
-  renderOrbText, renderOraclePhrase, renderIdleState, renderCard, hideCard,
-  showToast, openSheet, closeSheet,
-} from './ui.js';
-import { addToHistory, isFavorite } from './profile.js';
-import { scene } from './scene.js';
+import { initMixes } from './mixes.js';
+import { createGlobeRotator, spawnMotes } from './effects.js';
+import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
+import { initScene, requestOracle } from './scene.js';
 
 // ---------------------------------------------------------------
-// Telegram WebApp bootstrap
+// Telegram WebApp bootstrap — любой из этих API может быть недоступен
+// в конкретном клиенте (Android/iOS/Desktop/браузер), и это не ошибка:
+// используем, если есть, иначе просто продолжаем без него.
 // ---------------------------------------------------------------
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) {
-  try { tg.ready(); } catch (e) { console.warn('[ALX Oracle] tg.ready() недоступен:', e); }
-  try { tg.expand(); } catch (e) { console.warn('[ALX Oracle] tg.expand() недоступен:', e); }
-  try { tg.setHeaderColor && tg.setHeaderColor('#0b0912'); } catch (e) { /* безопасный fallback — просто без цвета */ }
+  if (typeof tg.ready === 'function') { try { tg.ready(); } catch (e) { console.warn('[ALX] tg.ready() недоступен:', e); } }
+  if (typeof tg.expand === 'function') { try { tg.expand(); } catch (e) { console.warn('[ALX] tg.expand() недоступен:', e); } }
+  if (typeof tg.setHeaderColor === 'function') {
+    try { tg.setHeaderColor('#0b0912'); } catch (e) { console.warn('[ALX] setHeaderColor недоступен:', e); }
+  }
 }
 function haptic(style) {
-  if (tg && tg.HapticFeedback) {
-    try { tg.HapticFeedback.impactOccurred(style || 'medium'); } catch (e) { /* нет Haptic — просто без вибро-отклика */ }
+  if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
+    try { tg.HapticFeedback.impactOccurred(style || 'medium'); } catch (e) { console.warn('[ALX] HapticFeedback недоступен:', e); }
   } else if (navigator.vibrate) {
     try { navigator.vibrate(style === 'light' ? 12 : 30); } catch (e) { /* вибрация недоступна — не критично */ }
   }
@@ -42,135 +43,41 @@ const lockBtn = document.getElementById('lockBtn');
 const mixCardEl = document.getElementById('mixCard');
 const motesEl = document.getElementById('motes');
 
+// ---------------------------------------------------------------
+// Mix lock — закрепление ТЕКУЩЕГО результата пользователем.
+// Это НЕ то же самое, что состояние сцены (scene.isRunning из scene.js).
+// Две разные, независимые блокировки: одна про «идёт ли анимация»,
+// вторая — про «хочет ли пользователь зафиксировать то, что уже показано».
+// ---------------------------------------------------------------
 let count = 0;
-let locked = false;
-let currentMix = null;
+let mixLocked = false;
 
 spawnMotes(motesEl, 22);
 const rotator = createGlobeRotator(orbSurface);
 
+initScene(
+  {
+    orbWrap, orbSmoke, screenEl, screenContent, mixCardEl,
+    haptic,
+    onResult(mix) {
+      count++;
+      counterEl.textContent = '№ ' + String(count).padStart(3, '0');
+      lockBtn.style.display = 'inline-block';
+    },
+  },
+  rotator,
+  () => mixLocked,
+);
+
 // ---------------------------------------------------------------
-// Сцена «оракул отвечает» — управляется ИСКЛЮЧИТЕЛЬНО через scene.js.
-// Ни один из вызываемых здесь модулей не решает сам, что показывать
-// дальше — это делает только эта функция, шаг за шагом.
+// Встряхивание — ДОПОЛНИТЕЛЬНЫЙ способ вызвать requestOracle(),
+// не основной. Если devicemotion недоступен (нет разрешения, нет
+// API вообще) — приложение полностью работает через тап по шару,
+// никаких ошибок и зависаний из-за отсутствия Motion.
 //
-// Защита от двойного запуска: scene.beginScene() — синхронная и первая
-// операция функции, до единого await. Если сцена уже идёт — beginScene()
-// вернёт null, и функция немедленно выйдет. Не важно, что именно вызвало
-// повторный триггер — click, touch, devicemotion или Telegram-событие —
-// вторая сцена никогда не запустится поверх первой.
-//
-// Защита от зависаний: каждый этап обёрнут в scene.guard(promise, 3000) —
-// если этап не уложился в 3 секунды, сцена принудительно прерывается
-// (AbortController), typeText() сама остановит все свои таймеры, и
-// приложение гарантированно вернётся в IDLE через finally.
-// ---------------------------------------------------------------
-const FADE = 420;              // должно совпадать с transition в css/orb.css (.screen)
-const T_DIM = FADE + 40;       // ждём, пока экран полностью погаснет
-const T_LIGHT = FADE + 40;     // ждём, пока экран полностью загорится
-const PHRASE_HOLD_MIN = 380;   // минимальная пауза на «додумать» после фразы
-const PHRASE_HOLD_MS_PER_CH = 8; // + время на дочитывание, пропорционально длине фразы
-const T_SETTLE = 600;          // шар успокаивается после ответа
-const STAGE_TIMEOUT = 3000;    // защитный таймаут на любой этап
-
-async function runScene() {
-  if (locked) return; // микс закреплён — сцена даже не начинается
-  const started = scene.beginScene();
-  if (!started) return; // сцена уже выполняется — повторный триггер игнорируется
-  const { signal } = started;
-
-  let clearSmoke = () => {};
-
-  try {
-    // ---- PREPARING: проверяем, что вообще есть из чего выбирать ----
-    await scene.guard(initMixes(), STAGE_TIMEOUT, 'PREPARING');
-    if (!hasMixes()) {
-      throw new Error('Список миксов пуст или не загрузился');
-    }
-
-    haptic('medium');
-    orbWrap.classList.add('thinking');
-    rotator.setBurst();
-    clearSmoke = spawnSmoke(orbSmoke, 5);
-
-    // ---- THINKING: шар светится, экран гаснет ----
-    scene.transition('THINKING');
-    screenEl.classList.add('off');
-    await scene.guard(wait(T_DIM, signal), STAGE_TIMEOUT, 'THINKING: затемнение');
-
-    // ---- CHOOSING: оракул выбирает микс и фразу (один раз за сцену) ----
-    scene.transition('CHOOSING');
-    const { mix, phrase } = oracleChooseMix();
-    if (!mix) throw new Error('Оракул не смог подобрать микс');
-
-    screenEl.classList.remove('off');
-    await scene.guard(renderOraclePhrase(screenContent, phrase, signal), STAGE_TIMEOUT, 'CHOOSING: фраза оракула');
-
-    const holdMs = Math.max(PHRASE_HOLD_MIN, phrase.length * PHRASE_HOLD_MS_PER_CH);
-    await scene.guard(wait(holdMs, signal), STAGE_TIMEOUT, 'CHOOSING: пауза на чтение');
-
-    screenEl.classList.add('off');
-    await scene.guard(wait(T_DIM, signal), STAGE_TIMEOUT, 'CHOOSING: затемнение перед раскрытием');
-
-    // ---- REVEAL: раскрываем сам микс ----
-    scene.transition('REVEAL');
-    currentMix = mix;
-    screenEl.classList.remove('off');
-    screenEl.classList.remove('sweep');
-    void screenEl.offsetWidth;
-    screenEl.classList.add('sweep');
-
-    await scene.guard(wait(T_LIGHT, signal), STAGE_TIMEOUT, 'REVEAL: включение экрана');
-    await scene.guard(renderOrbText(screenContent, mix, signal), STAGE_TIMEOUT, 'REVEAL: печать названия');
-
-    // ---- RESULT: карточка появляется красиво ----
-    scene.transition('RESULT');
-    renderCard(mixCardEl, mix);
-    count++;
-    counterEl.textContent = '№ ' + String(count).padStart(3, '0');
-    lockBtn.style.display = 'inline-block';
-    addToHistory(mix.id);
-
-    await scene.guard(wait(T_SETTLE, signal), STAGE_TIMEOUT, 'RESULT: успокоение');
-  } catch (err) {
-    console.error('[ALX Oracle] сцена прервана:', err.message);
-    showToast('Оракул на секунду отвлёкся — попробуй ещё раз');
-  } finally {
-    // Гарантия из пункта 6 ТЗ: что бы ни случилось выше — анимации
-    // останавливаются, блокировки снимаются, состояние возвращается в IDLE.
-    rotator.setIdle();
-    orbWrap.classList.remove('thinking');
-    clearSmoke();
-    scene.endScene();
-  }
-}
-
-/**
- * Пауза, которая умеет прерываться сигналом отмены сцены —
- * если сцену отменили посреди wait(), промис сразу отклоняется,
- * а не «висит» до истечения полного времени.
- */
-function wait(ms, signal) {
-  return new Promise((resolve, reject) => {
-    if (signal && signal.aborted) {
-      reject(new DOMException('Сцена отменена', 'AbortError'));
-      return;
-    }
-    const id = setTimeout(resolve, ms);
-    if (signal) {
-      signal.addEventListener('abort', () => {
-        clearTimeout(id);
-        reject(new DOMException('Сцена отменена', 'AbortError'));
-      }, { once: true });
-    }
-  });
-}
-
-// ---------------------------------------------------------------
-// Встряхивание: только реальный рывок, не поворот телефона.
 // Используем линейное ускорение БЕЗ гравитации — поворот/наклон
 // телефона меняет вектор гравитации, но не даёт скачка линейного
-// ускорения, поэтому больше не путается со встряхиванием.
+// ускорения, поэтому не путается со встряхиванием.
 // ---------------------------------------------------------------
 const SHAKE_THRESHOLD = 15;
 const SHAKE_COOLDOWN = 700;
@@ -182,7 +89,7 @@ function processLinearAcceleration(x, y, z, now) {
   const magnitude = Math.sqrt(x * x + y * y + z * z);
   if (magnitude > SHAKE_THRESHOLD && now - lastTriggerTs > SHAKE_COOLDOWN) {
     lastTriggerTs = now;
-    runScene();
+    requestOracle(); // тот же единственный вход, что и у клика
   }
 }
 
@@ -211,13 +118,17 @@ function handleMotion(e) {
 
 let shakeAttached = false;
 function attachShake() {
-  if (shakeAttached) return; // повторная регистрация запрещена
+  if (shakeAttached) return; // запрещена повторная регистрация слушателя
   shakeAttached = true;
   window.addEventListener('devicemotion', handleMotion, true);
 }
 
 function initMotion() {
-  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+  if (typeof DeviceMotionEvent === 'undefined') return; // Motion недоступен — просто работаем через тап
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    // iOS 13+ требует явного разрешения по жесту пользователя — это
+    // ДОПОЛНИТЕЛЬНАЯ возможность, основной сценарий (тап по шару)
+    // доступен и без неё, никакого permission screen поверх него нет.
     const btn = document.createElement('button');
     btn.className = 'permission-btn';
     btn.textContent = 'Разрешить встряхивание';
@@ -225,23 +136,27 @@ function initMotion() {
       DeviceMotionEvent.requestPermission().then((state) => {
         if (state === 'granted') attachShake();
         btn.remove();
-      }).catch(() => btn.remove());
+      }).catch((e) => { console.warn('[ALX] DeviceMotion permission недоступен:', e); btn.remove(); });
     };
     document.getElementById('hint').insertAdjacentElement('afterend', btn);
-  } else if (typeof DeviceMotionEvent !== 'undefined') {
+  } else {
     attachShake();
   }
 }
 
 // ---------------------------------------------------------------
-// Остальные обработчики UI
+// Единственный источник взаимодействия с шаром — click.
+// Намеренно НЕ добавляем одновременно touchstart/touchend/pointerdown
+// поверх него — это и есть требование «один основной механизм»,
+// чтобы Telegram WebView не мог вызвать requestOracle() дважды
+// на одно и то же нажатие через разные события.
 // ---------------------------------------------------------------
-orbWrap.addEventListener('click', runScene);
+orbWrap.addEventListener('click', requestOracle);
 
 lockBtn.addEventListener('click', () => {
-  locked = !locked;
-  lockBtn.textContent = locked ? '🔓 Открепить микс' : '🔒 Закрепить микс';
-  lockBtn.classList.toggle('active', locked);
+  mixLocked = !mixLocked;
+  lockBtn.textContent = mixLocked ? '🔓 Открепить микс' : '🔒 Закрепить микс';
+  lockBtn.classList.toggle('active', mixLocked);
   haptic('light');
 });
 
@@ -257,4 +172,7 @@ document.getElementById('sheetOverlay').addEventListener('click', (e) => {
 // ---------------------------------------------------------------
 renderIdleState(screenContent);
 initMotion();
-initMixes().catch(() => showToast('Не удалось загрузить базу миксов'));
+initMixes().catch((err) => {
+  console.error('[ALX ERROR]', { stage: 'STARTUP', error: err.message, time: new Date().toISOString() });
+  showToast('Оракул временно недоступен. Попробуй ещё раз.');
+});
