@@ -71,6 +71,7 @@ let els = null;   // DOM-элементы, переданные из app.js че
 let rotator = null;
 let isMixLocked = () => false; // подставляется из app.js через initScene()
 let activeClearSmoke = () => {};
+let sceneId = 0; // диагностика v1.2.3 — уникальный id на каждую ПОПЫТКУ вызова requestOracle()
 
 function log(...args) {
   if (debug) console.log('[ALX]', ...args);
@@ -167,11 +168,22 @@ function wait(ms, signal) {
 // приложении — click, shake, любой будущий жест — вызывает только её.
 // -------------------------------------------------------------------
 export async function requestOracle() {
-  if (isMixLocked()) return;          // микс закреплён пользователем — не относится к scene lock
+  // --- ДИАГНОСТИКА v1.2.3: не влияет на логику, только на консоль ---
+  const currentSceneId = ++sceneId;
+  console.log('[ALX TRACE] REQUEST', currentSceneId);
+  console.trace('[ALX TRACE] REQUEST SOURCE');
+
+  if (isMixLocked()) {                // микс закреплён пользователем — не относится к scene lock
+    console.log('[ALX TRACE] REQUEST REJECTED', currentSceneId, `state=${state}`, '(mix locked)');
+    return;
+  }
   if (isRunning()) {                  // единственная защита от двойного запуска
+    console.log('[ALX TRACE] REQUEST REJECTED', currentSceneId, `state=${state}`);
     log('Повторный запуск отклонён — сцена уже выполняется:', state);
     return;
   }
+  console.log('[ALX TRACE] SCENE START', currentSceneId);
+  // --- конец диагностической вставки ---
 
   controller = new AbortController();
   const { signal } = controller;
@@ -201,10 +213,10 @@ export async function requestOracle() {
     if (!chosen.mix) throw new Error('Оракул не смог подобрать микс');
     mix = chosen.mix;
     log('PHRASE');
-    await withTimeout((sig) => stagePhrase(chosen.phrase, sig), signal, 'CHOOSING');
+    await withTimeout((sig) => stagePhrase(chosen.phrase, sig, currentSceneId), signal, 'CHOOSING');
 
     setState(SCENES.REVEAL);
-    await withTimeout((sig) => stageReveal(mix, sig), signal, 'REVEAL');
+    await withTimeout((sig) => stageReveal(mix, sig, currentSceneId), signal, 'REVEAL');
 
     setState(SCENES.RESULT);
     stageResult(mix);
@@ -232,9 +244,10 @@ async function stageThinking(signal) {
 }
 
 // CHOOSING / «одна фраза оракула» — печатается один раз, без повторов.
-async function stagePhrase(phrase, signal) {
+async function stagePhrase(phrase, signal, sceneId) {
+  console.log('[ALX TRACE] STAGE PHRASE', sceneId, phrase);
   els.screenEl.classList.remove('off');
-  await renderOraclePhrase(els.screenContent, phrase, signal);
+  await renderOraclePhrase(els.screenContent, phrase, signal, sceneId);
 
   const holdMs = Math.max(PHRASE_HOLD_MIN, phrase.length * PHRASE_HOLD_MS_PER_CH);
   await wait(holdMs, signal);
@@ -244,14 +257,14 @@ async function stagePhrase(phrase, signal) {
 }
 
 // REVEAL: раскрываем сам микс.
-async function stageReveal(mix, signal) {
+async function stageReveal(mix, signal, sceneId) {
   els.screenEl.classList.remove('off');
   els.screenEl.classList.remove('sweep');
   void els.screenEl.offsetWidth;
   els.screenEl.classList.add('sweep');
 
   await wait(T_LIGHT, signal);
-  await renderOrbText(els.screenContent, mix, signal);
+  await renderOrbText(els.screenContent, mix, signal, sceneId);
 }
 
 // RESULT: карточка. Синхронный рендер, без сети и без таймеров.

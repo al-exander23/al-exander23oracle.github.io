@@ -136,9 +136,10 @@ export function renderCard(cardEl, mix) {
   shareBtn.addEventListener('click', () => shareMix(mix));
 }
 
-export async function renderOrbText(screenContentEl, mix, signal) {
+export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
   const nameEl = document.createElement('div');
   nameEl.className = 'mix-name';
+  nameEl.dataset.sceneId = String(sceneId);
   const descEl = document.createElement('div');
   descEl.className = 'mix-desc';
   descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
@@ -148,17 +149,25 @@ export async function renderOrbText(screenContentEl, mix, signal) {
   screenContentEl.replaceChildren(nameEl, descEl);
 
   nameEl.classList.add('in');
-  await typeText(nameEl, mix.name, signal);
+  await typeText(nameEl, mix.name, signal, sceneId);
   descEl.classList.add('in');
 }
 
-export async function renderOraclePhrase(screenContentEl, phrase, signal) {
+export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
+  // --- ДИАГНОСТИКА v1.2.3 ---
+  console.log('[ALX TRACE] RENDER PHRASE', sceneId);
+  console.log('[ALX TRACE] SCREEN BEFORE', screenContentEl.children.length, screenContentEl.innerHTML);
+  // --- конец диагностической вставки ---
+
   const phraseEl = document.createElement('div');
   phraseEl.className = 'oracle-phrase';
+  phraseEl.dataset.sceneId = String(sceneId); // пункт 7 ТЗ
   screenContentEl.replaceChildren(phraseEl);
 
+  console.log('[ALX TRACE] SCREEN AFTER', screenContentEl.children.length, screenContentEl.innerHTML);
+
   phraseEl.classList.add('in');
-  await typeText(phraseEl, phrase, signal);
+  await typeText(phraseEl, phrase, signal, sceneId);
 }
 
 export function renderIdleState(screenContentEl) {

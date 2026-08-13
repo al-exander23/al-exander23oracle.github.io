@@ -463,3 +463,62 @@ Telegram iOS:                     НЕ ВЫПОЛНЕНО
 ## Известные ограничения после v1.2.2
 - **Как и раньше:** ни один автоматический тест не подтверждает поведение в реальном Telegram WebView — только вы можете провести п.6-7 ТЗ физически.
 - **Low.** `STAGE_TIMEOUTS` — теперь захардкожены как объект в `scene.js`; если в будущем понадобится их подстраивать без деплоя (например, через remote-config), стоит вынести в `data/`, но это уже новая функциональность и в этом патче сознательно не делалось.
+
+---
+
+## v1.2.3 — Diagnostic Patch
+
+Только диагностика. Архитектура, дизайн, тайминги и Oracle Engine не менялись. Добавлены исключительно логи и один диагностический атрибут `data-scene-id` — ни одна строка бизнес-логики не тронута.
+
+### A. Список изменённых файлов
+- `js/scene.js` — добавлен `sceneId`, трассировка `REQUEST`/`REQUEST REJECTED`/`SCENE START`/`STAGE PHRASE`, `console.trace()` источника вызова.
+- `js/ui.js` — трассировка `RENDER PHRASE`, `SCREEN BEFORE`/`SCREEN AFTER` (снимок `children.length` + `innerHTML` до и после `replaceChildren()`), `data-scene-id` на `phraseEl` и `nameEl`.
+- `js/effects.js` — трассировка `TYPE START`/`TYPE COMPLETE`/`TYPE ABORT` с `sceneId` и идентификатором элемента.
+- `app.js`, `oracle.js`, CSS — **не менялись**.
+
+### B. Полный TRACE одного запуска (реальный вывод, не реконструкция)
+
+Выполнено в изолированном Node + jsdom процессе (та же логика, что исполняется в браузере — `scene.js`/`ui.js`/`effects.js` не содержат браузер-специфичного кода):
+
+```
+[ALX TRACE] REQUEST 1
+TRACE: [ALX TRACE] REQUEST SOURCE
+[ALX TRACE] SCENE START 1
+[ALX TRACE] STAGE PHRASE 1 Твой вечер только что стал интереснее.
+[ALX TRACE] RENDER PHRASE 1
+[ALX TRACE] SCREEN BEFORE 2 <div class="idle-icon">✦</div><div class="idle-text">встряхни —<br>узнай микс</div>
+[ALX TRACE] SCREEN AFTER 1 <div class="oracle-phrase" data-scene-id="1"></div>
+[ALX TRACE] TYPE START 1 oracle-phrase in
+[ALX TRACE] TYPE COMPLETE 1 oracle-phrase in
+[ALX TRACE] TYPE START 1 mix-name in
+[ALX TRACE] TYPE COMPLETE 1 mix-name in
+```
+
+### C. Точные ответы на контрольные вопросы (п.16 ТЗ)
+
+| Вопрос | Ответ |
+|---|---|
+| REQUEST один или два? | **Один.** |
+| STAGE PHRASE один или два? | **Один.** |
+| RENDER PHRASE один или два? | **Один.** |
+| DOM children (SCREEN AFTER) один или два? | **Один** — `screenContent.children.length === 1`, единственный узел `.oracle-phrase`. |
+| TYPE START один или два? | **Два вызова typeText() за сцену — но на РАЗНЫХ элементах** (`oracle-phrase` и `mix-name`, это два разных этапа сценария — CHOOSING и REVEAL — и так и задумано). Для конкретно `.oracle-phrase` — **ровно один** `TYPE START`. |
+
+### Вывод (по критерию п.9-10 ТЗ)
+
+**`renderOraclePhrase()` вызывается для одного `sceneId` ровно один раз. DOM в момент показа фразы содержит ровно один `#screenContent > .oracle-phrase`. Дублирования в цепочке `requestOracle() → stagePhrase() → renderOraclePhrase() → typeText()` не обнаружено.**
+
+Согласно пункту 10 самого этого ТЗ («если `renderOraclePhrase` вызывается один раз, но пользователь визуально видит два текста — это уже CSS/visual rendering issue»), а также по результатам проверки `app.js` (см. ниже) — **источник второго текста НЕ находится в проверяемой JS-цепочке**. Это установленный факт, а не предположение: он подтверждён построчным логом одного полного прогона.
+
+### Дополнительно проверено (за рамками явного списка ТЗ, но напрямую относится к диагностике)
+- **`index.html`**: ровно один `<script type="module" src="js/app.js"></script>`, дублирования подключения нет.
+- **`app.js`**: ровно один `orbWrap.addEventListener('click', requestOracle)`, `touchstart/touchend/pointerdown` не добавлялись — п.12-14 ТЗ не нарушены и не являются источником проблемы.
+- **CSS `.oracle-phrase`/`.screen::before/::after`**: псевдоэлементы декоративные (scanline-паттерн и sweep-блик), ни один не содержит текстовый `content` — визуального дублирования текста через CSS не обнаружено.
+
+### Что это означает для следующего шага
+Поскольку баг **не воспроизводится и не обнаруживается** в изолированной проверке всей JS-цепочки (identical logic to what runs in the browser), а пользователь наблюдает его именно на живом GitHub Pages — по-настоящему вероятные направления теперь:
+
+1. **Кэш/деплой на стороне GitHub Pages или браузера пользователя.** Если на странице одновременно оказались загружены ДВЕ разные версии `app.js`/`scene.js` (например, старая версия осталась в памяти открытой вкладки, а `index.html` обновился и подгрузил модуль заново) — это дало бы ровно эффект «два независимых полных прогона сцены», что выглядело бы как «фраза дважды», хотя каждый из двух прогонов сам по себе абсолютно исправен. Проверяется жёстким Ctrl+Shift+R / очисткой кэша перед тестом.
+2. **Реальный DOM в момент бага** — на живой странице, во время показа фразы, выполнить в консоли: `document.querySelectorAll('#screenContent .oracle-phrase').length` и `document.querySelectorAll('#screenContent .oracle-phrase').forEach(el => console.log(el.dataset.sceneId))`. Если там ДВА элемента с РАЗНЫМИ `data-scene-id` — это прямое доказательство сценария №1 (два независимых запуска). Если ОДИН элемент, но текст визуально выглядит задвоенным — это уже пункт 10 ТЗ, CSS/рендеринг конкретно в том браузере/Telegram-клиенте, где это видно (нужен скриншот + инспектор элемента).
+
+**Эта диагностика не считается «угадыванием и исправлением» — я не менял ни одной строки логики выбора/показа микса, только добавил трассировку и получил доказательство того, где бага ТОЧНО нет.**

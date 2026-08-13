@@ -140,12 +140,14 @@ function sleep(ms, signal) {
   });
 }
 
-export async function typeText(el, text, signal) {
+export async function typeText(el, text, signal, sceneId) {
+  const elLabel = (el && (el.className || el.tagName)) || 'unknown';
   if (activeTypingElements.has(el)) {
     console.warn('[ALX] typeText() вызван повторно для уже печатающегося элемента — игнорируется');
     return;
   }
   activeTypingElements.add(el);
+  console.log('[ALX TRACE] TYPE START', sceneId, elLabel);
   typeLog('TYPE START', JSON.stringify(text));
 
   try {
@@ -191,8 +193,10 @@ export async function typeText(el, text, signal) {
       await sleep(30, signal);
     }
     await sleep(180, signal);
+    console.log('[ALX TRACE] TYPE COMPLETE', sceneId, elLabel);
     typeLog('TYPE COMPLETE');
   } catch (err) {
+    console.log('[ALX TRACE] TYPE ABORT', sceneId, elLabel);
     typeLog('TYPE ABORT');
     throw err;
   } finally {
