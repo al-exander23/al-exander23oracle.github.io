@@ -257,9 +257,13 @@
   opacity: 1;
   transform: translateY(4px);
   transition: transform .5s cubic-bezier(.25,.1,.25,1);
-  display:-webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
+  /* было: display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;
+     -webkit-line-clamp в сочетании с посимвольной мутацией DOM (typeText добавляет
+     буквы каждые 30мс) и filter на родителе (.screen.off{filter:brightness()})
+     — известная связка, вызывающая repaint-дублирование текста в WebKit/Chromium
+     WebView. Заменено на обычный блочный layout с ограничением по высоте —
+     тот же визуальный клипп в ~4 строки, без спецрежима multi-line-clamp. */
+  max-height: calc(1.45em * 4);
   overflow: hidden;
   word-break: normal;
   overflow-wrap: normal;
@@ -281,9 +285,9 @@
     0 0 3px var(--neon),
     0 0 6px var(--neon);
   margin-bottom: 6px;
-  display:-webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  /* см. комментарий у .oracle-phrase — та же замена -webkit-line-clamp
+     на max-height, тот же класс риска (typeText мутирует по букве) */
+  max-height: calc(1.34em * 3);
   overflow: hidden;
   opacity: 0;
   transform: translateY(5px);
@@ -309,9 +313,7 @@
   color: var(--neon-soft);
   text-decoration: none;
   text-shadow: 0 0 1px #fff, 0 0 2px rgba(255, 219, 163, 0.5), 0 0 5px rgba(255, 219, 163, 0.3);
-  display:-webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
+  max-height: calc(1.45em * 4); /* см. комментарий у .oracle-phrase */
   overflow: hidden;
   opacity: 0;
   transform: translateY(5px);
