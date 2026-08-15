@@ -2,7 +2,6 @@
 // подбора миксов (это oracle.js) и не лезет в localStorage напрямую
 // (это profile.js) — только берёт готовые данные и показывает их.
 
-import { typeText } from './effects.js';
 import { isFavorite, toggleFavorite, getFavorites, getHistory } from './profile.js';
 import { getMixById } from './mixes.js';
 
@@ -137,56 +136,33 @@ export function renderCard(cardEl, mix) {
 }
 
 export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
-  const nameEl = document.createElement('div');
-  nameEl.className = 'mix-name';
-  nameEl.dataset.sceneId = String(sceneId);
-  const descEl = document.createElement('div');
-  descEl.className = 'mix-desc';
-  descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
+  // Production minimal renderer: one plain text node, no typewriter, no .ch.
+  screenContentEl.replaceChildren();
 
-  // один вход — один контейнер; старое содержимое полностью удаляется,
-  // прежде чем добавится новое (пункт 9 ТЗ — исключает случайное наложение)
-  screenContentEl.replaceChildren(nameEl, descEl);
+  const mixName = document.createElement('div');
+  mixName.className = 'mix-name';
+  mixName.dataset.sceneId = String(sceneId);
+  mixName.textContent = mix.name;
 
-  nameEl.classList.add('in');
-  await typeText(nameEl, mix.name, signal, sceneId);
-  descEl.classList.add('in');
+  screenContentEl.replaceChildren(mixName);
+  console.assert(screenContentEl.children.length === 1, '[ALX] REVEAL must contain exactly one child');
+  console.assert(screenContentEl.querySelectorAll('.mix-name').length === 1, '[ALX] REVEAL must contain exactly one .mix-name');
+  window.ALX_DIAG?.snapshot?.('REVEAL_PLAIN_TEXT');
 }
 
 export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
-  // --- ДИАГНОСТИКА v1.2.3 ---
-  console.log('[ALX TRACE] RENDER PHRASE', sceneId);
-  console.log('[ALX TRACE] SCREEN BEFORE', screenContentEl.children.length, screenContentEl.innerHTML);
-  // --- конец диагностической вставки ---
+  // Production minimal renderer: exactly one plain phrase element.
+  screenContentEl.replaceChildren();
 
-  window.ALX_DIAG?.snapshot?.('T0_BEFORE_PHRASE');
   const phraseEl = document.createElement('div');
   phraseEl.className = 'oracle-phrase';
-  phraseEl.dataset.sceneId = String(sceneId); // пункт 7 ТЗ
+  phraseEl.dataset.sceneId = String(sceneId);
+  phraseEl.textContent = phrase;
+
   screenContentEl.replaceChildren(phraseEl);
-
-  console.log('[ALX TRACE] SCREEN AFTER', screenContentEl.children.length, screenContentEl.innerHTML);
-  window.ALX_DIAG?.snapshot?.('T1_AFTER_REPLACE_CHILDREN');
-
-  phraseEl.classList.add('in');
-
-  // TEMPORARY FORENSIC A/B ONLY: ?diag=1&plain=1
-  // Keeps the same phrase element and scene lifecycle, but bypasses typeText()
-  // and .ch generation for the isolated Telegram WebView experiment.
-  let plainDiagnostic = false;
-  try {
-    const params = new URLSearchParams(location.search);
-    plainDiagnostic = params.get('diag') === '1' && params.get('plain') === '1';
-  } catch (e) { /* diagnostic flag unavailable: use normal path */ }
-  if (plainDiagnostic) {
-    phraseEl.textContent = phrase;
-    console.log('[ALX DIAGNOSTIC] PLAIN TEXT MODE', sceneId);
-    window.ALX_DIAG?.snapshot?.('T2_AFTER_PLAIN_TEXT');
-    return;
-  }
-
-  await typeText(phraseEl, phrase, signal, sceneId);
-  window.ALX_DIAG?.snapshot?.('T2_AFTER_TYPE_COMPLETE');
+  console.assert(screenContentEl.children.length === 1, '[ALX] PHRASE must contain exactly one child');
+  console.assert(screenContentEl.querySelectorAll('.oracle-phrase').length === 1, '[ALX] PHRASE must contain exactly one .oracle-phrase');
+  window.ALX_DIAG?.snapshot?.('PHRASE_PLAIN_TEXT');
 }
 
 export function renderIdleState(screenContentEl) {
