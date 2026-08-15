@@ -167,6 +167,21 @@ export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneI
   console.log('[ALX TRACE] SCREEN AFTER', screenContentEl.children.length, screenContentEl.innerHTML);
 
   phraseEl.classList.add('in');
+
+  // TEMPORARY FORENSIC A/B ONLY: ?diag=1&plain=1
+  // Keeps the same phrase element and scene lifecycle, but bypasses typeText()
+  // and .ch generation for the isolated Telegram WebView experiment.
+  let plainDiagnostic = false;
+  try {
+    const params = new URLSearchParams(location.search);
+    plainDiagnostic = params.get('diag') === '1' && params.get('plain') === '1';
+  } catch (e) { /* diagnostic flag unavailable: use normal path */ }
+  if (plainDiagnostic) {
+    phraseEl.textContent = phrase;
+    console.log('[ALX DIAGNOSTIC] PLAIN TEXT MODE', sceneId);
+    return;
+  }
+
   await typeText(phraseEl, phrase, signal, sceneId);
 }
 

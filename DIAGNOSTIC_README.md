@@ -1,23 +1,48 @@
-# ALX Oracle — temporary Telegram Mobile diagnostic version
+# ALX Oracle — temporary Telegram Mobile A/B diagnostic build
 
-This is a temporary diagnostic build. It does not contain a bug fix and does not change SceneController, Oracle selection, scene timings, or the typewriter algorithm. The only code changes are a conditional overlay activated by `diag=1` and observation callbacks at existing `TYPE START`, `TYPE COMPLETE`, and `TYPE ABORT` points.
+This build is temporary and is not a bug fix. It preserves the existing scene, timings, Oracle selection, `typeText()` implementation, and architecture. It adds only an overlay, type-operation observation callbacks, and isolated query-parameter experiments.
 
-## GitHub upload
+Upload the contents to a temporary GitHub branch/repository served by GitHub Pages. Do not overwrite production. For every test, use a fresh app launch and enable exactly one mode.
 
-Upload the contents of this directory to a temporary branch or temporary repository. Do not overwrite the production branch until the diagnostic run is complete. GitHub Pages must serve the branch/repository.
+## URLs
 
-## Telegram launch URL
+Normal diagnostic control:
 
-Open the published page in Telegram Mobile with:
+`https://YOUR-PAGES-URL/?debug=1&diag=1`
 
-`https://YOUR-PAGES-URL/?debug=1&nofx=1&diag=1`
+Plain-text test, bypasses `typeText()` and creates no `.ch` only for PHRASE:
 
-The overlay is disabled unless `diag=1` is present. It stays on top of the app and refreshes automatically.
+`https://YOUR-PAGES-URL/?debug=1&diag=1&plain=1`
 
-## Test sequence
+Transition test:
 
-Open the URL in Telegram Mobile. Leave the overlay visible. Start the Oracle once and wait until the visual duplicate appears. Without starting another scene, read or copy the report using `COPY DIAGNOSTICS`. Repeat for runs 1–3 if desired, copying each report separately.
+`https://YOUR-PAGES-URL/?debug=1&diag=1&notransition=1`
 
-The report includes `[ALX RUNTIME]` fields, `[ALX DOM]` counts, `[ALX TYPE]` active operations and IDs, `[ALX SCREEN]` properties, and `[ALX RESULT]` flags. The copy button uses the browser clipboard; if Telegram rejects clipboard access, select the report text manually.
+Screen compositing test:
 
-Remove this diagnostic branch/files after the investigation. This package is not a permanent fix.
+`https://YOUR-PAGES-URL/?debug=1&diag=1&nocomposite=1`
+
+Sweep test:
+
+`https://YOUR-PAGES-URL/?debug=1&diag=1&nosweep=1`
+
+Pseudo-element test:
+
+`https://YOUR-PAGES-URL/?debug=1&diag=1&nopseudo=1`
+
+## Procedure
+
+Run each URL separately on the same iPhone Telegram Mobile WebView. Start the Oracle once. When the phrase appears and the visual result is clear, record `SINGLE` or `DUPLICATE` in the table. Use `COPY DIAGNOSTICS` before starting another scene. Do not combine query flags.
+
+| TEST | RESULT |
+|---|---|
+| NORMAL | SINGLE / DUPLICATE |
+| PLAIN_TEXT | SINGLE / DUPLICATE |
+| NO_TRANSITION | SINGLE / DUPLICATE |
+| NO_COMPOSITE | SINGLE / DUPLICATE |
+| NO_SWEEP | SINGLE / DUPLICATE |
+| NO_PSEUDO | SINGLE / DUPLICATE |
+
+The overlay reports Telegram runtime, DOM counts, typeText operation IDs, screen class/opacity/filter/transform/transition/animation, active diagnostic mode, and clipboard copy status. Linux Chromium output is only a control check and is not valid for the mobile acceptance criteria.
+
+After collecting the table, remove this temporary branch/files. Do not apply a permanent fix from these tests alone.

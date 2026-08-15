@@ -35,6 +35,13 @@
     const content = document.querySelector('#screenContent');
     const active = [...state.typeOperations.values()].filter((op) => op.status === 'ACTIVE');
     return {
+      mode: {
+        plain: params.get('plain') === '1',
+        noTransition: params.get('notransition') === '1',
+        noComposite: params.get('nocomposite') === '1',
+        noSweep: params.get('nosweep') === '1',
+        noPseudo: params.get('nopseudo') === '1',
+      },
       runtime: runtime(),
       dom: {
         oraclePhraseCount: count('.oracle-phrase'),
@@ -133,7 +140,12 @@
 
   const installStyles = () => {
     const style = document.createElement('style');
-    style.textContent = `
+    const rules = [];
+    if (params.get('notransition') === '1') rules.push('.screen, .screen * { transition: none !important; }');
+    if (params.get('nocomposite') === '1') rules.push('.screen { transform: none !important; filter: none !important; will-change: auto !important; backface-visibility: visible !important; -webkit-backface-visibility: visible !important; }');
+    if (params.get('nosweep') === '1') rules.push('.screen.sweep::after { animation: none !important; transform: none !important; }');
+    if (params.get('nopseudo') === '1') rules.push('.screen::before, .screen::after { display: none !important; }');
+    style.textContent = rules.join('\\n') + `
       #alx-diagnostic-panel { position:fixed; z-index:2147483647; left:8px; right:8px; bottom:8px; max-height:48vh; display:flex; flex-direction:column; gap:6px; padding:10px; color:#f6ecd7; background:rgba(8,6,15,.96); border:2px solid #e3bd71; border-radius:12px; font:12px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace; box-shadow:0 0 24px rgba(0,0,0,.8); }
       #alx-diagnostic-panel strong { color:#f2c879; font-size:11px; }
       #alx-diagnostic-panel button { min-height:38px; color:#120d1e; background:#e3bd71; border:0; border-radius:8px; font:700 13px ui-monospace,SFMono-Regular,Menlo,monospace; }
