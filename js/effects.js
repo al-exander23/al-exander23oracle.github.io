@@ -149,6 +149,7 @@ export async function typeText(el, text, signal, sceneId) {
   activeTypingElements.add(el);
   console.log('[ALX TRACE] TYPE START', sceneId, elLabel);
   typeLog('TYPE START', JSON.stringify(text));
+  window.ALX_DIAG?.onTypeStart?.(sceneId, elLabel, text);
 
   try {
     el.replaceChildren();
@@ -195,9 +196,11 @@ export async function typeText(el, text, signal, sceneId) {
     await sleep(180, signal);
     console.log('[ALX TRACE] TYPE COMPLETE', sceneId, elLabel);
     typeLog('TYPE COMPLETE');
+    window.ALX_DIAG?.onTypeComplete?.(sceneId, elLabel);
   } catch (err) {
     console.log('[ALX TRACE] TYPE ABORT', sceneId, elLabel);
     typeLog('TYPE ABORT');
+    window.ALX_DIAG?.onTypeAbort?.(sceneId, elLabel);
     throw err;
   } finally {
     activeTypingElements.delete(el);
