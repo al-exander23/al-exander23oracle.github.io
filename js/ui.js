@@ -159,12 +159,14 @@ export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneI
   console.log('[ALX TRACE] SCREEN BEFORE', screenContentEl.children.length, screenContentEl.innerHTML);
   // --- конец диагностической вставки ---
 
+  window.ALX_DIAG?.snapshot?.('T0_BEFORE_PHRASE');
   const phraseEl = document.createElement('div');
   phraseEl.className = 'oracle-phrase';
   phraseEl.dataset.sceneId = String(sceneId); // пункт 7 ТЗ
   screenContentEl.replaceChildren(phraseEl);
 
   console.log('[ALX TRACE] SCREEN AFTER', screenContentEl.children.length, screenContentEl.innerHTML);
+  window.ALX_DIAG?.snapshot?.('T1_AFTER_REPLACE_CHILDREN');
 
   phraseEl.classList.add('in');
 
@@ -179,10 +181,12 @@ export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneI
   if (plainDiagnostic) {
     phraseEl.textContent = phrase;
     console.log('[ALX DIAGNOSTIC] PLAIN TEXT MODE', sceneId);
+    window.ALX_DIAG?.snapshot?.('T2_AFTER_PLAIN_TEXT');
     return;
   }
 
   await typeText(phraseEl, phrase, signal, sceneId);
+  window.ALX_DIAG?.snapshot?.('T2_AFTER_TYPE_COMPLETE');
 }
 
 export function renderIdleState(screenContentEl) {

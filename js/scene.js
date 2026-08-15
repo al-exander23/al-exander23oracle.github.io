@@ -333,6 +333,7 @@ function forensicSnapshot(sceneId) {
 
 // REVEAL: раскрываем сам микс.
 async function stageReveal(mix, signal, sceneId) {
+  window.ALX_DIAG?.snapshot?.('T3_BEFORE_REVEAL');
   els.screenEl.classList.remove('off');
   els.screenEl.classList.remove('sweep');
   void els.screenEl.offsetWidth;
