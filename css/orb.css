@@ -320,3 +320,31 @@
   transition: opacity .8s cubic-bezier(.25,.1,.25,1) .18s, transform .8s cubic-bezier(.25,.1,.25,1) .18s;
 }
 .mix-desc.in{ opacity: 1; transform: translateY(0); }
+
+/* ======================================================================
+   ALX VISUAL FORENSICS — временный диагностический патч v1.2.5.
+   НЕ оставлять включённым по умолчанию (см. п.8 ТЗ). Активируется только
+   через ?nofx=1 в URL (см. js/app.js) или вручную из консоли:
+   window.ALX_DISABLE_TEXT_EFFECTS() / window.ALX_ENABLE_TEXT_EFFECTS()
+   ====================================================================== */
+html.alx-no-text-effects .oracle-phrase,
+html.alx-no-text-effects .oracle-phrase.in,
+html.alx-no-text-effects .oracle-phrase .ch,
+html.alx-no-text-effects .oracle-phrase .ch.show {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    opacity: 1 !important;
+    mix-blend-mode: normal !important;
+}
+
+html.alx-no-text-effects .oracle-phrase::before,
+html.alx-no-text-effects .oracle-phrase::after,
+html.alx-no-text-effects .oracle-phrase .ch::before,
+html.alx-no-text-effects .oracle-phrase .ch::after {
+    content: none !important;
+    display: none !important;
+}

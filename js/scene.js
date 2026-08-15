@@ -249,11 +249,86 @@ async function stagePhrase(phrase, signal, sceneId) {
   els.screenEl.classList.remove('off');
   await renderOraclePhrase(els.screenContent, phrase, signal, sceneId);
 
+  // диагностика v1.2.5 — обязательно в своём try/catch: снимок ни при
+  // каких условиях не должен обрывать реальную сцену, которую диагностирует
+  try { forensicSnapshot(sceneId); } catch (fxErr) { console.warn('[ALX FORENSICS] snapshot failed:', fxErr); }
+
   const holdMs = Math.max(PHRASE_HOLD_MIN, phrase.length * PHRASE_HOLD_MS_PER_CH);
   await wait(holdMs, signal);
 
   els.screenEl.classList.add('off');
   await wait(T_DIM, signal);
+}
+
+// ---------------------------------------------------------------
+// ALX VISUAL FORENSICS (v1.2.5) — временная диагностика визуального
+// дубля текста. Только читает DOM/computed styles и пишет в консоль,
+// НИЧЕГО не меняет и не влияет на сцену, тайминги или lifecycle.
+// ---------------------------------------------------------------
+function rectToPlainObject(rect) {
+  // не полагаемся на DOMRect.prototype.toJSON() — он есть не везде
+  // (например, отсутствует в некоторых встроенных WebView/тестовых средах)
+  if (!rect) return null;
+  return {
+    x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+    top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left,
+  };
+}
+
+function forensicSnapshot(sceneId) {
+  const el = document.querySelector('.oracle-phrase');
+
+  console.log('[ALX FORENSICS]', {
+    sceneId,
+    text: el ? el.innerText : null,
+    html: el ? el.outerHTML : null,
+    rect: el ? rectToPlainObject(el.getBoundingClientRect()) : null,
+    computed: el ? {
+      display: getComputedStyle(el).display,
+      position: getComputedStyle(el).position,
+      opacity: getComputedStyle(el).opacity,
+      transform: getComputedStyle(el).transform,
+      filter: getComputedStyle(el).filter,
+      textShadow: getComputedStyle(el).textShadow,
+      webkitTextStroke: getComputedStyle(el).webkitTextStroke,
+      animation: getComputedStyle(el).animation,
+      transition: getComputedStyle(el).transition,
+      zIndex: getComputedStyle(el).zIndex,
+    } : null,
+  });
+
+  // родительские элементы — ищем compositing layers (п.5 ТЗ)
+  const chain = [
+    ['.oracle-phrase', el],
+    ['.screen-content', document.querySelector('.screen-content')],
+    ['.screen', document.querySelector('.screen')],
+    ['.orb', document.querySelector('.orb')],
+  ];
+  chain.forEach(([label, node]) => {
+    if (!node) { console.log('[ALX FORENSICS] PARENT', label, '— элемент не найден'); return; }
+    const cs = getComputedStyle(node);
+    console.log('[ALX FORENSICS] PARENT', label, {
+      transform: cs.transform,
+      filter: cs.filter,
+      opacity: cs.opacity,
+      textShadow: cs.textShadow,
+      mixBlendMode: cs.mixBlendMode,
+      isolation: cs.isolation,
+      willChange: cs.willChange,
+      backfaceVisibility: cs.backfaceVisibility,
+      perspective: cs.perspective,
+    });
+  });
+
+  // .ch spans (п.6 ТЗ)
+  const chNodes = document.querySelectorAll('.oracle-phrase .ch');
+  console.log('[ALX FORENSICS] CH COUNT', chNodes.length);
+  console.log('[ALX FORENSICS] TEXT', el ? el.innerText : null);
+  if (el) {
+    const expectedLen = (el.innerText || '').length;
+    console.log('[ALX FORENSICS] CH COUNT MATCHES TEXT LENGTH?', chNodes.length === expectedLen, `(ch=${chNodes.length}, textLen=${expectedLen})`);
+  }
+  console.log('[ALX FORENSICS] .oracle-phrase COUNT (должно быть 1):', document.querySelectorAll('.oracle-phrase').length);
 }
 
 // REVEAL: раскрываем сам микс.

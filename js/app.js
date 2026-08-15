@@ -10,6 +10,27 @@ import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
 import { initScene, requestOracle } from './scene.js';
 
 // ---------------------------------------------------------------
+// ALX VISUAL FORENSICS (v1.2.5) — временный диагностический код.
+// Только включает/выключает CSS-класс, НЕ трогает scene.js/typeText()/
+// SceneController и ничего в JS lifecycle. См. п.8 ТЗ — не оставлять
+// как постоянное поведение, только для диагностики визуального дубля.
+// ---------------------------------------------------------------
+window.ALX_DISABLE_TEXT_EFFECTS = () => {
+  document.documentElement.classList.add('alx-no-text-effects');
+  console.log('[ALX FORENSICS] alx-no-text-effects ВКЛЮЧЁН — все текстовые CSS-эффекты .oracle-phrase отключены');
+};
+window.ALX_ENABLE_TEXT_EFFECTS = () => {
+  document.documentElement.classList.remove('alx-no-text-effects');
+  console.log('[ALX FORENSICS] alx-no-text-effects ВЫКЛЮЧЕН — эффекты вернулись');
+};
+try {
+  const forensicParams = new URLSearchParams(location.search);
+  if (forensicParams.get('nofx') === '1') {
+    window.ALX_DISABLE_TEXT_EFFECTS();
+  }
+} catch (e) { /* URLSearchParams/location недоступны — просто не включаем */ }
+
+// ---------------------------------------------------------------
 // Telegram WebApp bootstrap — любой из этих API может быть недоступен
 // в конкретном клиенте (Android/iOS/Desktop/браузер), и это не ошибка:
 // используем, если есть, иначе просто продолжаем без него.
