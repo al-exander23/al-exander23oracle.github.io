@@ -9,11 +9,6 @@ import { createGlobeRotator, spawnMotes } from './effects.js';
 import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
 import { initScene, requestOracle } from './scene.js';
 
-// Temporary absolute screen/body probe guard. screenprobe.js runs before this module.
-if (window.__ALX_SCREEN_PROBE__) {
-  console.info('[ALX SCREEN PROBE] app bootstrap skipped');
-} else {
-
 // ---------------------------------------------------------------
 // ALX VISUAL FORENSICS (v1.2.5) — временный диагностический код.
 // Только включает/выключает CSS-класс, НЕ трогает scene.js/typeText()/
@@ -202,4 +197,3 @@ initMixes().catch((err) => {
   console.error('[ALX ERROR]', { stage: 'STARTUP', error: err.message, time: new Date().toISOString() });
   showToast('Оракул временно недоступен. Попробуй ещё раз.');
 });
-}
