@@ -137,6 +137,7 @@ export function renderCard(cardEl, mix) {
 }
 
 export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
+  window.ALX_DIAG?.trace?.('RENDER REVEAL', { sceneId, requestId: sceneId, timestamp: Date.now() });
   const nameEl = document.createElement('div');
   nameEl.className = 'mix-name';
   nameEl.dataset.sceneId = String(sceneId);
@@ -154,6 +155,7 @@ export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
 }
 
 export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
+  window.ALX_DIAG?.trace?.('RENDER PHRASE', { sceneId, requestId: sceneId, timestamp: Date.now() });
   // --- ДИАГНОСТИКА v1.2.3 ---
   console.log('[ALX TRACE] RENDER PHRASE', sceneId);
   console.log('[ALX TRACE] SCREEN BEFORE', screenContentEl.children.length, screenContentEl.innerHTML);

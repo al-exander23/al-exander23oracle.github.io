@@ -183,6 +183,7 @@ export async function requestOracle() {
     return;
   }
   console.log('[ALX TRACE] SCENE START', currentSceneId);
+  window.ALX_DIAG?.lifecycle?.('SCENE START', { sceneId: currentSceneId, requestId: currentSceneId, timestamp: Date.now() });
   // --- конец диагностической вставки ---
 
   controller = new AbortController();
@@ -225,9 +226,11 @@ export async function requestOracle() {
     errorLog(state, err);
     showToast('Оракул на секунду отвлёкся — попробуй ещё раз');
   } finally {
+    window.ALX_DIAG?.lifecycle?.('RESET', { sceneId: currentSceneId, requestId: currentSceneId, timestamp: Date.now() });
     log('CLEANUP');
     cleanupScene();
     setState(SCENES.RESET);
+    window.ALX_DIAG?.lifecycle?.('IDLE', { sceneId: currentSceneId, requestId: currentSceneId, timestamp: Date.now() });
     setState(SCENES.IDLE);
     if (debug) log(`Scene duration: ${(performance.now() - sceneStartTs).toFixed(0)}ms`);
   }
@@ -245,6 +248,7 @@ async function stageThinking(signal) {
 
 // CHOOSING / «одна фраза оракула» — печатается один раз, без повторов.
 async function stagePhrase(phrase, signal, sceneId) {
+  window.ALX_DIAG?.lifecycle?.('PHRASE START', { sceneId, requestId: sceneId, timestamp: Date.now() });
   console.log('[ALX TRACE] STAGE PHRASE', sceneId, phrase);
   els.screenEl.classList.remove('off');
   await renderOraclePhrase(els.screenContent, phrase, signal, sceneId);
@@ -333,6 +337,7 @@ function forensicSnapshot(sceneId) {
 
 // REVEAL: раскрываем сам микс.
 async function stageReveal(mix, signal, sceneId) {
+  window.ALX_DIAG?.lifecycle?.('REVEAL', { sceneId, requestId: sceneId, timestamp: Date.now() });
   els.screenEl.classList.remove('off');
   els.screenEl.classList.remove('sweep');
   void els.screenEl.offsetWidth;

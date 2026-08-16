@@ -148,6 +148,7 @@ export async function typeText(el, text, signal, sceneId) {
   }
   activeTypingElements.add(el);
   console.log('[ALX TRACE] TYPE START', sceneId, elLabel);
+  window.ALX_DIAG?.onTypeStart?.(sceneId, elLabel, text);
   typeLog('TYPE START', JSON.stringify(text));
 
   try {
@@ -194,9 +195,11 @@ export async function typeText(el, text, signal, sceneId) {
     }
     await sleep(180, signal);
     console.log('[ALX TRACE] TYPE COMPLETE', sceneId, elLabel);
+    window.ALX_DIAG?.onTypeComplete?.(sceneId, elLabel);
     typeLog('TYPE COMPLETE');
   } catch (err) {
     console.log('[ALX TRACE] TYPE ABORT', sceneId, elLabel);
+    window.ALX_DIAG?.onTypeAbort?.(sceneId, elLabel);
     typeLog('TYPE ABORT');
     throw err;
   } finally {
