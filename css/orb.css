@@ -191,13 +191,12 @@
   z-index: 2;
   opacity: 1;
   transform: scale(1);
-  transition: opacity .42s cubic-bezier(.25,.1,.25,1), transform .42s cubic-bezier(.25,.1,.25,1), filter .42s ease;
+  transition: opacity .42s cubic-bezier(.25,.1,.25,1), transform .42s cubic-bezier(.25,.1,.25,1);
 }
 
 .screen.off{
   opacity: 0;
   transform: scale(0.96);
-  filter: brightness(0.35);
 }
 
 .screen::before{
@@ -253,22 +252,17 @@
   font-size: 13px;
   line-height: 1.45;
   color: var(--gold-soft);
-  text-shadow: 0 0 4px rgba(217,184,120,0.5);
   opacity: 1;
-  transform: translateY(4px);
-  transition: transform .5s cubic-bezier(.25,.1,.25,1);
-  /* было: display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;
-     -webkit-line-clamp в сочетании с посимвольной мутацией DOM (typeText добавляет
-     буквы каждые 30мс) и filter на родителе (.screen.off{filter:brightness()})
-     — известная связка, вызывающая repaint-дублирование текста в WebKit/Chromium
-     WebView. Заменено на обычный блочный layout с ограничением по высоте —
-     тот же визуальный клипп в ~4 строки, без спецрежима multi-line-clamp. */
+  transform: none;
+  transition: none;
+  text-shadow: none;
+  filter: none;
+  animation: none;
   max-height: calc(1.45em * 4);
   overflow: hidden;
   word-break: normal;
   overflow-wrap: normal;
 }
-.oracle-phrase.in{ transform: translateY(0); }
 
 .mix-name{
   font-family: 'Lora', serif;
@@ -280,30 +274,16 @@
   text-decoration: none;
   word-break: normal;
   overflow-wrap: normal;
-  text-shadow:
-    0 0 1px #fff,
-    0 0 3px var(--neon),
-    0 0 6px var(--neon);
+  text-shadow: none;
   margin-bottom: 6px;
-  /* см. комментарий у .oracle-phrase — та же замена -webkit-line-clamp
-     на max-height, тот же класс риска (typeText мутирует по букве) */
   max-height: calc(1.34em * 3);
   overflow: hidden;
-  opacity: 0;
-  transform: translateY(5px);
-  transition: opacity .7s cubic-bezier(.25,.1,.25,1), transform .7s cubic-bezier(.25,.1,.25,1);
+  opacity: 1;
+  transform: none;
+  transition: none;
+  filter: none;
+  animation: none;
 }
-.mix-name.in{ opacity: 1; transform: translateY(0); }
-
-/* общий механизм «печати» букв — используется и для мысли оракула, и для названия микса,
-   поэтому оба появления выглядят как одна и та же логика, а не два разных эффекта */
-.ch{
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(3px);
-  transition: opacity .5s cubic-bezier(.25,.1,.25,1), transform .5s cubic-bezier(.25,.1,.25,1);
-}
-.ch.show{ opacity: 1; transform: translateY(0); }
 
 .mix-desc{
   font-family: 'Inter', sans-serif;
@@ -312,39 +292,50 @@
   line-height: 1.45;
   color: var(--neon-soft);
   text-decoration: none;
-  text-shadow: 0 0 1px #fff, 0 0 2px rgba(255, 219, 163, 0.5), 0 0 5px rgba(255, 219, 163, 0.3);
-  max-height: calc(1.45em * 4); /* см. комментарий у .oracle-phrase */
+  text-shadow: none;
+  max-height: calc(1.45em * 4);
   overflow: hidden;
-  opacity: 0;
-  transform: translateY(5px);
-  transition: opacity .8s cubic-bezier(.25,.1,.25,1) .18s, transform .8s cubic-bezier(.25,.1,.25,1) .18s;
-}
-.mix-desc.in{ opacity: 1; transform: translateY(0); }
-
-/* ======================================================================
-   ALX VISUAL FORENSICS — временный диагностический патч v1.2.5.
-   НЕ оставлять включённым по умолчанию (см. п.8 ТЗ). Активируется только
-   через ?nofx=1 в URL (см. js/app.js) или вручную из консоли:
-   window.ALX_DISABLE_TEXT_EFFECTS() / window.ALX_ENABLE_TEXT_EFFECTS()
-   ====================================================================== */
-html.alx-no-text-effects .oracle-phrase,
-html.alx-no-text-effects .oracle-phrase.in,
-html.alx-no-text-effects .oracle-phrase .ch,
-html.alx-no-text-effects .oracle-phrase .ch.show {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-    filter: none !important;
-    text-shadow: none !important;
-    -webkit-text-stroke: 0 !important;
-    opacity: 1 !important;
-    mix-blend-mode: normal !important;
+  opacity: 1;
+  transform: none;
+  transition: none;
+  filter: none;
+  animation: none;
 }
 
-html.alx-no-text-effects .oracle-phrase::before,
-html.alx-no-text-effects .oracle-phrase::after,
-html.alx-no-text-effects .oracle-phrase .ch::before,
-html.alx-no-text-effects .oracle-phrase .ch::after {
-    content: none !important;
-    display: none !important;
+
+/* Production text path: no animated/composited text layers. */
+.screen {
+  position: relative;
 }
+
+.screen-content {
+  position: relative;
+  z-index: 1;
+}
+
+.oracle-phrase,
+.mix-name,
+.mix-desc {
+  display: block;
+  opacity: 1 !important;
+  visibility: visible !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  text-shadow: none !important;
+  -webkit-line-clamp: unset;
+  -webkit-box: unset;
+  -webkit-box-orient: unset;
+}
+
+.oracle-phrase {
+  max-height: calc(1.45em * 4);
+}
+
+.mix-name,
+.mix-desc {
+  max-height: none;
+}
+

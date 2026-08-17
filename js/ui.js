@@ -2,7 +2,6 @@
 // подбора миксов (это oracle.js) и не лезет в localStorage напрямую
 // (это profile.js) — только берёт готовые данные и показывает их.
 
-import { typeText } from './effects.js';
 import { isFavorite, toggleFavorite, getFavorites, getHistory } from './profile.js';
 import { getMixById } from './mixes.js';
 
@@ -136,46 +135,61 @@ export function renderCard(cardEl, mix) {
   shareBtn.addEventListener('click', () => shareMix(mix));
 }
 
-export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
-  window.ALX_DIAG?.trace?.('RENDER REVEAL', { sceneId, requestId: sceneId, timestamp: Date.now() });
+export function renderOrbText(screenContentEl, mix) {
+  screenContentEl.replaceChildren();
+
   const nameEl = document.createElement('div');
   nameEl.className = 'mix-name';
-  nameEl.dataset.sceneId = String(sceneId);
-  const descEl = document.createElement('div');
-  descEl.className = 'mix-desc';
-  descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
+  nameEl.textContent = mix.name;
+  screenContentEl.appendChild(nameEl);
 
-  // один вход — один контейнер; старое содержимое полностью удаляется,
-  // прежде чем добавится новое (пункт 9 ТЗ — исключает случайное наложение)
-  screenContentEl.replaceChildren(nameEl, descEl);
+  if (mix.recipe?.length) {
+    const descEl = document.createElement('div');
+    descEl.className = 'mix-desc';
+    descEl.textContent = mix.recipe
+      .map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`)
+      .join(' · ');
+    screenContentEl.appendChild(descEl);
+  }
 
-  nameEl.classList.add('in');
-  await typeText(nameEl, mix.name, signal, sceneId);
-  descEl.classList.add('in');
+  console.assert(
+    screenContentEl.querySelectorAll('.mix-name').length === 1,
+    'ALX: expected exactly one mix name',
+  );
+  console.assert(
+    screenContentEl.querySelectorAll('.oracle-phrase').length === 0,
+    'ALX: no oracle phrase may remain during reveal',
+  );
 }
 
-export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
-  window.ALX_DIAG?.trace?.('RENDER PHRASE', { sceneId, requestId: sceneId, timestamp: Date.now() });
-  // --- ДИАГНОСТИКА v1.2.3 ---
-  console.log('[ALX TRACE] RENDER PHRASE', sceneId);
-  console.log('[ALX TRACE] SCREEN BEFORE', screenContentEl.children.length, screenContentEl.innerHTML);
-  // --- конец диагностической вставки ---
+export function renderOraclePhrase(screenContentEl, phrase) {
+  screenContentEl.replaceChildren();
 
-  const phraseEl = document.createElement('div');
-  phraseEl.className = 'oracle-phrase';
-  phraseEl.dataset.sceneId = String(sceneId); // пункт 7 ТЗ
-  screenContentEl.replaceChildren(phraseEl);
+  const el = document.createElement('div');
+  el.className = 'oracle-phrase';
+  el.textContent = phrase;
+  screenContentEl.appendChild(el);
 
-  console.log('[ALX TRACE] SCREEN AFTER', screenContentEl.children.length, screenContentEl.innerHTML);
-
-  phraseEl.classList.add('in');
-  await typeText(phraseEl, phrase, signal, sceneId);
+  console.assert(
+    screenContentEl.querySelectorAll('.oracle-phrase').length === 1,
+    'ALX: expected exactly one oracle phrase',
+  );
 }
 
 export function renderIdleState(screenContentEl) {
-  screenContentEl.innerHTML =
-    '<div class="idle-icon">✦</div>' +
-    '<div class="idle-text">встряхни —<br>узнай микс</div>';
+  screenContentEl.replaceChildren();
+
+  const icon = document.createElement('div');
+  icon.className = 'idle-icon';
+  icon.textContent = '✦';
+
+  const text = document.createElement('div');
+  text.className = 'idle-text';
+  text.append(document.createTextNode('встряхни —'));
+  text.append(document.createElement('br'));
+  text.append(document.createTextNode('узнай микс'));
+
+  screenContentEl.append(icon, text);
 }
 
 export function hideCard(cardEl) {
