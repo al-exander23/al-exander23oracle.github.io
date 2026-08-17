@@ -1,4 +1,4 @@
-// scene.js — SceneController: ЕДИНСТВЕННЫЙ владелец сцены.
+// scene.v2.js — SceneController: ЕДИНСТВЕННЫЙ владелец сцены.
 //
 // app.js больше не знает деталей сценария ("сначала фаза гаснет, потом
 // печатается фраза, потом..."). Он только один раз вызывает initScene()
@@ -16,8 +16,8 @@
 
 import { initMixes, hasMixes } from './mixes.js';
 import { oracleChooseMix } from './oracle.js';
-import { createGlobeRotator, spawnSmoke } from './effects.js';
-import { renderOrbText, renderOraclePhrase, renderIdleState, renderCard, showToast } from './ui.js';
+import { createGlobeRotator, spawnSmoke } from './effects.v2.js';
+import { renderOrbText, renderOraclePhrase, renderIdleState, renderCard, showToast } from './ui.v2.js';
 import { addToHistory } from './profile.js';
 
 export const SCENES = Object.freeze({
@@ -47,7 +47,7 @@ const STAGE_TIMEOUTS = Object.freeze({
 });
 const DEFAULT_STAGE_TIMEOUT = 5000;
 
-// тайминги сцены — синхронизированы с css/orb.css (.screen transition: .42s)
+// тайминги сцены — синхронизированы с css/orb.v2.css (.screen transition: .42s)
 const FADE = 420;
 const T_DIM = FADE + 40;
 const T_LIGHT = FADE + 40;
@@ -158,6 +158,8 @@ export async function requestOracleOnce() {
 
   busy = true;
   const requestId = ++requestSequence;
+  console.log('[ALX REQUEST]', requestSequence);
+  console.log('[ALX SCENE]', requestId);
   currentRequestId = requestId;
 
   controller = new AbortController();

@@ -1,15 +1,19 @@
-// app.js — точка входа. Только: инициализация приложения, подключение
+// app.v2.js — точка входа. Только: инициализация приложения, подключение
 // Telegram, регистрация пользовательских событий и запуск SceneController.
 //
 // Вся детальная последовательность сцены (fade/дым/фраза/reveal/карточка)
 // теперь целиком живёт в scene.js — этот файл её не знает и не должна.
 
 import { initMixes } from './mixes.js';
-import { createGlobeRotator, spawnMotes } from './effects.js';
-import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
-import { initScene, requestOracleOnce } from './scene.js';
+import { createGlobeRotator, spawnMotes } from './effects.v2.js';
+import { renderIdleState, showToast, openSheet, closeSheet } from './ui.v2.js';
+import { initScene, requestOracleOnce } from './scene.v2.js';
 
 // ---------------------------------------------------------------
+// ALX runtime identity — sole module bootstrap.
+window.ALX_BUILD = '2.0.0';
+console.log('[ALX BUILD] 2.0.0');
+
 // Telegram WebApp bootstrap — любой из этих API может быть недоступен
 // в конкретном клиенте (Android/iOS/Desktop/браузер), и это не ошибка:
 // используем, если есть, иначе просто продолжаем без него.
