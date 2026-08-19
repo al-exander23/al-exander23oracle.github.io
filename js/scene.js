@@ -17,7 +17,7 @@
 import { initMixes, hasMixes } from './mixes.js';
 import { oracleChooseMix } from './oracle.js';
 import { createGlobeRotator, spawnSmoke } from './effects.js';
-import { renderOrbText, renderOraclePhrase, renderCard, showToast } from './ui.js';
+import { prepareOrbText, typeOrbText, prepareOraclePhrase, typeOraclePhrase, renderCard, showToast } from './ui.js';
 import { addToHistory } from './profile.js';
 
 export const SCENES = Object.freeze({
@@ -246,11 +246,12 @@ async function stageThinking(signal) {
 // CHOOSING / «одна фраза оракула» — печатается один раз, без повторов.
 async function stagePhrase(phrase, signal, sceneId) {
   console.log('[ALX TRACE] STAGE PHRASE', sceneId, phrase);
-  // Swap the text while the old screen is fully hidden, then reveal it.
+  // Prepare while hidden, then reveal and type visibly to keep the phrase smooth.
   els.screenEl.classList.add('off');
-  await renderOraclePhrase(els.screenContent, phrase, signal, sceneId);
+  const phraseEl = prepareOraclePhrase(els.screenContent, phrase, sceneId);
   void els.screenEl.offsetWidth;
   els.screenEl.classList.remove('off');
+  await typeOraclePhrase(phraseEl, phrase, signal, sceneId);
 
   // диагностика v1.2.5 — обязательно в своём try/catch: снимок ни при
   // каких условиях не должен обрывать реальную сцену, которую диагностирует
@@ -336,14 +337,14 @@ function forensicSnapshot(sceneId) {
 
 // REVEAL: раскрываем сам микс.
 async function stageReveal(mix, signal, sceneId) {
-  // Swap phrase to mix while the old screen is fully hidden.
+  // Prepare while hidden, then reveal and type the mix name visibly.
   els.screenEl.classList.add('off');
-  await wait(T_LIGHT, signal);
-  await renderOrbText(els.screenContent, mix, signal, sceneId);
+  const { nameEl, descEl } = prepareOrbText(els.screenContent, mix, sceneId);
   els.screenEl.classList.remove('sweep');
   void els.screenEl.offsetWidth;
   els.screenEl.classList.remove('off');
   els.screenEl.classList.add('sweep');
+  await typeOrbText(nameEl, descEl, mix.name, signal, sceneId);
 }
 
 // RESULT: карточка. Синхронный рендер, без сети и без таймеров.

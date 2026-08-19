@@ -136,38 +136,44 @@ export function renderCard(cardEl, mix) {
   shareBtn.addEventListener('click', () => shareMix(mix));
 }
 
-export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
+export function prepareOrbText(screenContentEl, mix, sceneId) {
   const nameEl = document.createElement('div');
   nameEl.className = 'mix-name';
   nameEl.dataset.sceneId = String(sceneId);
   const descEl = document.createElement('div');
   descEl.className = 'mix-desc';
   descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
-
-  // один вход — один контейнер; старое содержимое полностью удаляется,
-  // прежде чем добавится новое (пункт 9 ТЗ — исключает случайное наложение)
   screenContentEl.replaceChildren(nameEl, descEl);
+  return { nameEl, descEl };
+}
 
+export async function typeOrbText(nameEl, descEl, mixName, signal, sceneId) {
   nameEl.classList.add('in');
-  await typeText(nameEl, mix.name, signal, sceneId);
+  await typeText(nameEl, mixName, signal, sceneId);
   descEl.classList.add('in');
 }
 
-export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
-  // --- ДИАГНОСТИКА v1.2.3 ---
-  console.log('[ALX TRACE] RENDER PHRASE', sceneId);
-  console.log('[ALX TRACE] SCREEN BEFORE', screenContentEl.children.length, screenContentEl.innerHTML);
-  // --- конец диагностической вставки ---
-
+export function prepareOraclePhrase(screenContentEl, phrase, sceneId) {
   const phraseEl = document.createElement('div');
   phraseEl.className = 'oracle-phrase';
-  phraseEl.dataset.sceneId = String(sceneId); // пункт 7 ТЗ
+  phraseEl.dataset.sceneId = String(sceneId);
   screenContentEl.replaceChildren(phraseEl);
+  return phraseEl;
+}
 
-  console.log('[ALX TRACE] SCREEN AFTER', screenContentEl.children.length, screenContentEl.innerHTML);
-
+export async function typeOraclePhrase(phraseEl, phrase, signal, sceneId) {
   phraseEl.classList.add('in');
   await typeText(phraseEl, phrase, signal, sceneId);
+}
+
+export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
+  const { nameEl, descEl } = prepareOrbText(screenContentEl, mix, sceneId);
+  await typeOrbText(nameEl, descEl, mix.name, signal, sceneId);
+}
+
+export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
+  const phraseEl = prepareOraclePhrase(screenContentEl, phrase, sceneId);
+  await typeOraclePhrase(phraseEl, phrase, signal, sceneId);
 }
 
 export function renderIdleState(screenContentEl) {
