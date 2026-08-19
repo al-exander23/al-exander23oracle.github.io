@@ -260,6 +260,14 @@ html, body{
     inset 0 20px 40px rgba(255,255,255,0.06);
 }
 
+/* Build 3.2 visual lifecycle: animation belongs only to the orb itself. */
+.orb-wrap.is-spinning .orb {
+  animation: orb-spin 1s linear infinite;
+}
+.screen.is-spinning {
+  /* state marker only; no text animation or transform */
+}
+
 /* контейнер поверхности глобуса — материки и меридианы добавляются и позиционируются через JS */
 .orb-surface{
   position:absolute; inset:0;
@@ -482,6 +490,11 @@ html, body{
 @keyframes levitate{
   0%,100%{ transform: translateY(0); }
   50%{ transform: translateY(-7px); }
+}
+
+@keyframes orb-spin{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
 }
 
 @keyframes spin{

@@ -1,5 +1,5 @@
-// app.v3.1.js — minimal runtime recovery with observable PHRASE/REVEAL frames.
-// One click entry, one running guard, plain DOM rendering, no scene/effects layer.
+// app.v3.2.js — minimal runtime with orb-only visual spin and observable PHRASE/REVEAL frames.
+// One click entry, one running guard, plain DOM rendering, orb-only visual spin.
 
 import { initMixes, getMixById } from './mixes.js';
 import { oracleChooseMix } from './oracle.js';
@@ -11,8 +11,8 @@ import {
   addToHistory,
 } from './profile.js';
 
-window.ALX_BUILD = '3.1.0';
-console.log('[ALX BUILD] 3.1.0');
+window.ALX_BUILD = '3.2.0';
+console.log('[ALX BUILD] 3.2.0');
 
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) {
@@ -25,6 +25,7 @@ if (tg) {
 
 const orbWrap = document.getElementById('orbWrap');
 const screenContent = document.getElementById('screenContent');
+const screenEl = document.getElementById('screen');
 const counterEl = document.getElementById('counter');
 const lockBtn = document.getElementById('lockBtn');
 const mixCardEl = document.getElementById('mixCard');
@@ -203,10 +204,13 @@ function closeSheet() {
 async function runOracle() {
   if (runningState.value) return;
   runningState.value = true;
+  orbWrap.classList.add('is-spinning');
+  screenEl.classList.add('is-spinning');
   try {
     await initMixes();
     const result = oracleChooseMix();
     if (!result.mix) return;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     renderPhrase(result.phrase);
     await new Promise((resolve) => requestAnimationFrame(resolve));
     renderReveal(result.mix);
@@ -217,6 +221,9 @@ async function runOracle() {
     counterEl.textContent = `№ ${String(count).padStart(3, '0')}`;
     lockBtn.style.display = 'inline-block';
   } finally {
+    orbWrap.classList.remove('is-spinning');
+    screenEl.classList.remove('is-spinning');
+    renderIdle();
     runningState.value = false;
   }
 }
