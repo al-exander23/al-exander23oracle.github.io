@@ -140,7 +140,7 @@ function sleep(ms, signal) {
   });
 }
 
-export async function typeText(el, text, signal, sceneId) {
+export async function typeText(el, text, signal, sceneId, intervalMs = 30) {
   const elLabel = (el && (el.className || el.tagName)) || 'unknown';
   if (activeTypingElements.has(el)) {
     console.warn('[ALX] typeText() вызван повторно для уже печатающегося элемента — игнорируется');
@@ -190,7 +190,7 @@ export async function typeText(el, text, signal, sceneId) {
     for (const span of spans) {
       if (signal && signal.aborted) throw new DOMException('Отменено', 'AbortError');
       span.classList.add('show');
-      await sleep(30, signal);
+      await sleep(intervalMs, signal);
     }
     await sleep(180, signal);
     console.log('[ALX TRACE] TYPE COMPLETE', sceneId, elLabel);

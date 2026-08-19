@@ -163,7 +163,7 @@ export function prepareOraclePhrase(screenContentEl, phrase, sceneId) {
 
 export async function typeOraclePhrase(phraseEl, phrase, signal, sceneId) {
   phraseEl.classList.add('in');
-  await typeText(phraseEl, phrase, signal, sceneId);
+  await typeText(phraseEl, phrase, signal, sceneId, 36);
 }
 
 export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
