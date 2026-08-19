@@ -136,45 +136,76 @@ export function renderCard(cardEl, mix) {
   shareBtn.addEventListener('click', () => shareMix(mix));
 }
 
-export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
-  const nameEl = document.createElement('div');
-  nameEl.className = 'mix-name';
-  nameEl.dataset.sceneId = String(sceneId);
-  const descEl = document.createElement('div');
-  descEl.className = 'mix-desc';
-  descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
+let screenSlots = null;
 
-  // один вход — один контейнер; старое содержимое полностью удаляется,
-  // прежде чем добавится новое (пункт 9 ТЗ — исключает случайное наложение)
-  screenContentEl.replaceChildren(nameEl, descEl);
+function ensureScreenSlots(screenContentEl) {
+  if (screenSlots) return screenSlots;
 
-  nameEl.classList.add('in');
-  await typeText(nameEl, mix.name, signal, sceneId);
-  descEl.classList.add('in');
+  const idleIcon = document.createElement('div');
+  idleIcon.className = 'idle-icon';
+  idleIcon.textContent = '✦';
+
+  const idleText = document.createElement('div');
+  idleText.className = 'idle-text';
+  idleText.append(document.createTextNode('встряхни —'), document.createElement('br'), document.createTextNode('узнай микс'));
+
+  const phrase = document.createElement('div');
+  phrase.className = 'oracle-phrase';
+  phrase.style.display = 'none';
+
+  const name = document.createElement('div');
+  name.className = 'mix-name';
+  name.style.display = 'none';
+
+  const desc = document.createElement('div');
+  desc.className = 'mix-desc';
+  desc.style.display = 'none';
+
+  screenContentEl.replaceChildren(idleIcon, idleText, phrase, name, desc);
+  screenSlots = { idleIcon, idleText, phrase, name, desc };
+  return screenSlots;
 }
 
-let persistentOraclePhrase = null;
+function hideScreenSlots(slots) {
+  slots.idleIcon.style.display = 'none';
+  slots.idleText.style.display = 'none';
+  slots.phrase.style.display = 'none';
+  slots.name.style.display = 'none';
+  slots.desc.style.display = 'none';
+  slots.phrase.classList.remove('in');
+  slots.name.classList.remove('in');
+  slots.desc.classList.remove('in');
+}
+
+export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
+  const slots = ensureScreenSlots(screenContentEl);
+  hideScreenSlots(slots);
+
+  slots.name.dataset.sceneId = String(sceneId);
+  slots.desc.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
+  slots.name.style.display = 'block';
+  slots.desc.style.display = 'block';
+  slots.name.classList.add('in');
+  await typeText(slots.name, mix.name, signal, sceneId);
+  slots.desc.classList.add('in');
+}
 
 export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
-  // Forensic experiment only: preserve one phrase element and mutate only
-  // its textContent/visibility. The original SceneController, timings,
-  // Thinking, orb animation, Reveal, Result and Reset remain unchanged.
-  if (!persistentOraclePhrase) {
-    persistentOraclePhrase = document.createElement('div');
-    persistentOraclePhrase.className = 'oracle-phrase';
-  }
+  const slots = ensureScreenSlots(screenContentEl);
+  hideScreenSlots(slots);
 
-  persistentOraclePhrase.dataset.sceneId = String(sceneId);
-  persistentOraclePhrase.textContent = phrase;
-  persistentOraclePhrase.style.visibility = 'visible';
-  persistentOraclePhrase.classList.add('in');
-  screenContentEl.replaceChildren(persistentOraclePhrase);
+  slots.phrase.dataset.sceneId = String(sceneId);
+  slots.phrase.textContent = phrase;
+  slots.phrase.style.visibility = 'visible';
+  slots.phrase.style.display = 'block';
+  slots.phrase.classList.add('in');
 }
 
 export function renderIdleState(screenContentEl) {
-  screenContentEl.innerHTML =
-    '<div class="idle-icon">✦</div>' +
-    '<div class="idle-text">встряхни —<br>узнай микс</div>';
+  const slots = ensureScreenSlots(screenContentEl);
+  hideScreenSlots(slots);
+  slots.idleIcon.style.display = 'block';
+  slots.idleText.style.display = 'block';
 }
 
 export function hideCard(cardEl) {
