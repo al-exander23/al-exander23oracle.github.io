@@ -246,8 +246,11 @@ async function stageThinking(signal) {
 // CHOOSING / «одна фраза оракула» — печатается один раз, без повторов.
 async function stagePhrase(phrase, signal, sceneId) {
   console.log('[ALX TRACE] STAGE PHRASE', sceneId, phrase);
-  els.screenEl.classList.remove('off');
+  // Swap the text while the old screen is fully hidden, then reveal it.
+  els.screenEl.classList.add('off');
   await renderOraclePhrase(els.screenContent, phrase, signal, sceneId);
+  void els.screenEl.offsetWidth;
+  els.screenEl.classList.remove('off');
 
   // диагностика v1.2.5 — обязательно в своём try/catch: снимок ни при
   // каких условиях не должен обрывать реальную сцену, которую диагностирует
@@ -333,13 +336,14 @@ function forensicSnapshot(sceneId) {
 
 // REVEAL: раскрываем сам микс.
 async function stageReveal(mix, signal, sceneId) {
-  els.screenEl.classList.remove('off');
-  els.screenEl.classList.remove('sweep');
-  void els.screenEl.offsetWidth;
-  els.screenEl.classList.add('sweep');
-
+  // Swap phrase to mix while the old screen is fully hidden.
+  els.screenEl.classList.add('off');
   await wait(T_LIGHT, signal);
   await renderOrbText(els.screenContent, mix, signal, sceneId);
+  els.screenEl.classList.remove('sweep');
+  void els.screenEl.offsetWidth;
+  els.screenEl.classList.remove('off');
+  els.screenEl.classList.add('sweep');
 }
 
 // RESULT: карточка. Синхронный рендер, без сети и без таймеров.
