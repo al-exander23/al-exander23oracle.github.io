@@ -51,8 +51,8 @@ const DEFAULT_STAGE_TIMEOUT = 5000;
 const FADE = 420;
 const T_DIM = FADE + 40;
 const T_LIGHT = FADE + 40;
-const PHRASE_HOLD_MIN = 520;
-const PHRASE_HOLD_MS_PER_CH = 11;
+const PHRASE_HOLD_MIN = 900;
+const PHRASE_HOLD_MS_PER_CH = 14;
 const T_SETTLE = 600;
 
 // -------------------------------------------------------------------
