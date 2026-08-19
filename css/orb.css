@@ -175,7 +175,11 @@
 }
 
 .screen{
-  position: relative;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -91px;
+  margin-top: -91px;
   width: 182px; height: 182px;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 38%, #16112a 0%, var(--screen-bg) 78%);

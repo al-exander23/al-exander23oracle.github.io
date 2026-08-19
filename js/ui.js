@@ -136,76 +136,44 @@ export function renderCard(cardEl, mix) {
   shareBtn.addEventListener('click', () => shareMix(mix));
 }
 
-let screenSlots = null;
-
-function ensureScreenSlots(screenContentEl) {
-  if (screenSlots) return screenSlots;
-
-  const idleIcon = document.createElement('div');
-  idleIcon.className = 'idle-icon';
-  idleIcon.textContent = '✦';
-
-  const idleText = document.createElement('div');
-  idleText.className = 'idle-text';
-  idleText.append(document.createTextNode('встряхни —'), document.createElement('br'), document.createTextNode('узнай микс'));
-
-  const phrase = document.createElement('div');
-  phrase.className = 'oracle-phrase';
-  phrase.style.display = 'none';
-
-  const name = document.createElement('div');
-  name.className = 'mix-name';
-  name.style.display = 'none';
-
-  const desc = document.createElement('div');
-  desc.className = 'mix-desc';
-  desc.style.display = 'none';
-
-  screenContentEl.replaceChildren(idleIcon, idleText, phrase, name, desc);
-  screenSlots = { idleIcon, idleText, phrase, name, desc };
-  return screenSlots;
-}
-
-function hideScreenSlots(slots) {
-  slots.idleIcon.style.display = 'none';
-  slots.idleText.style.display = 'none';
-  slots.phrase.style.display = 'none';
-  slots.name.style.display = 'none';
-  slots.desc.style.display = 'none';
-  slots.phrase.classList.remove('in');
-  slots.name.classList.remove('in');
-  slots.desc.classList.remove('in');
-}
-
 export async function renderOrbText(screenContentEl, mix, signal, sceneId) {
-  const slots = ensureScreenSlots(screenContentEl);
-  hideScreenSlots(slots);
+  const nameEl = document.createElement('div');
+  nameEl.className = 'mix-name';
+  nameEl.dataset.sceneId = String(sceneId);
+  const descEl = document.createElement('div');
+  descEl.className = 'mix-desc';
+  descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
 
-  slots.name.dataset.sceneId = String(sceneId);
-  slots.desc.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
-  slots.name.style.display = 'block';
-  slots.desc.style.display = 'block';
-  slots.name.classList.add('in');
-  await typeText(slots.name, mix.name, signal, sceneId);
-  slots.desc.classList.add('in');
+  // один вход — один контейнер; старое содержимое полностью удаляется,
+  // прежде чем добавится новое (пункт 9 ТЗ — исключает случайное наложение)
+  screenContentEl.replaceChildren(nameEl, descEl);
+
+  nameEl.classList.add('in');
+  await typeText(nameEl, mix.name, signal, sceneId);
+  descEl.classList.add('in');
 }
 
 export async function renderOraclePhrase(screenContentEl, phrase, signal, sceneId) {
-  const slots = ensureScreenSlots(screenContentEl);
-  hideScreenSlots(slots);
+  // --- ДИАГНОСТИКА v1.2.3 ---
+  console.log('[ALX TRACE] RENDER PHRASE', sceneId);
+  console.log('[ALX TRACE] SCREEN BEFORE', screenContentEl.children.length, screenContentEl.innerHTML);
+  // --- конец диагностической вставки ---
 
-  slots.phrase.dataset.sceneId = String(sceneId);
-  slots.phrase.textContent = phrase;
-  slots.phrase.style.visibility = 'visible';
-  slots.phrase.style.display = 'block';
-  slots.phrase.classList.add('in');
+  const phraseEl = document.createElement('div');
+  phraseEl.className = 'oracle-phrase';
+  phraseEl.dataset.sceneId = String(sceneId); // пункт 7 ТЗ
+  screenContentEl.replaceChildren(phraseEl);
+
+  console.log('[ALX TRACE] SCREEN AFTER', screenContentEl.children.length, screenContentEl.innerHTML);
+
+  phraseEl.classList.add('in');
+  await typeText(phraseEl, phrase, signal, sceneId);
 }
 
 export function renderIdleState(screenContentEl) {
-  const slots = ensureScreenSlots(screenContentEl);
-  hideScreenSlots(slots);
-  slots.idleIcon.style.display = 'block';
-  slots.idleText.style.display = 'block';
+  screenContentEl.innerHTML =
+    '<div class="idle-icon">✦</div>' +
+    '<div class="idle-text">встряхни —<br>узнай микс</div>';
 }
 
 export function hideCard(cardEl) {
