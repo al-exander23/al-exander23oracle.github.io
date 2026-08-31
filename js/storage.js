@@ -1,54 +1,94 @@
-// storage.js — тонкая безопасная обёртка над localStorage.
-// Ничего не знает о профиле/избранном/истории — просто хранит JSON по ключу.
-// Если localStorage недоступен (приватный режим, отключены cookies и т.п.),
-// всё продолжает работать через обычный объект в памяти — приложение не падает.
+// storage.js — локальное хранилище данных для Истории и Избранного.
+// Изолированный слой данных (Data Layer), не зависящий от DOM.
 
-const memoryFallback = {};
-let storageAvailable = true;
+const HISTORY_KEY = 'alx_oracle_history';
+const FAVORITES_KEY = 'alx_oracle_favorites';
+const HISTORY_LIMIT = 30; // Максимальное количество хранимых миксов в истории
 
-try {
-  const testKey = '__alx_oracle_test__';
-  window.localStorage.setItem(testKey, '1');
-  window.localStorage.removeItem(testKey);
-} catch (e) {
-  storageAvailable = false;
-}
-
-export function getItem(key, fallback = null) {
+// Безопасное чтение из localStorage (защита от ошибок парсинга и квот)
+function readStorage(key) {
   try {
-    if (!storageAvailable) return memoryFallback[key] ?? fallback;
-    const raw = window.localStorage.getItem(key);
-    if (raw === null) return fallback;
-    return JSON.parse(raw);
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : [];
   } catch (e) {
-    return fallback;
+    console.error(`[ALX STORAGE] Ошибка чтения ключа ${key}:`, e);
+    return [];
   }
 }
 
-export function setItem(key, value) {
+// Безопасная запись в localStorage
+function writeStorage(key, data) {
   try {
-    if (!storageAvailable) {
-      memoryFallback[key] = value;
-      return true;
-    }
-    window.localStorage.setItem(key, JSON.stringify(value));
-    return true;
+    localStorage.setItem(key, JSON.stringify(data));
   } catch (e) {
-    return false;
+    console.error(`[ALX STORAGE] Ошибка записи ключа ${key}:`, e);
   }
 }
 
-export function removeItem(key) {
-  try {
-    if (!storageAvailable) {
-      delete memoryFallback[key];
-      return true;
-    }
-    window.localStorage.removeItem(key);
-    return true;
-  } catch (e) {
-    return false;
-  }
+// ==========================================
+// ИСТОРИЯ
+// ==========================================
+
+export function getHistory() {
+  return readStorage(HISTORY_KEY);
 }
 
-export const isStorageAvailable = () => storageAvailable;
+export function saveToHistory(mix) {
+  if (!mix || !mix.id) return;
+
+  const history = getHistory();
+  
+  // Создаем копию объекта микса и добавляем временную метку
+  const record = {
+    ...mix,
+    savedAt: Date.now()
+  };
+
+  // Добавляем новый микс в начало списка
+  history.unshift(record);
+
+  // Обрезаем массив до установленного лимита
+  if (history.length > HISTORY_LIMIT) {
+    history.length = HISTORY_LIMIT;
+  }
+
+  writeStorage(HISTORY_KEY, history);
+}
+
+// ==========================================
+// ИЗБРАННОЕ
+// ==========================================
+
+export function getFavorites() {
+  return readStorage(FAVORITES_KEY);
+}
+
+export function isFavorite(mixId) {
+  const favs = getFavorites();
+  return favs.some(f => f.id === mixId);
+}
+
+// Возвращает boolean: true, если добавлено в избранное, false - если удалено
+export function toggleFavorite(mix) {
+  if (!mix || !mix.id) return false;
+
+  const favs = getFavorites();
+  const existsIndex = favs.findIndex(f => f.id === mix.id);
+  let isNowFavorite = false;
+
+  if (existsIndex >= 0) {
+    // Если уже в избранном — удаляем
+    favs.splice(existsIndex, 1);
+    isNowFavorite = false;
+  } else {
+    // Если нет — добавляем
+    favs.unshift({
+      ...mix,
+      favoritedAt: Date.now()
+    });
+    isNowFavorite = true;
+  }
+
+  writeStorage(FAVORITES_KEY, favs);
+  return isNowFavorite;
+}
