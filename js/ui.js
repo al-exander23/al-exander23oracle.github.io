@@ -3,7 +3,7 @@
 // (это profile.js) — только берёт готовые данные и показывает их.
 
 import { typeText } from './effects.js';
-import { isFavorite, toggleFavorite, getFavorites, getHistory } from './profile.js';
+import { isFavorite, toggleFavorite, getFavorites, getHistory, isDisliked, toggleDislike, resetTaste } from './profile.js';
 import { getMixById } from './mixes.js';
 
 const STAT_FIELDS = [
@@ -76,18 +76,32 @@ function buildRatingLine(mix) {
 // обработчики уходят вместе со старыми узлами — без утечек.
 export function renderCard(cardEl, mix) {
   const fav = isFavorite(mix.id);
+  const dis = isDisliked(mix.id);
 
   const head = document.createElement('div');
   head.className = 'mix-card-head';
   const title = document.createElement('div');
   title.className = 'mix-card-title';
   title.textContent = mix.name;
+
+  const actionsWrap = document.createElement('div');
+  actionsWrap.style.display = 'flex';
+  actionsWrap.style.gap = '8px';
+
+  const disBtn = document.createElement('button');
+  disBtn.className = 'fav-btn' + (dis ? ' active' : '');
+  disBtn.setAttribute('aria-label', 'Не для меня');
+  disBtn.textContent = '👎';
+
   const favBtn = document.createElement('button');
   favBtn.className = 'fav-btn' + (fav ? ' active' : '');
   favBtn.setAttribute('aria-label', 'В избранное');
   favBtn.textContent = fav ? '♥' : '♡';
+
+  actionsWrap.appendChild(disBtn);
+  actionsWrap.appendChild(favBtn);
   head.appendChild(title);
-  head.appendChild(favBtn);
+  head.appendChild(actionsWrap);
 
   const desc = document.createElement('div');
   desc.className = 'mix-card-desc';
@@ -130,7 +144,21 @@ export function renderCard(cardEl, mix) {
     favBtn.classList.remove('pop');
     void favBtn.offsetWidth;
     favBtn.classList.add('pop');
+    if (nowFav) disBtn.classList.remove('active');
     showToast(nowFav ? 'Добавлено в избранное' : 'Убрано из избранного');
+  });
+
+  disBtn.addEventListener('click', () => {
+    const nowDis = toggleDislike(mix.id);
+    disBtn.classList.toggle('active', nowDis);
+    disBtn.classList.remove('pop');
+    void disBtn.offsetWidth;
+    disBtn.classList.add('pop');
+    if (nowDis) {
+      favBtn.classList.remove('active');
+      favBtn.textContent = '♡';
+    }
+    showToast(nowDis ? 'Больше не предлагаем' : 'Снята отметка');
   });
 
   shareBtn.addEventListener('click', () => shareMix(mix));
@@ -240,7 +268,21 @@ export function openSheet(kind) {
     ? getFavorites()
     : [...new Set(getHistory().map((h) => h.id))];
 
-  titleEl.firstChild.textContent = kind === 'favorites' ? 'Избранные миксы' : 'История';
+ titleEl.firstChild.textContent = kind === 'favorites' ? 'Избранные миксы' : 'История';
+
+  let resetBtn = document.getElementById('alxResetTasteBtn');
+  if (!resetBtn) {
+    resetBtn = document.createElement('button');
+    resetBtn.id = 'alxResetTasteBtn';
+    resetBtn.className = 'sheet-close';
+    resetBtn.style.marginRight = '12px';
+    resetBtn.textContent = 'Сбросить вкус';
+    resetBtn.onclick = () => {
+      resetTaste();
+      showToast('Вкус сброшен');
+    };
+    titleEl.insertBefore(resetBtn, document.getElementById('sheetClose'));
+  }
 
   if (!ids.length) {
     listEl.innerHTML = `<div class="sheet-empty">${
