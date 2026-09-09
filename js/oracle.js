@@ -1,19 +1,9 @@
 // oracle.js — «мозг» приложения.
-//
-// Сюда сознательно вынесена вся логика подбора микса и подбора фразы
-// оракула, отдельно от UI и эффектов. Сейчас внутри — взвешенная
-// случайность без повторов подряд, НО сигнатура oracleChooseMix()
-// уже спроектирована так, чтобы со временем принять контекст
-// (любимые вкусы, историю, настроение, время суток, сезон, погоду)
-// без изменения способа, которым её вызывает остальной код.
+// Интегрирована персонализация с безопасным откатом к случайному выбору.
 
 import { getMixes } from './mixes.js';
+import { selectWeightedMix } from './personalization.js';
 
-// ---------------------------------------------------------------
-// Personality Engine — фразы оракула. 110 уникальных сообщений,
-// разбитых на смысловые категории. Подряд одна и та же фраза
-// не повторяется (см. pickPhrase).
-// ---------------------------------------------------------------
 export const oracleMessages = {
   mysterious: [
     'Дым уже знает ответ...',
@@ -139,8 +129,6 @@ export const oracleMessages = {
   ],
 };
 
-// веса категорий — «редкие» и «эпические» должны выпадать заметно реже,
-// это и есть тот самый элемент «предсказания», а не ровного рандома
 const CATEGORY_WEIGHTS = {
   mysterious: 24,
   kind: 20,
@@ -169,7 +157,6 @@ function pickPhrase() {
   let pool = oracleMessages[category];
   let phrase = pool[Math.floor(Math.random() * pool.length)];
 
-  // не повторяем ровно ту же фразу два раза подряд
   let guard = 0;
   while (phrase === lastPhrase && guard < 5) {
     category = weightedCategory();
@@ -191,31 +178,25 @@ function pickMix(mixes) {
   return mixes[idx];
 }
 
-/**
- * Главная точка входа Oracle Engine.
- *
- * @param {Object} context — задел на будущее. Сейчас не используется
- *   для отбора, но уже принимается и будет использован без изменения
- *   сигнатуры функции, когда появятся:
- *   - context.favoriteIds   — учитывать любимые вкусы
- *   - context.history       — не повторять недавнее чаще нужного
- *   - context.mood          — подбор по настроению
- *   - context.timeOfDay     — утро/день/вечер/ночь
- *   - context.season        — зима/весна/лето/осень
- *   - context.weather       — данные погоды
- * @returns {{ mix: Object, phrase: string, phraseCategory: string }}
- */
 export function oracleChooseMix(context = {}) {
   const mixes = getMixes();
   if (!mixes.length) {
     return { mix: null, phrase: 'Оракул пока молчит...', phraseCategory: 'mysterious' };
   }
 
-  // ЗАДЕЛ: здесь в будущих версиях появится фильтрация/переранжирование
-  // mixes на основе context, прежде чем передать их в pickMix().
-  // Например: poolByMood(mixes, context.mood) или boostFavorites(mixes, context.favoriteIds).
-  const mix = pickMix(mixes);
-  const { phrase, category } = pickPhrase();
+  let mix = null;
+  try {
+    mix = selectWeightedMix(mixes, lastMixId);
+  } catch (e) {
+    // Fallback if scoring fails
+  }
 
+  if (!mix) {
+    mix = pickMix(mixes);
+  } else {
+    lastMixId = mix.id; // Update guard
+  }
+
+  const { phrase, category } = pickPhrase();
   return { mix, phrase, phraseCategory: category };
 }

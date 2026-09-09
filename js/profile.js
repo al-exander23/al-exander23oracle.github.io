@@ -1,15 +1,14 @@
 // profile.js — всё, что связано с локальным профилем человека:
-// избранные миксы, история показов, простые настройки.
-// Осознанно НЕ хранит здесь ничего облачного — это задел на будущее
-// (когда появится Telegram-аккаунт/бэкенд, эти функции просто поменяют
-// реализацию внутри, а вызывающий код останется прежним).
+// избранные миксы, история показов, простые настройки и дизлайки.
+// Taste Profile вычисляется динамически из этих данных.
 
-import { getItem, setItem } from './storage.js';
+import { getItem, setItem, removeItem } from './storage.js';
 
 const KEYS = {
   favorites: 'alx_oracle_favorites', // array of mix ids
   history: 'alx_oracle_history',     // array of { id, ts }
   settings: 'alx_oracle_settings',   // { hapticsEnabled, ... }
+  dislikes: 'alx_oracle_dislikes'    // array of mix ids
 };
 
 const HISTORY_LIMIT = 50;
@@ -23,16 +22,61 @@ export function isFavorite(mixId) {
   return getFavorites().includes(mixId);
 }
 
+export function removeFavorite(mixId) {
+  const favs = getFavorites();
+  const idx = favs.indexOf(mixId);
+  if (idx !== -1) {
+    favs.splice(idx, 1);
+    setItem(KEYS.favorites, favs);
+  }
+}
+
 export function toggleFavorite(mixId) {
   const favs = getFavorites();
   const idx = favs.indexOf(mixId);
+  let isNowFavorite = false;
   if (idx === -1) {
     favs.push(mixId);
+    isNowFavorite = true;
+    removeDislike(mixId); // Mutual exclusion: убираем из дизлайков
   } else {
     favs.splice(idx, 1);
   }
   setItem(KEYS.favorites, favs);
-  return favs.includes(mixId);
+  return isNowFavorite;
+}
+
+// ---------- дизлайки ----------
+export function getDislikes() {
+  return getItem(KEYS.dislikes, []);
+}
+
+export function isDisliked(mixId) {
+  return getDislikes().includes(mixId);
+}
+
+export function removeDislike(mixId) {
+  const dis = getDislikes();
+  const idx = dis.indexOf(mixId);
+  if (idx !== -1) {
+    dis.splice(idx, 1);
+    setItem(KEYS.dislikes, dis);
+  }
+}
+
+export function toggleDislike(mixId) {
+  const dis = getDislikes();
+  const idx = dis.indexOf(mixId);
+  let isNowDisliked = false;
+  if (idx === -1) {
+    dis.push(mixId);
+    isNowDisliked = true;
+    removeFavorite(mixId); // Mutual exclusion: убираем из избранного
+  } else {
+    dis.splice(idx, 1);
+  }
+  setItem(KEYS.dislikes, dis);
+  return isNowDisliked;
 }
 
 // ---------- история ----------
@@ -46,7 +90,7 @@ export function addToHistory(mixId) {
   setItem(KEYS.history, history.slice(0, HISTORY_LIMIT));
 }
 
-// ---------- настройки (задел на будущее: PRO-режим, звук и т.д.) ----------
+// ---------- настройки ----------
 export function getSettings() {
   return getItem(KEYS.settings, {
     hapticsEnabled: true,
@@ -60,13 +104,29 @@ export function setSetting(key, value) {
   return settings;
 }
 
-// ---------- задел под будущие сигналы для Oracle Engine ----------
-// Пока не используется, но именно отсюда oracle.js в будущем сможет
-// брать "любимые вкусы" и "настроение", не меняя свой публичный API.
+export function resetTaste() {
+  // Сбрасываем только дизлайки. Избранное и история сохраняются.
+  removeItem(KEYS.dislikes);
+}
+
+// ---------- Derived Taste Profile ----------
 export function getTasteProfile() {
   const favs = getFavorites();
+  const history = getHistory();
+  const dislikes = getDislikes();
+
+  // Считаем уникальные сигналы по ID
+  const uniqueSignals = new Set([
+    ...favs,
+    ...history.map(h => h.id),
+    ...dislikes
+  ]);
+
   return {
     favoriteIds: favs,
-    favoritesCount: favs.length,
+    dislikedIds: dislikes,
+    history: history,
+    uniqueSignalCount: uniqueSignals.size,
+    favoritesCount: favs.length
   };
 }
