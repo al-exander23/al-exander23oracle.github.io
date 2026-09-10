@@ -89,13 +89,17 @@ export function renderCard(cardEl, mix) {
   actionsWrap.style.gap = '8px';
 
   const disBtn = document.createElement('button');
-  disBtn.className = 'fav-btn' + (dis ? ' active' : '');
+  disBtn.className = 'fav-btn dislike-btn' + (dis ? ' active' : '');
+  disBtn.dataset.mixId = mix.id;
   disBtn.setAttribute('aria-label', 'Не для меня');
+  disBtn.setAttribute('aria-pressed', String(dis));
   disBtn.textContent = '👎';
 
   const favBtn = document.createElement('button');
-  favBtn.className = 'fav-btn' + (fav ? ' active' : '');
+  favBtn.className = 'fav-btn favorite-btn' + (fav ? ' active' : '');
+  favBtn.dataset.mixId = mix.id;
   favBtn.setAttribute('aria-label', 'В избранное');
+  favBtn.setAttribute('aria-pressed', String(fav));
   favBtn.textContent = fav ? '♥' : '♡';
 
   actionsWrap.appendChild(disBtn);
@@ -140,22 +144,28 @@ export function renderCard(cardEl, mix) {
   favBtn.addEventListener('click', () => {
     const nowFav = toggleFavorite(mix.id);
     favBtn.classList.toggle('active', nowFav);
+    favBtn.setAttribute('aria-pressed', String(nowFav));
     favBtn.textContent = nowFav ? '♥' : '♡';
     favBtn.classList.remove('pop');
     void favBtn.offsetWidth;
     favBtn.classList.add('pop');
-    if (nowFav) disBtn.classList.remove('active');
+    if (nowFav) {
+      disBtn.classList.remove('active');
+      disBtn.setAttribute('aria-pressed', 'false');
+    }
     showToast(nowFav ? 'Добавлено в избранное' : 'Убрано из избранного');
   });
 
   disBtn.addEventListener('click', () => {
     const nowDis = toggleDislike(mix.id);
     disBtn.classList.toggle('active', nowDis);
+    disBtn.setAttribute('aria-pressed', String(nowDis));
     disBtn.classList.remove('pop');
     void disBtn.offsetWidth;
     disBtn.classList.add('pop');
     if (nowDis) {
       favBtn.classList.remove('active');
+      favBtn.setAttribute('aria-pressed', 'false');
       favBtn.textContent = '♡';
     }
     showToast(nowDis ? 'Больше не предлагаем' : 'Снята отметка');
@@ -279,7 +289,11 @@ export function openSheet(kind) {
     resetBtn.textContent = 'Сбросить вкус';
     resetBtn.onclick = () => {
       resetTaste();
-      showToast('Вкус сброшен');
+      document.querySelectorAll('.dislike-btn.active').forEach((btn) => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+      showToast('Отметки «не для меня» сброшены');
     };
     titleEl.insertBefore(resetBtn, document.getElementById('sheetClose'));
   }
@@ -306,7 +320,13 @@ export function openSheet(kind) {
     if (kind === 'favorites') {
       listEl.querySelectorAll('[data-remove]').forEach((btn) => {
         btn.addEventListener('click', () => {
-          toggleFavorite(btn.getAttribute('data-remove'));
+          const mixId = btn.getAttribute('data-remove');
+          toggleFavorite(mixId);
+          document.querySelectorAll(`.favorite-btn[data-mix-id="${mixId}"]`).forEach((favButton) => {
+            favButton.classList.remove('active');
+            favButton.setAttribute('aria-pressed', 'false');
+            favButton.textContent = '♡';
+          });
           openSheet('favorites');
         });
       });
