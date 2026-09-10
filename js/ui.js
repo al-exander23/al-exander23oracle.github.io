@@ -178,9 +178,36 @@ export function prepareOrbText(screenContentEl, mix, sceneId) {
   const nameEl = document.createElement('div');
   nameEl.className = 'mix-name';
   nameEl.dataset.sceneId = String(sceneId);
+
   const descEl = document.createElement('div');
   descEl.className = 'mix-desc';
-  descEl.textContent = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
+  const descText = mix.recipe.map((r) => `${r.flavor}${r.percent ? ' ' + r.percent + '%' : ''}`).join(' · ');
+  descEl.textContent = descText;
+
+  const nameLength = Array.from(mix.name || '').length;
+  const descLength = Array.from(descText).length;
+  const totalLength = nameLength + descLength;
+
+  screenContentEl.classList.remove('screen-content--dense', 'screen-content--extra-dense');
+
+  if (nameLength >= 27) {
+    nameEl.classList.add('mix-name--very-long');
+  } else if (nameLength >= 23) {
+    nameEl.classList.add('mix-name--long');
+  }
+
+  if (descLength >= 48) {
+    descEl.classList.add('mix-desc--very-long');
+  } else if (descLength >= 42) {
+    descEl.classList.add('mix-desc--long');
+  }
+
+  if (nameLength >= 27 || descLength >= 48 || totalLength >= 74) {
+    screenContentEl.classList.add('screen-content--extra-dense');
+  } else if (nameLength >= 23 || descLength >= 42 || totalLength >= 64) {
+    screenContentEl.classList.add('screen-content--dense');
+  }
+
   screenContentEl.replaceChildren(nameEl, descEl);
   return { nameEl, descEl };
 }
@@ -192,6 +219,7 @@ export async function typeOrbText(nameEl, descEl, mixName, signal, sceneId) {
 }
 
 export function prepareOraclePhrase(screenContentEl, phrase, sceneId) {
+  screenContentEl.classList.remove('screen-content--dense', 'screen-content--extra-dense');
   const phraseEl = document.createElement('div');
   phraseEl.className = 'oracle-phrase';
   phraseEl.dataset.sceneId = String(sceneId);
