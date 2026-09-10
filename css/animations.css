@@ -8,6 +8,21 @@
   50%{ background-position: 100% 50%; }
 }
 
+@keyframes brand-smoke-core{
+  0%,100%{ transform: translate3d(0, 0, 0) scale(1,1); opacity:.48; }
+  26%{ transform: translate3d(-1px,-2px,0) scale(1.01,1.05); opacity:.68; }
+  58%{ transform: translate3d(1.5px,-4px,0) scale(1.015,1.09); opacity:.58; }
+  82%{ transform: translate3d(-1px,-2px,0) scale(1.005,1.04); opacity:.52; }
+}
+
+@keyframes brand-smoke-drift{
+  0%,100%{ transform: translate3d(0,-1px,0) scale(1,1); opacity:.40; }
+  22%{ transform: translate3d(-3px,-5px,0) scale(1.03,1.10); opacity:.58; }
+  48%{ transform: translate3d(2px,-9px,0) scale(1.05,1.18); opacity:.50; }
+  72%{ transform: translate3d(-2px,-13px,0) scale(1.03,1.22); opacity:.38; }
+  88%{ transform: translate3d(1px,-6px,0) scale(1.01,1.10); opacity:.32; }
+}
+
 @keyframes puddle-breathe{
   0%,100%{ transform: scale(1); opacity: .95; }
   50%{ transform: scale(0.86); opacity: .55; }
@@ -62,5 +77,5 @@
 }
 
 @media (prefers-reduced-motion: reduce){
-  .orb-halo, .idle-icon, .mote, .orb-ring, .orb-frame, .orb-puddle{ animation: none !important; }
+  .brand::before, .brand::after, .brand-text, .orb-halo, .idle-icon, .mote, .orb-ring, .orb-frame, .orb-puddle{ animation: none !important; }
 }
