@@ -8,75 +8,49 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/main.css?v=4.0.0">
-<link rel="stylesheet" href="css/orb.css?v=4.0.0">
-<link rel="stylesheet" href="css/animations.css?v=4.0.0">
-<link rel="stylesheet" href="css/cards.css?v=4.0.0">
-<link rel="stylesheet" href="css/taste.css?v=4.0.0">
-<link rel="stylesheet" href="css/theme-v4.css?v=4.0.0">
+<link rel="stylesheet" href="css/main.css?v=5.0.0">
+<link rel="stylesheet" href="css/orb.css?v=5.0.0">
+<link rel="stylesheet" href="css/animations.css?v=5.0.0">
+<link rel="stylesheet" href="css/cards.css?v=5.0.0">
+<link rel="stylesheet" href="css/taste.css?v=5.0.0">
+<link rel="stylesheet" href="css/theme-v5.css?v=5.0.0">
 </head>
 <body>
 
 <div class="stage" id="stage">
-  <div class="v4-room" aria-hidden="true">
-    <span class="v4-candle v4-candle--l"></span>
-    <span class="v4-candle v4-candle--l2"></span>
-    <span class="v4-candle v4-candle--r"></span>
-    <span class="v4-candle v4-candle--r2"></span>
-  </div>
   <div class="grain"></div>
   <div class="motes" id="motes"></div>
 
   <div class="top-toolbar" id="topToolbar" aria-label="Быстрые действия">
     <button class="icon-btn" id="favBtnTop" aria-label="Избранное">♡</button>
-    <button class="icon-btn" id="historyBtnTop" aria-label="История">🕐</button>
+    <button class="icon-btn" id="historyBtnTop" aria-label="История">◷</button>
   </div>
   <div class="counter" id="counter"></div>
 
-  <div class="brand" aria-label="Микс Оракул">
-    <div class="brand-smoke-field" aria-hidden="true"></div>
-    <span class="brand-text">МИКС<br>ОРАКУЛ</span>
-  </div>
-  <div class="brand-subtitle">Случайность со вкусом</div>
-  <div class="brand-divider"></div>
+  <!-- v5: the approved reference is the actual hero surface, not a CSS imitation. -->
+  <div class="orb-wrap phase-idle" id="orbWrap" aria-label="Коснись шара, чтобы узнать микс">
+    <img class="v5-hero-art" id="v5HeroArt" alt="" aria-hidden="true" draggable="false">
+    <div class="v5-title-smoke" aria-hidden="true"></div>
+    <div class="v5-side-smoke" aria-hidden="true"></div>
 
-  <div class="orb-wrap phase-idle" id="orbWrap">
-    <div class="crystal-aura" aria-hidden="true"></div>
-    <div class="orb-puddle" aria-hidden="true"></div>
+    <!-- Compatibility-only surface for the existing rotator API. It is visually hidden. -->
+    <div class="orb-surface" id="orbSurface" aria-hidden="true"></div>
 
-    <div class="orb-frame">
-      <div class="orb-ring"></div>
-      <div class="orb" id="orb">
-        <div class="glass-back" aria-hidden="true"></div>
-        <div class="orb-surface" id="orbSurface"></div>
-        <div class="orb-latitude"></div>
-        <div class="orb-edge-shade"></div>
-        <div class="orb-smoke" id="orbSmoke"></div>
-        <div class="smoke-vortex" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span><span></span>
-        </div>
-        <div class="orb-highlight"></div>
-        <div class="orb-highlight-sharp"></div>
-        <div class="orb-rim"></div>
-        <div class="orb-sheen"></div>
-      </div>
-    </div>
+    <!-- Dynamic smoke + mask are aligned with the photographed glass sphere. -->
+    <div class="v5-orb-mask" aria-hidden="true"></div>
+    <div class="orb-smoke v5-orb-smoke" id="orbSmoke" aria-hidden="true"></div>
 
-    <!-- Text remains outside the rotating/transformed orb subtree by design. -->
+    <!-- PROTECTED: live text remains outside any rotating/transformed orb subtree. -->
     <div class="screen" id="screen">
       <div class="screen-content" id="screenContent">
         <div class="idle-icon">✦</div>
         <div class="idle-text">коснись шара —<br>узнай микс</div>
       </div>
     </div>
-    <div class="glass-front" aria-hidden="true"></div>
-
-    <div class="crystal-stand" aria-hidden="true">
-      <span class="stand-gem"></span>
-    </div>
+    <div class="v5-glass-front" aria-hidden="true"></div>
   </div>
 
-  <div class="hint" id="hint">Встряхни телефон или коснись шара — <b>оракул</b> подберёт для тебя микс.</div>
+  <div class="hint" id="hint">Коснись шара или встряхни телефон — оракул подберёт микс.</div>
   <button class="lock-btn" id="lockBtn" style="display:none;">🔒 Закрепить микс</button>
 
   <div class="mix-card" id="mixCard"></div>
@@ -94,8 +68,8 @@
   </div>
 </div>
 
-<script type="module" src="js/app.js?v=4.0.0"></script>
-<script type="module" src="js/taste.js?v=4.0.0"></script>
-<script type="module" src="js/theme-v4.js?v=4.0.0"></script>
+<script type="module" src="js/app.js?v=5.0.0"></script>
+<script type="module" src="js/taste.js?v=5.0.0"></script>
+<script type="module" src="js/theme-v5.js?v=5.0.0"></script>
 </body>
 </html>
