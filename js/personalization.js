@@ -1,146 +1,179 @@
 // js/personalization.js
+// Локальная персонализация без внешних API.
+// Явные сигналы пользователя (Favorite / Dislike) важнее истории показов.
+
 import { getTasteProfile } from './profile.js';
+
+const NUMERIC_ATTRS = ['strength', 'freshness', 'sweetness', 'sourness'];
+const RECENT_PENALTIES = [-10, -7, -5, -3, -2];
 
 export function buildDerivedProfile(mixes) {
   const rawProfile = getTasteProfile();
-  
-  const favs = rawProfile.favoriteIds || [];
-  const dislikes = rawProfile.dislikedIds || [];
-  const history = rawProfile.history || [];
-  
+
+  const favs = Array.isArray(rawProfile.favoriteIds) ? rawProfile.favoriteIds : [];
+  const dislikes = Array.isArray(rawProfile.dislikedIds) ? rawProfile.dislikedIds : [];
+  const history = Array.isArray(rawProfile.history) ? rawProfile.history : [];
+
+  const explicitSignalIds = new Set([...favs, ...dislikes]);
   const profile = {
-    uniqueSignalCount: rawProfile.uniqueSignalCount || 0,
+    explicitSignalCount: explicitSignalIds.size,
     favoriteIds: favs,
     dislikedIds: dislikes,
-    recentMixIds: history.slice(0, 5).map(h => h.id || h),
+    recentMixIds: history.slice(0, 5).map((h) => h.id || h),
+    seenMixIds: new Set(history.map((h) => h.id || h)),
     ingredients: {},
-    numeric: { strength: 0, freshness: 0, sweetness: 0, sourness: 0 },
-    numericCounts: { strength: 0, freshness: 0, sweetness: 0, sourness: 0 }
+    numeric: { strength: null, freshness: null, sweetness: null, sourness: null },
+    numericTotals: { strength: 0, freshness: 0, sweetness: 0, sourness: 0 },
+    numericWeights: { strength: 0, freshness: 0, sweetness: 0, sourness: 0 },
   };
 
-  if (profile.uniqueSignalCount === 0) return profile;
+  if (!mixes.length || favs.length === 0) return profile;
 
-  const mixDict = {};
-  mixes.forEach(m => mixDict[m.id] = m);
+  const mixDict = Object.create(null);
+  mixes.forEach((mix) => {
+    if (mix && mix.id) mixDict[mix.id] = mix;
+  });
 
-  const processMix = (mixId, weight) => {
+  // Положительный taste-профиль строим только по Favorite.
+  // Сам факт показа микса не означает, что пользователю понравился вкус.
+  favs.forEach((mixId) => {
     const mix = mixDict[mixId];
     if (!mix) return;
 
-    if (mix.recipe) {
-      mix.recipe.forEach(r => {
-        profile.ingredients[r.flavor] = (profile.ingredients[r.flavor] || 0) + weight;
+    if (Array.isArray(mix.recipe)) {
+      mix.recipe.forEach((item) => {
+        if (!item || !item.flavor) return;
+        const share = Number.isFinite(item.percent) && item.percent > 0 ? item.percent / 100 : 0.33;
+        profile.ingredients[item.flavor] = (profile.ingredients[item.flavor] || 0) + share;
       });
     }
 
-    ['strength', 'freshness', 'sweetness', 'sourness'].forEach(attr => {
-      if (mix[attr] != null) {
-        profile.numeric[attr] += mix[attr] * weight;
-        profile.numericCounts[attr] += weight;
-      }
+    NUMERIC_ATTRS.forEach((attr) => {
+      const value = mix[attr];
+      if (!Number.isFinite(value)) return;
+      profile.numericTotals[attr] += value;
+      profile.numericWeights[attr] += 1;
     });
-  };
+  });
 
-  // Dislike НЕ создаёт глобальный blacklist ингредиентов.
-  // Ингредиенты и числовые идеалы строятся ТОЛЬКО на положительных сигналах.
-  history.forEach(h => processMix(h.id || h, 1));
-  favs.forEach(id => processMix(id, 3));
-
-  ['strength', 'freshness', 'sweetness', 'sourness'].forEach(attr => {
-    if (profile.numericCounts[attr] > 0) {
-      profile.numeric[attr] = profile.numeric[attr] / profile.numericCounts[attr];
-    } else {
-      profile.numeric[attr] = null;
+  NUMERIC_ATTRS.forEach((attr) => {
+    if (profile.numericWeights[attr] > 0) {
+      profile.numeric[attr] = profile.numericTotals[attr] / profile.numericWeights[attr];
     }
   });
 
   return profile;
 }
 
-export function calculateMixScore(mix, derivedProfile) {
-  let score = 10; // Base score
+function getPersonalizationMultiplier(profile) {
+  if (profile.explicitSignalCount <= 0) return 0;
+  if (profile.explicitSignalCount <= 2) return 0.55;
+  if (profile.explicitSignalCount <= 5) return 0.8;
+  return 1;
+}
 
-  // 1. Прямые сигналы для конкретного микса
-  if (derivedProfile.favoriteIds.includes(mix.id)) score += 5;
-  if (derivedProfile.dislikedIds.includes(mix.id)) score -= 15; // Сильный штраф КОНКРЕТНОМУ миксу
+export function calculateMixScore(mix, profile) {
+  let score = 10;
 
-  // 2. Recent Penalty (последние 5)
-  const penaltyMap = [-8, -5, -3, -2, -1];
-  const recentIdx = derivedProfile.recentMixIds.indexOf(mix.id);
-  if (recentIdx !== -1) {
-    score += penaltyMap[recentIdx];
-  }
+  // Прямые сигналы по конкретному миксу — самые сильные.
+  if (profile.favoriteIds.includes(mix.id)) score += 8;
+  if (profile.dislikedIds.includes(mix.id)) return 0.05;
 
-  // 3. Сила персонализации
-  let pMultiplier = 1;
-  if (derivedProfile.uniqueSignalCount >= 3 && derivedProfile.uniqueSignalCount <= 5) {
-    pMultiplier = 0.5; // Weak personalization
-  }
+  const recentIdx = profile.recentMixIds.indexOf(mix.id);
+  if (recentIdx !== -1) score += RECENT_PENALTIES[recentIdx];
 
-  // 4. Сходство числовых характеристик (дистанция 1-5 -> макс дистанция 4)
-  let numericScore = 0;
-  ['strength', 'freshness', 'sweetness', 'sourness'].forEach(attr => {
-    const ideal = derivedProfile.numeric[attr];
-    if (ideal !== null && mix[attr] != null) {
-      const distance = Math.abs(mix[attr] - ideal);
-      const similarity = 1 - (distance / 4); 
-      numericScore += similarity * 2;
-    }
-  });
-  score += numericScore * pMultiplier;
+  const multiplier = getPersonalizationMultiplier(profile);
 
-  // 5. Сходство ингредиентов (Ограниченное)
-  let ingredientScore = 0;
-  if (mix.recipe) {
-    mix.recipe.forEach(r => {
-      if (derivedProfile.ingredients[r.flavor]) {
-        ingredientScore += derivedProfile.ingredients[r.flavor];
-      }
+  if (multiplier > 0 && profile.favoriteIds.length > 0) {
+    let numericScore = 0;
+    let numericMatches = 0;
+
+    NUMERIC_ATTRS.forEach((attr) => {
+      const ideal = profile.numeric[attr];
+      const value = mix[attr];
+      if (!Number.isFinite(ideal) || !Number.isFinite(value)) return;
+
+      const distance = Math.abs(value - ideal);
+      const similarity = Math.max(0, 1 - distance / 4);
+      numericScore += similarity * 2.5;
+      numericMatches++;
     });
-  }
-  score += Math.max(-5, Math.min(10, ingredientScore)) * pMultiplier;
 
-  // 6. Безопасность
-  if (isNaN(score) || !isFinite(score)) score = 1;
-  return Math.max(0.1, score); // Никогда не <= 0, не NaN, не Infinity
+    if (numericMatches > 0) score += numericScore * multiplier;
+
+    let ingredientScore = 0;
+    if (Array.isArray(mix.recipe)) {
+      mix.recipe.forEach((item) => {
+        if (!item || !item.flavor) return;
+        const preference = profile.ingredients[item.flavor] || 0;
+        if (preference <= 0) return;
+
+        const share = Number.isFinite(item.percent) && item.percent > 0 ? item.percent / 100 : 0.33;
+        ingredientScore += preference * share * 10;
+      });
+    }
+
+    score += Math.min(12, ingredientScore) * multiplier;
+  }
+
+  // Небольшой бонус новым миксам помогает не зацикливаться на уже показанных.
+  if (!profile.seenMixIds.has(mix.id)) score += 1.5;
+
+  if (!Number.isFinite(score)) score = 1;
+  return Math.max(0.05, score);
+}
+
+function pickRandom(items) {
+  if (!items.length) return null;
+  return items[Math.floor(Math.random() * items.length)];
 }
 
 export function selectWeightedMix(mixes, lastMixId) {
-  // Защита от немедленного повторения: lastMixId фильтруется до любых вычислений
-  const availableMixes = mixes.length > 1 ? mixes.filter(m => m.id !== lastMixId) : mixes;
+  if (!Array.isArray(mixes) || mixes.length === 0) return null;
+
+  const availableMixes = mixes.length > 1
+    ? mixes.filter((mix) => mix && mix.id !== lastMixId)
+    : mixes.filter(Boolean);
+
+  if (!availableMixes.length) return null;
+
   const profile = buildDerivedProfile(mixes);
 
-  // Cold Start (0-2 signals)
-  if (profile.uniqueSignalCount <= 2) return null; // trigger safe fallback
+  // Пока пользователь не поставил ни одного явного сигнала, сохраняем
+  // исходное случайное поведение Oracle. История сама по себе не равна вкусу.
+  if (profile.explicitSignalCount === 0) return null;
 
-  // Exploration (25%)
-  if (Math.random() < 0.25) {
-    let candidates = availableMixes.filter(m => 
-      !profile.favoriteIds.includes(m.id) && 
-      !profile.dislikedIds.includes(m.id) && 
-      !profile.recentMixIds.includes(m.id)
+  // Чем больше явных сигналов, тем меньше exploration.
+  const explorationChance = profile.explicitSignalCount <= 2 ? 0.35 : 0.20;
+
+  if (Math.random() < explorationChance) {
+    let candidates = availableMixes.filter((mix) =>
+      !profile.favoriteIds.includes(mix.id) &&
+      !profile.dislikedIds.includes(mix.id) &&
+      !profile.recentMixIds.includes(mix.id)
     );
-    
-    // Безопасный fallback, если кандидатов не осталось
-    if (candidates.length === 0) candidates = availableMixes;
-    return candidates[Math.floor(Math.random() * candidates.length)];
+
+    if (!candidates.length) {
+      candidates = availableMixes.filter((mix) => !profile.dislikedIds.includes(mix.id));
+    }
+
+    return pickRandom(candidates.length ? candidates : availableMixes);
   }
 
-  // Weighted Selection (75%)
   let totalWeight = 0;
-  const scored = availableMixes.map(mix => {
-    const w = calculateMixScore(mix, profile);
-    totalWeight += w;
-    return { mix, weight: w };
+  const scored = availableMixes.map((mix) => {
+    const weight = calculateMixScore(mix, profile);
+    totalWeight += weight;
+    return { mix, weight };
   });
 
-  if (totalWeight <= 0 || isNaN(totalWeight) || !isFinite(totalWeight)) return null;
+  if (!Number.isFinite(totalWeight) || totalWeight <= 0) return null;
 
-  let r = Math.random() * totalWeight;
+  let roll = Math.random() * totalWeight;
   for (const item of scored) {
-    r -= item.weight;
-    if (r <= 0) return item.mix;
+    roll -= item.weight;
+    if (roll <= 0) return item.mix;
   }
 
-  return null;
+  return scored[scored.length - 1]?.mix || null;
 }
