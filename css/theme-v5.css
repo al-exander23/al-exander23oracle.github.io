@@ -1,0 +1,218 @@
+/* ALX Oracle v5.0 — reference-driven hybrid visual system.
+   The approved reference is treated as the hard visual target.
+   Live text remains in the stable overlay outside any transformed orb subtree. */
+:root{
+  --v5-bg:#01050a;
+  --v5-panel:rgba(4,18,31,.82);
+  --v5-line:rgba(143,218,255,.78);
+  --v5-ice:#f4fbff;
+  --v5-cyan:#8edcff;
+  --v5-muted:#8faec1;
+  --gold:#8edcff;
+  --gold-soft:#e8f8ff;
+  --neon:#8edcff;
+  --neon-soft:#f4fbff;
+  --text-muted:#9db7c8;
+  --text-dim:#6c8799;
+}
+
+html,body{background:var(--v5-bg);color:var(--v5-ice)}
+body{overflow-x:hidden}
+.stage{
+  min-height:100dvh;
+  padding:70px 14px 44px;
+  overflow-x:hidden;
+  background:
+    radial-gradient(ellipse 75% 38% at 50% 20%,rgba(19,73,111,.30),transparent 72%),
+    radial-gradient(circle at 10% 48%,rgba(255,169,80,.07),transparent 16%),
+    radial-gradient(circle at 90% 48%,rgba(255,169,80,.07),transparent 16%),
+    linear-gradient(180deg,#010408 0%,#03101b 46%,#01060b 100%);
+  isolation:isolate;
+}
+.stage::before{
+  content:'';position:fixed;inset:0;z-index:-4;pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,0,0,.58),transparent 17% 83%,rgba(0,0,0,.58));
+}
+.stage::after{
+  content:'';position:fixed;inset:0;z-index:-3;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%,transparent 18%,rgba(0,0,0,.23) 56%,rgba(0,0,0,.65) 100%);
+}
+.grain{opacity:.018}.mote{background:#b9eaff;opacity:.12;box-shadow:0 0 8px rgba(102,201,255,.32)}
+
+/* Reference toolbar */
+.top-toolbar{
+  position:fixed;top:17px;left:auto;right:16px;z-index:30;
+  display:flex;align-items:center;gap:14px;padding:5px 14px;
+  border:1px solid rgba(154,222,255,.78);border-radius:999px;
+  background:linear-gradient(180deg,rgba(8,28,45,.88),rgba(1,8,14,.88));
+  box-shadow:0 0 0 1px rgba(242,252,255,.08),0 0 24px rgba(75,185,241,.18),inset 0 1px rgba(255,255,255,.10);
+  backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);
+}
+.icon-btn{position:static;width:32px;height:32px;border:0;background:transparent;color:#eaf9ff;font-size:17px;text-shadow:0 0 10px rgba(113,207,255,.72)}
+.icon-btn:active{background:rgba(118,208,255,.10)}
+.counter{display:none!important}
+
+/* The hero itself is the approved reference crop. */
+.orb-wrap{
+  position:relative;
+  width:min(100vw,480px);
+  aspect-ratio:480/464;
+  height:auto;
+  margin:-6px auto 0;
+  flex:0 0 auto;
+  cursor:pointer;
+  overflow:visible;
+  border-radius:0;
+  isolation:isolate;
+}
+.v5-hero-art{
+  position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;
+  opacity:0;transition:opacity .45s ease;
+  background:
+    radial-gradient(circle at 50% 62%,rgba(74,174,231,.32),transparent 28%),
+    linear-gradient(180deg,#03101b,#01060c);
+  filter:saturate(1.04) contrast(1.03);
+  pointer-events:none;user-select:none;-webkit-user-drag:none;
+}
+.v5-art-ready .v5-hero-art{opacity:1}
+
+/* Subtle living smoke on top of the baked cinematic art. */
+.v5-title-smoke,.v5-side-smoke{position:absolute;pointer-events:none;z-index:2;mix-blend-mode:screen}
+.v5-title-smoke{left:10%;right:10%;top:0;height:40%;filter:blur(13px);opacity:.34;background:
+  radial-gradient(ellipse 30% 22% at 22% 55%,rgba(179,233,255,.34),transparent 72%),
+  radial-gradient(ellipse 36% 26% at 52% 42%,rgba(112,204,250,.28),transparent 72%),
+  radial-gradient(ellipse 28% 24% at 78% 58%,rgba(177,230,255,.30),transparent 72%);
+  animation:v5-title-breathe 10s ease-in-out infinite;
+}
+.v5-side-smoke{inset:12% -4% 2%;filter:blur(18px);opacity:.18;background:
+  radial-gradient(ellipse 22% 44% at 8% 58%,rgba(117,205,246,.22),transparent 74%),
+  radial-gradient(ellipse 22% 44% at 92% 54%,rgba(117,205,246,.22),transparent 74%);
+  animation:v5-side-drift 13s ease-in-out infinite;
+}
+
+/* Hidden compatibility surface: the old globe rotator keeps its API but no longer owns the visual. */
+#orbSurface{display:none!important}
+
+/* Center mask hides the baked question mark while live text is revealed. */
+.v5-orb-mask{
+  position:absolute;left:25.5%;top:43.5%;width:49%;height:39%;z-index:3;border-radius:50%;
+  opacity:0;pointer-events:none;transition:opacity .48s ease,filter .48s ease;
+  background:radial-gradient(circle,rgba(1,13,24,.90) 0%,rgba(3,20,35,.82) 48%,rgba(3,21,35,.48) 70%,transparent 83%);
+  box-shadow:inset 0 0 46px rgba(70,180,239,.12);
+}
+.orb-wrap.thinking .v5-orb-mask{opacity:.53;filter:brightness(1.10)}
+.orb-wrap.phase-phrase .v5-orb-mask,.orb-wrap.phase-reveal .v5-orb-mask{opacity:.82}
+
+/* Dynamic smoke is visually inside the photographed glass. */
+.v5-orb-smoke{
+  position:absolute;left:25%;top:43%;width:50%;height:40%;z-index:4;border-radius:50%;overflow:hidden;
+  pointer-events:none;mix-blend-mode:screen;opacity:.32;transition:opacity .45s ease,filter .45s ease;
+}
+.v5-orb-smoke::before,.v5-orb-smoke::after{
+  content:'';position:absolute;border-radius:50%;filter:blur(12px);
+  background:radial-gradient(ellipse,rgba(220,247,255,.38),rgba(83,183,236,.14) 40%,transparent 72%);
+  animation:v5-orb-drift 8.6s ease-in-out infinite;
+}
+.v5-orb-smoke::before{width:76%;height:28%;left:5%;top:58%;transform:rotate(-12deg)}
+.v5-orb-smoke::after{width:62%;height:26%;right:1%;top:27%;animation-delay:-3.2s;transform:rotate(13deg)}
+.orb-wrap.thinking .v5-orb-smoke{opacity:.72;filter:brightness(1.35)}
+.orb-wrap.phase-phrase .v5-orb-smoke{opacity:.48}
+.orb-wrap.phase-reveal .v5-orb-smoke{opacity:.24}
+.v5-orb-smoke .smoke-puff{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(238,251,255,.72) 0%,rgba(105,203,249,.27) 36%,transparent 72%);filter:blur(5px);animation:smoke-rise linear forwards;mix-blend-mode:screen}
+
+/* PROTECTED: live text is a stable sibling overlay, not part of a rotating/transformed sphere. */
+.screen{
+  position:absolute!important;
+  left:26%!important;top:49%!important;width:48%!important;height:28%!important;
+  margin:0!important;z-index:7!important;border-radius:50%!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  overflow:visible!important;filter:none!important;transform:none!important;
+  transition:opacity .42s ease!important;pointer-events:none!important;
+}
+.screen.off{opacity:0!important}
+.screen::before,.screen::after{display:none!important}
+.screen-content{position:relative!important;width:86%!important;max-width:none!important;max-height:90%!important;text-align:center!important;z-index:1!important}
+.idle-icon,.idle-text{display:none!important}
+.oracle-phrase,.mix-name{
+  font-family:'Lora',serif!important;color:#f8fdff!important;font-weight:600!important;
+  text-align:center!important;text-shadow:0 0 2px #fff,0 0 8px rgba(201,241,255,.95),0 0 20px rgba(92,196,248,.72)!important;
+  filter:none!important;
+}
+.oracle-phrase{font-size:18px!important;line-height:1.28!important;letter-spacing:.015em!important}
+.mix-name{font-size:21px!important;line-height:1.14!important;margin:0 0 8px!important}
+.mix-name--long{font-size:18px!important}.mix-name--very-long{font-size:16px!important}
+.mix-desc{font:500 10.5px/1.42 'Inter',sans-serif!important;color:#aee4fb!important;letter-spacing:.01em!important;text-shadow:0 0 9px rgba(75,176,232,.24)!important;margin:0!important;opacity:0;transition:opacity .30s ease}
+.mix-desc.in{opacity:1}
+.ch{opacity:0}.ch.show{opacity:1}
+.v5-glass-front{
+  position:absolute;left:25%;top:43%;width:50%;height:40%;z-index:8;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse 34% 15% at 36% 15%,rgba(255,255,255,.16),transparent 75%),radial-gradient(circle at 82% 45%,rgba(157,227,255,.08),transparent 29%);
+  box-shadow:inset 0 0 0 1px rgba(216,245,255,.05);
+  opacity:.72;
+}
+
+/* The old hint becomes a tiny secondary instruction, not a visual block. */
+.hint{max-width:340px;margin:5px auto 0;color:#607c90;font:400 11px/1.55 'Inter',sans-serif;text-align:center}
+.hint b{color:#a8d8ef}
+.lock-btn{margin-top:9px;border-color:rgba(135,209,246,.28);background:rgba(5,22,36,.56);color:#9ec8dc}
+.permission-btn{margin:10px auto 0;padding:10px 16px;border-radius:999px;border:1px solid rgba(142,210,245,.30);background:rgba(5,21,35,.66);color:#a9d4e8;font:500 11px 'Inter',sans-serif}
+
+/* Result card: expanded, text-only, matching the final approved reference. */
+.mix-card{
+  width:min(92vw,410px)!important;max-width:410px!important;min-height:214px!important;
+  margin:18px auto 0!important;padding:25px 30px 24px!important;border-radius:28px!important;
+  border:1px solid rgba(153,224,255,.78)!important;
+  background:linear-gradient(145deg,rgba(7,29,49,.86),rgba(1,11,20,.93))!important;
+  box-shadow:0 24px 62px rgba(0,0,0,.58),0 0 28px rgba(67,178,238,.13),inset 0 1px rgba(245,253,255,.09),inset 0 0 42px rgba(60,158,214,.08)!important;
+  backdrop-filter:blur(17px);-webkit-backdrop-filter:blur(17px);
+  position:relative!important;overflow:hidden!important;
+  flex-direction:column!important;align-items:center!important;text-align:center!important;
+}
+.mix-card.show{display:flex!important}
+.mix-card::before{
+  content:'—   Т В О Й   М И К С   —';order:1;display:block;margin:0 0 18px;
+  color:#a6d8ee;font:500 9px/1 'Lora',serif;letter-spacing:.24em;text-transform:uppercase;
+}
+.mix-card::after{content:'';position:absolute;inset:auto -10% -48% -10%;height:70%;background:radial-gradient(ellipse,rgba(50,151,209,.13),transparent 66%);filter:blur(18px);pointer-events:none}
+.mix-card-head{order:2!important;width:100%!important;display:flex!important;align-items:flex-start!important;justify-content:center!important;gap:8px!important;margin:0!important;position:relative!important}
+.mix-card-title{font:600 27px/1.12 'Lora',serif!important;color:#f8fcff!important;text-align:center!important;text-shadow:0 0 12px rgba(129,210,250,.18)!important;padding:0 46px!important}
+.mix-card-head>div:last-child{position:absolute!important;right:0!important;top:-6px!important;display:flex!important;gap:5px!important}
+.fav-btn{width:32px!important;height:32px!important;border:1px solid rgba(148,218,251,.30)!important;background:rgba(5,24,39,.42)!important;color:#dff7ff!important;border-radius:50%!important;box-shadow:none!important}
+.dislike-btn{font-size:12px!important;opacity:.72}.favorite-btn{font-size:20px!important}
+.mix-card-rating,.mix-card-section-label,.stat-grid,.mix-card-foot{display:none!important}
+.recipe-chips{order:3!important;display:flex!important;justify-content:center!important;align-items:center!important;flex-wrap:wrap!important;gap:0!important;margin:14px 0 0!important;color:#8fddff!important}
+.recipe-chip{display:inline!important;border:0!important;background:none!important;padding:0!important;font:500 16px/1.45 'Inter',sans-serif!important;color:#8fddff!important;border-radius:0!important}
+.recipe-chip b{font-weight:500!important;color:inherit!important}
+.recipe-chip:not(:last-child)::after{content:' + ';white-space:pre;color:#8fddff}
+.mix-card-desc{order:4!important;max-width:330px!important;margin:16px auto 0!important;color:#a8bdca!important;font:400 15px/1.48 'Inter',sans-serif!important;text-align:center!important}
+
+.next-mix-btn{
+  width:min(88vw,370px)!important;height:64px!important;margin:20px auto 0!important;border-radius:999px!important;
+  border:1px solid rgba(139,219,255,.88)!important;
+  background:linear-gradient(180deg,rgba(9,37,59,.82),rgba(2,13,23,.92))!important;
+  color:#eaf9ff!important;font:500 13px/1 'Lora',serif!important;letter-spacing:.19em!important;text-transform:uppercase!important;
+  box-shadow:0 0 0 1px rgba(240,251,255,.06),0 0 21px rgba(66,182,244,.20),inset 0 0 34px rgba(59,174,235,.10)!important;
+  position:relative!important;
+}
+.next-mix-btn::before{content:'⚄';font-size:27px;margin-right:18px;vertical-align:-3px;text-shadow:0 0 12px rgba(140,222,255,.48)}
+.next-mix-btn:active{filter:brightness(1.12);transform:scale(.992)}
+.footer-motto{margin:24px auto 0;color:#789caf;font:500 9px/1 'Lora',serif;letter-spacing:.30em;text-transform:uppercase}
+
+/* Glass sheets/profile inherit the same visual language. */
+.sheet-overlay{background:rgba(0,5,10,.74)!important;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.sheet{background:linear-gradient(180deg,rgba(8,28,45,.98),rgba(2,11,20,.99))!important;border-color:rgba(141,213,249,.30)!important;box-shadow:0 -24px 70px rgba(0,0,0,.62),0 0 30px rgba(57,165,224,.08)!important}
+.sheet-title{color:#edfaff!important}.sheet-close{color:#a9d5ea!important}
+.sheet-item{border-color:rgba(122,188,224,.13)!important}.sheet-item-name{color:#dff5ff!important}
+
+@keyframes v5-title-breathe{0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.27}45%{transform:translate3d(-4px,-5px,0) scale(1.045,1.08);opacity:.43}72%{transform:translate3d(3px,-2px,0) scale(1.02,1.04);opacity:.33}}
+@keyframes v5-side-drift{0%,100%{transform:translateX(0);opacity:.13}50%{transform:translateX(8px);opacity:.24}}
+@keyframes v5-orb-drift{0%,100%{transform:translate3d(0,0,0) rotate(-10deg) scale(1);opacity:.32}40%{transform:translate3d(11px,-16px,0) rotate(5deg) scale(1.12);opacity:.62}72%{transform:translate3d(-7px,-25px,0) rotate(-3deg) scale(.96);opacity:.40}}
+
+@media(max-width:390px){
+  .stage{padding-top:66px}.top-toolbar{right:12px;gap:11px;padding-inline:11px}
+  .mix-card{padding:22px 20px!important}.mix-card-title{font-size:24px!important;padding:0 42px!important}
+  .recipe-chip{font-size:14px!important}.mix-card-desc{font-size:13.5px!important}
+  .oracle-phrase{font-size:16.5px!important}.mix-name{font-size:19px!important}.mix-desc{font-size:9.8px!important}
+}
+@media(prefers-reduced-motion:reduce){.v5-title-smoke,.v5-side-smoke,.v5-orb-smoke::before,.v5-orb-smoke::after{animation:none!important}}
