@@ -13,9 +13,15 @@ const KEYS = {
 
 const HISTORY_LIMIT = 50;
 
+function getIdArray(key) {
+  const value = getItem(key, []);
+  if (!Array.isArray(value)) return [];
+  return value.filter((id) => typeof id === 'string' && id.length > 0);
+}
+
 // ---------- избранное ----------
 export function getFavorites() {
-  return getItem(KEYS.favorites, []);
+  return getIdArray(KEYS.favorites);
 }
 
 export function isFavorite(mixId) {
@@ -48,7 +54,7 @@ export function toggleFavorite(mixId) {
 
 // ---------- дизлайки ----------
 export function getDislikes() {
-  return getItem(KEYS.dislikes, []);
+  return getIdArray(KEYS.dislikes);
 }
 
 export function isDisliked(mixId) {
@@ -81,7 +87,16 @@ export function toggleDislike(mixId) {
 
 // ---------- история ----------
 export function getHistory() {
-  return getItem(KEYS.history, []);
+  const value = getItem(KEYS.history, []);
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((entry) => entry && typeof entry === 'object' && typeof entry.id === 'string' && entry.id.length > 0)
+    .map((entry) => ({
+      id: entry.id,
+      ts: Number.isFinite(entry.ts) ? entry.ts : 0,
+    }))
+    .slice(0, HISTORY_LIMIT);
 }
 
 export function addToHistory(mixId) {
@@ -92,9 +107,14 @@ export function addToHistory(mixId) {
 
 // ---------- настройки ----------
 export function getSettings() {
-  return getItem(KEYS.settings, {
-    hapticsEnabled: true,
-  });
+  const settings = getItem(KEYS.settings, null);
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+    return { hapticsEnabled: true };
+  }
+  return {
+    hapticsEnabled: settings.hapticsEnabled !== false,
+    ...settings,
+  };
 }
 
 export function setSetting(key, value) {
@@ -125,7 +145,7 @@ export function getTasteProfile() {
   return {
     favoriteIds: favs,
     dislikedIds: dislikes,
-    history: history,
+    history,
     uniqueSignalCount: uniqueSignals.size,
     favoritesCount: favs.length
   };
