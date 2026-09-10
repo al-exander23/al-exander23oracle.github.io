@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 132" role="img" aria-label="">
+  <defs>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#10263a"/>
+      <stop offset=".28" stop-color="#d0eeff"/>
+      <stop offset=".38" stop-color="#254a66"/>
+      <stop offset=".6" stop-color="#07111c"/>
+      <stop offset=".82" stop-color="#3c627d"/>
+      <stop offset="1" stop-color="#02060a"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2d5978"/>
+      <stop offset=".2" stop-color="#bfe9ff"/>
+      <stop offset=".5" stop-color="#5caee0"/>
+      <stop offset=".8" stop-color="#dff6ff"/>
+      <stop offset="1" stop-color="#23455e"/>
+    </linearGradient>
+    <radialGradient id="gem">
+      <stop offset="0" stop-color="#eaf9ff"/>
+      <stop offset=".22" stop-color="#7dd5ff"/>
+      <stop offset=".7" stop-color="#1675b4"/>
+      <stop offset="1" stop-color="#03101a"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <ellipse cx="210" cy="117" rx="176" ry="12" fill="#000" opacity=".7"/>
+  <path d="M80 33 C103 48 116 57 126 71 L294 71 C304 57 317 48 340 33 L365 68 C354 70 344 77 338 91 L82 91 C76 77 66 70 55 68 Z" fill="url(#metal)" stroke="url(#edge)" stroke-width="2"/>
+  <path d="M70 89 C90 101 118 104 150 104 H270 C302 104 330 101 350 89 L366 113 H54 Z" fill="url(#metal)" stroke="#5885a2" stroke-width="1.5"/>
+  <path d="M111 69 C126 82 145 88 168 88 H252 C275 88 294 82 309 69" fill="none" stroke="#d5f0ff" stroke-opacity=".42" stroke-width="2"/>
+  <path d="M120 90 q18 -20 36 0 q18 -20 36 0 q18 -20 36 0 q18 -20 36 0 q18 -20 36 0" fill="none" stroke="#6aaed5" stroke-opacity=".56" stroke-width="2"/>
+  <path d="M67 108 L34 122 H111 L126 108 Z" fill="url(#metal)" stroke="#47728f"/>
+  <path d="M353 108 L386 122 H309 L294 108 Z" fill="url(#metal)" stroke="#47728f"/>
+  <path d="M210 76 l17 17 -17 17 -17 -17 Z" fill="#07121d" stroke="#8fdcff" stroke-width="2"/>
+  <path d="M210 82 l11 11 -11 11 -11 -11 Z" fill="url(#gem)" filter="url(#glow)"/>
+  <path d="M80 34 C65 37 51 49 42 64 C58 58 75 59 88 70" fill="none" stroke="url(#edge)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M340 34 C355 37 369 49 378 64 C362 58 345 59 332 70" fill="none" stroke="url(#edge)" stroke-width="5" stroke-linecap="round"/>
+</svg>
