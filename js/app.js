@@ -8,6 +8,7 @@ import { initMixes } from './mixes.js';
 import { createGlobeRotator, spawnMotes } from './effects.js';
 import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
 import { initScene, requestOracle } from './scene.js';
+import { getSettings } from './profile.js';
 
 // ---------------------------------------------------------------
 // ALX VISUAL FORENSICS (v1.2.5) — временный диагностический код.
@@ -44,6 +45,8 @@ if (tg) {
   }
 }
 function haptic(style) {
+  if (!getSettings().hapticsEnabled) return;
+
   if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === 'function') {
     try { tg.HapticFeedback.impactOccurred(style || 'medium'); } catch (e) { console.warn('[ALX] HapticFeedback недоступен:', e); }
   } else if (navigator.vibrate) {
@@ -84,6 +87,7 @@ initScene(
       count++;
       counterEl.textContent = '№ ' + String(count).padStart(3, '0');
       lockBtn.style.display = 'inline-block';
+      haptic('light');
     },
   },
   rotator,
