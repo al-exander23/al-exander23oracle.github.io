@@ -63,8 +63,9 @@ function ensureTasteUi() {
   btn.setAttribute('aria-label', 'Профиль вкуса');
   btn.textContent = '✦';
 
+  const toolbar = document.getElementById('topToolbar');
   const stage = document.getElementById('stage');
-  stage.appendChild(btn);
+  (toolbar || stage).appendChild(btn);
 
   const overlay = document.createElement('div');
   overlay.className = 'taste-overlay';
