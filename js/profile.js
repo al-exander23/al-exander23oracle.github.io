@@ -111,9 +111,14 @@ export function getSettings() {
   if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
     return { hapticsEnabled: true };
   }
+
+  const hapticsEnabled = typeof settings.hapticsEnabled === 'boolean'
+    ? settings.hapticsEnabled
+    : true;
+
   return {
-    hapticsEnabled: settings.hapticsEnabled !== false,
     ...settings,
+    hapticsEnabled,
   };
 }
 
