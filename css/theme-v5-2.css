@@ -168,7 +168,7 @@
   0%,100%{transform:translate3d(0,8px,0) scale(.86) rotate(0deg);opacity:.12}
   22%{opacity:.43}
   56%{transform:translate3d(var(--dx),var(--dy),0) scale(1.12) rotate(var(--rot));opacity:.35}
-  82%{transform:translate3d(calc(var(--dx) * -.35),calc(var(--dy) * 1.28),0) scale(.98) rotate(calc(var(--rot) * -.5));opacity:.18}
+  82%{transform:translate3d(-8px,-52px,0) scale(.98) rotate(-4deg);opacity:.18}
 }
 @keyframes v52-aura-pulse{
   0%,100%{opacity:.45;transform:scale(.97)}
