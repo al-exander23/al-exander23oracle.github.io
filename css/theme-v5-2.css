@@ -1,0 +1,186 @@
+/* ALX Oracle v5.2 — larger cinematic hero, full-screen ambience and living smoke.
+   Visual-only layer. The protected #screen text overlay and scene lifecycle remain untouched. */
+
+/* One continuous cinematic background for the whole Mini App. */
+.stage{
+  position:relative;
+  min-height:100dvh;
+  background:#01050a!important;
+  overflow-x:hidden;
+}
+.v52-stage-bg{
+  position:fixed;
+  inset:-7vh -9vw;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 78% 42% at 50% 24%,rgba(26,94,139,.32),transparent 70%),
+    linear-gradient(180deg,#02070d 0%,#04121f 48%,#01060b 100%);
+}
+.v52-stage-bg-art{
+  position:absolute;
+  inset:-5%;
+  width:110%;
+  height:110%;
+  object-fit:cover;
+  object-position:50% 45%;
+  opacity:0;
+  transform:scale(1.12);
+  filter:blur(20px) brightness(.42) saturate(.90) contrast(1.04);
+  transition:opacity .7s ease;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.v52-ambient-ready .v52-stage-bg-art{opacity:.92}
+.v52-stage-bg::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:
+    linear-gradient(180deg,rgba(0,4,9,.06) 0%,rgba(0,5,10,.16) 42%,rgba(0,5,10,.45) 100%),
+    radial-gradient(ellipse at 50% 34%,transparent 8%,rgba(0,0,0,.14) 52%,rgba(0,0,0,.58) 100%);
+}
+.v52-stage-bg::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:3;
+  background:linear-gradient(90deg,rgba(0,0,0,.52),transparent 17% 83%,rgba(0,0,0,.52));
+}
+.stage > *:not(.v52-stage-bg):not(.v52-smoke-world){z-index:2}
+
+/* Make the approved hero larger without transforming orbWrap itself.
+   Keeping orbWrap untransformed protects the iPhone text rendering fix. */
+.orb-wrap{
+  width:min(118vw,570px)!important;
+  max-width:none!important;
+  margin-top:-14px!important;
+  flex-shrink:0!important;
+}
+.v5-hero-art{
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 80%,rgba(0,0,0,.92) 87%,rgba(0,0,0,.50) 95%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,#000 80%,rgba(0,0,0,.92) 87%,rgba(0,0,0,.50) 95%,transparent 100%);
+}
+
+/* Tone down the synthetic v5.1 lens motion. Smoke is now the primary movement. */
+.v5-orb-motion{animation-duration:11.5s!important}
+.v5-orb-motion-image{animation-duration:16s!important}
+.v5-orb-caustics{opacity:.28!important;animation-duration:18s!important}
+.v5-orb-live-rim{animation-duration:9.5s!important;opacity:.62!important}
+.v5-orb-glint{display:none!important}
+.orb-wrap.thinking .v5-orb-caustics{opacity:.48!important;animation-duration:8s!important}
+.orb-wrap.thinking .v5-orb-live-rim{opacity:.88!important}
+
+/* Full-screen drifting smoke ties the hero, card and lower controls into one scene. */
+.v52-smoke-world{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  opacity:.72;
+}
+.v52-smoke-world span{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(185,232,255,.18) 0%,rgba(79,169,221,.10) 36%,rgba(33,100,151,.035) 58%,transparent 76%);
+  filter:blur(19px);
+  will-change:transform,opacity;
+  opacity:0;
+  animation:v52-world-smoke linear infinite;
+}
+.v52-smoke-world span:nth-child(1){width:48vw;height:24vw;left:-20vw;top:18%;animation-duration:18s;animation-delay:-7s}
+.v52-smoke-world span:nth-child(2){width:42vw;height:22vw;right:-17vw;top:27%;animation-duration:22s;animation-delay:-13s}
+.v52-smoke-world span:nth-child(3){width:58vw;height:24vw;left:4vw;top:48%;animation-duration:25s;animation-delay:-16s}
+.v52-smoke-world span:nth-child(4){width:46vw;height:21vw;right:-10vw;top:58%;animation-duration:21s;animation-delay:-4s}
+.v52-smoke-world span:nth-child(5){width:55vw;height:23vw;left:-18vw;top:73%;animation-duration:27s;animation-delay:-18s}
+.v52-smoke-world span:nth-child(6){width:44vw;height:20vw;right:2vw;top:84%;animation-duration:24s;animation-delay:-10s}
+.v52-smoke-world span:nth-child(7){width:34vw;height:18vw;left:33vw;top:7%;animation-duration:20s;animation-delay:-14s}
+.v52-smoke-world span:nth-child(8){width:37vw;height:18vw;left:32vw;top:93%;animation-duration:28s;animation-delay:-20s}
+
+/* Denser smoke passes around the glass sphere itself. */
+.v52-orb-smoke-shell{
+  position:absolute;
+  inset:0;
+  z-index:6;
+  pointer-events:none;
+  overflow:visible;
+  mix-blend-mode:screen;
+  opacity:.78;
+  transition:opacity .45s ease,filter .45s ease;
+}
+.v52-orb-smoke-shell span{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(224,247,255,.34) 0%,rgba(102,199,245,.17) 38%,rgba(43,122,178,.055) 58%,transparent 76%);
+  filter:blur(12px);
+  opacity:.34;
+  will-change:transform,opacity;
+  animation:v52-orb-smoke ease-in-out infinite;
+}
+.v52-orb-smoke-shell span:nth-child(1){width:31%;height:13%;left:10%;top:61%;animation-duration:9.5s;animation-delay:-2s;--dx:30px;--dy:-32px;--rot:10deg}
+.v52-orb-smoke-shell span:nth-child(2){width:29%;height:12%;right:8%;top:56%;animation-duration:11s;animation-delay:-6s;--dx:-26px;--dy:-38px;--rot:-12deg}
+.v52-orb-smoke-shell span:nth-child(3){width:24%;height:10%;left:21%;top:45%;animation-duration:10.4s;animation-delay:-7s;--dx:22px;--dy:-29px;--rot:-8deg}
+.v52-orb-smoke-shell span:nth-child(4){width:26%;height:11%;right:20%;top:43%;animation-duration:12.2s;animation-delay:-3s;--dx:-20px;--dy:-34px;--rot:11deg}
+.v52-orb-smoke-shell span:nth-child(5){width:34%;height:14%;left:20%;top:75%;animation-duration:13s;animation-delay:-8s;--dx:-18px;--dy:-42px;--rot:6deg}
+.v52-orb-smoke-shell span:nth-child(6){width:30%;height:12%;right:15%;top:72%;animation-duration:10.8s;animation-delay:-5s;--dx:20px;--dy:-37px;--rot:-9deg}
+.v52-orb-smoke-shell span:nth-child(7){width:20%;height:18%;left:42%;top:51%;animation-duration:14s;animation-delay:-10s;--dx:9px;--dy:-36px;--rot:4deg}
+.v52-orb-smoke-shell span:nth-child(8){width:38%;height:13%;left:30%;top:82%;animation-duration:15s;animation-delay:-11s;--dx:-12px;--dy:-46px;--rot:-5deg}
+.orb-wrap.thinking .v52-orb-smoke-shell{opacity:1;filter:brightness(1.25) saturate(1.08)}
+.orb-wrap.phase-phrase .v52-orb-smoke-shell{opacity:.88}
+.orb-wrap.phase-reveal .v52-orb-smoke-shell{opacity:.62}
+
+/* A faint soft glow follows the sphere without moving the protected text parent. */
+.v52-orb-aura{
+  position:absolute;
+  left:21%;
+  top:39%;
+  width:58%;
+  aspect-ratio:1;
+  z-index:1;
+  border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(circle,rgba(110,208,255,.18) 0%,rgba(50,145,205,.09) 47%,transparent 72%);
+  filter:blur(17px);
+  opacity:.58;
+  animation:v52-aura-pulse 7.5s ease-in-out infinite;
+}
+.orb-wrap.thinking .v52-orb-aura{opacity:.86;filter:blur(15px) brightness(1.18)}
+
+/* Lower content now sits directly in the same ambience instead of on a visibly different flat section. */
+.mix-card,.next-mix-btn{backdrop-filter:blur(19px)!important;-webkit-backdrop-filter:blur(19px)!important}
+.hint{color:#7895a8!important;text-shadow:0 1px 12px rgba(0,0,0,.75)}
+.footer-motto{color:#87aabd!important;text-shadow:0 1px 10px rgba(0,0,0,.78)}
+
+@keyframes v52-world-smoke{
+  0%{transform:translate3d(-6vw,6vh,0) scale(.82) rotate(-8deg);opacity:0}
+  12%{opacity:.42}
+  44%{transform:translate3d(5vw,-3vh,0) scale(1.10) rotate(4deg);opacity:.32}
+  74%{transform:translate3d(-2vw,-9vh,0) scale(.96) rotate(-5deg);opacity:.22}
+  100%{transform:translate3d(7vw,-16vh,0) scale(1.17) rotate(8deg);opacity:0}
+}
+@keyframes v52-orb-smoke{
+  0%,100%{transform:translate3d(0,8px,0) scale(.86) rotate(0deg);opacity:.12}
+  22%{opacity:.43}
+  56%{transform:translate3d(var(--dx),var(--dy),0) scale(1.12) rotate(var(--rot));opacity:.35}
+  82%{transform:translate3d(-8px,-52px,0) scale(.98) rotate(-4deg);opacity:.18}
+}
+@keyframes v52-aura-pulse{
+  0%,100%{opacity:.45;transform:scale(.97)}
+  50%{opacity:.67;transform:scale(1.04)}
+}
+
+@media(max-width:390px){
+  .orb-wrap{width:121vw!important;margin-top:-10px!important}
+  .v52-smoke-world{opacity:.62}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .v52-smoke-world span,.v52-orb-smoke-shell span,.v52-orb-aura{animation:none!important}
+  .v52-smoke-world{opacity:.32}
+}
