@@ -93,8 +93,8 @@ void main(){
     float a = fbm(p*2.15 + w*1.65 + vec2(t*0.018,-t*0.032));
     float b = fbm(p*4.40 - w*1.10 + vec2(-t*0.012,t*0.024));
     density = smoothstep(0.50,0.82,a*0.72+b*0.36);
-    float edge = smoothstep(0.82,0.12,length((uv-0.5)*vec2(0.72,1.0)));
-    float vertical = smoothstep(1.04,0.06,uv.y) * 0.55 + 0.45;
+    float edge = 1.0-smoothstep(0.12,0.82,length((uv-0.5)*vec2(0.72,1.0)));
+    float vertical = (1.0-smoothstep(0.06,1.04,uv.y)) * 0.55 + 0.45;
     mask = mix(0.62,1.0,edge) * vertical;
     bright = b;
   } else if(u_mode < 1.5){
@@ -233,7 +233,7 @@ class Smoke2D {
     this.mode = mode;
     this.alpha = alpha;
     this.ctx = canvas.getContext('2d');
-    const count = mode === 2 ? 28 : mode === 1 ? 34 : 38;
+    const count = mode === 2 ? 30 : mode === 1 ? 36 : 40;
     this.particles = Array.from({length:count},(_,i)=>({
       x:Math.random(), y:Math.random(), r:.035+Math.random()*.11,
       vx:(Math.random()-.5)*.00025, vy:-(.00018+Math.random()*.00038),
@@ -261,8 +261,8 @@ class Smoke2D {
       }
       const rr=p.r*Math.min(w,h)*(1+Math.sin(time*.45+p.seed)*.16);
       const g=c.createRadialGradient(p.x*w,p.y*h,0,p.x*w,p.y*h,rr);
-      g.addColorStop(0,`rgba(215,246,255,${.10*this.alpha*(.7+energy*.3)})`);
-      g.addColorStop(.38,`rgba(93,190,239,${.07*this.alpha})`);
+      g.addColorStop(0,`rgba(215,246,255,${.12*this.alpha*(.7+energy*.3)})`);
+      g.addColorStop(.38,`rgba(93,190,239,${.085*this.alpha})`);
       g.addColorStop(1,'rgba(35,105,160,0)');
       c.fillStyle=g;c.beginPath();c.arc(p.x*w,p.y*h,rr,0,Math.PI*2);c.fill();
     }
@@ -300,9 +300,9 @@ function installCanvases() {
   orbWrap.appendChild(touch);
 
   return [
-    makeEngine(scene,0,0.31,1.1),
-    makeEngine(hero,1,0.34,1.25),
-    makeEngine(orb,2,0.72,1.65)
+    makeEngine(scene,0,0.42,1.1),
+    makeEngine(hero,1,0.46,1.25),
+    makeEngine(orb,2,0.84,1.65)
   ];
 }
 
