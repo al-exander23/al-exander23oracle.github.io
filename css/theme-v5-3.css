@@ -1,0 +1,388 @@
+/* ALX Oracle v5.3 — viewport-safe cinematic scene + living smoke.
+   Visual only. The protected #screen remains a stable sibling with no transform/filter. */
+
+:root{
+  --v53-ice:#f4fbff;
+  --v53-cyan:#8edcff;
+  --v53-deep:#01050a;
+  --v53-ease:cubic-bezier(.22,.61,.36,1);
+}
+
+html,body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden!important;
+  background:var(--v53-deep)!important;
+}
+
+.stage{
+  position:relative!important;
+  width:100%!important;
+  max-width:100vw!important;
+  min-height:100dvh!important;
+  padding-top:max(62px,calc(env(safe-area-inset-top) + 14px))!important;
+  padding-right:max(10px,env(safe-area-inset-right))!important;
+  padding-bottom:max(40px,calc(env(safe-area-inset-bottom) + 24px))!important;
+  padding-left:max(10px,env(safe-area-inset-left))!important;
+  overflow:hidden!important;
+  background:#01050a!important;
+  isolation:isolate;
+}
+
+/* Dedicated portrait ambience: it covers the entire app, so there is no visible top-only background seam. */
+.v53-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  background:linear-gradient(180deg,#02070d 0%,#03101b 48%,#01050a 100%);
+}
+.v53-backdrop-image{
+  position:absolute;
+  inset:-1.5%;
+  width:103%;
+  height:103%;
+  object-fit:cover;
+  object-position:center center;
+  opacity:0;
+  transform:scale(1.015);
+  filter:brightness(.55) saturate(.92) contrast(1.06);
+  transition:opacity .8s var(--v53-ease);
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.v53-bg-ready .v53-backdrop-image{opacity:1}
+.v53-backdrop::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:
+    radial-gradient(ellipse 66% 38% at 50% 30%,rgba(40,126,180,.12),transparent 72%),
+    linear-gradient(180deg,rgba(0,3,7,.08) 0%,rgba(0,4,9,.22) 48%,rgba(0,4,8,.55) 100%);
+}
+.v53-backdrop::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:radial-gradient(ellipse at center,transparent 26%,rgba(0,0,0,.18) 64%,rgba(0,0,0,.54) 100%);
+}
+.stage > *:not(.v53-backdrop):not(.v53-ambient-smoke){z-index:2}
+
+/* Very slow room haze. It is deliberately subtle: motion, not fog blobs. */
+.v53-ambient-smoke{
+  position:fixed;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  opacity:.62;
+}
+.v53-ambient-smoke span{
+  position:absolute;
+  border-radius:50%;
+  opacity:0;
+  filter:blur(24px);
+  background:radial-gradient(ellipse,rgba(176,227,252,.11) 0%,rgba(72,159,211,.055) 42%,transparent 74%);
+  will-change:transform,opacity;
+  animation:v53-room-drift var(--dur,32s) var(--v53-ease) infinite;
+  animation-delay:var(--delay,0s);
+}
+.v53-ambient-smoke span:nth-child(1){width:56vw;height:24vw;left:-26vw;top:10%;--dur:34s;--delay:-9s;--dx:16vw;--dy:-11vh}
+.v53-ambient-smoke span:nth-child(2){width:48vw;height:22vw;right:-22vw;top:24%;--dur:38s;--delay:-20s;--dx:-13vw;--dy:-13vh}
+.v53-ambient-smoke span:nth-child(3){width:62vw;height:25vw;left:-20vw;top:57%;--dur:42s;--delay:-28s;--dx:20vw;--dy:-16vh}
+.v53-ambient-smoke span:nth-child(4){width:54vw;height:22vw;right:-25vw;top:76%;--dur:40s;--delay:-17s;--dx:-18vw;--dy:-14vh}
+
+/* The approved hero always stays inside the Telegram viewport. No >100vw sizing and no transform on orbWrap. */
+.orb-wrap{
+  position:relative!important;
+  width:min(calc(100vw - 20px),470px)!important;
+  max-width:470px!important;
+  height:auto!important;
+  aspect-ratio:700 / 676!important;
+  margin:-3px auto 0!important;
+  flex:0 0 auto!important;
+  overflow:visible!important;
+  transform:none!important;
+  filter:none!important;
+  isolation:isolate;
+}
+.v5-hero-art{
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  max-width:100%!important;
+  transform:none!important;
+  filter:saturate(1.02) contrast(1.025)!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+
+/* v5.1/v5.2 synthetic optics are intentionally disabled in v5.3. */
+.v5-orb-motion,.v5-orb-caustics,.v5-orb-live-rim,.v5-orb-glint,
+.v52-stage-bg,.v52-smoke-world,.v52-orb-smoke-shell,.v52-orb-aura{display:none!important}
+
+/* Smoke that follows the smoke already painted into the approved hero. */
+.v53-hero-smoke{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+  overflow:visible;
+  mix-blend-mode:screen;
+  opacity:0;
+  transition:opacity 1.2s var(--v53-ease);
+}
+.v53-ready .v53-hero-smoke{opacity:.86}
+.v53-hero-smoke span{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(13px);
+  background:radial-gradient(ellipse,rgba(218,245,255,.30) 0%,rgba(110,204,247,.12) 38%,rgba(42,125,181,.035) 60%,transparent 76%);
+  opacity:.24;
+  will-change:transform,opacity;
+  animation:v53-hero-wisp var(--dur,18s) var(--v53-ease) infinite;
+  animation-delay:var(--delay,0s);
+}
+.v53-hero-smoke span:nth-child(1){width:30%;height:10%;left:6%;top:12%;--dur:20s;--delay:-6s;--dx:24px;--dy:-28px}
+.v53-hero-smoke span:nth-child(2){width:33%;height:11%;right:5%;top:11%;--dur:22s;--delay:-15s;--dx:-26px;--dy:-30px}
+.v53-hero-smoke span:nth-child(3){width:26%;height:10%;left:14%;top:31%;--dur:18s;--delay:-9s;--dx:26px;--dy:-34px}
+.v53-hero-smoke span:nth-child(4){width:27%;height:10%;right:13%;top:31%;--dur:21s;--delay:-12s;--dx:-25px;--dy:-36px}
+.v53-hero-smoke span:nth-child(5){width:35%;height:12%;left:4%;top:56%;--dur:24s;--delay:-17s;--dx:30px;--dy:-38px}
+.v53-hero-smoke span:nth-child(6){width:36%;height:12%;right:3%;top:55%;--dur:23s;--delay:-8s;--dx:-31px;--dy:-39px}
+.v53-hero-smoke span:nth-child(7){width:38%;height:12%;left:10%;top:78%;--dur:26s;--delay:-19s;--dx:20px;--dy:-31px}
+.v53-hero-smoke span:nth-child(8){width:37%;height:12%;right:9%;top:77%;--dur:25s;--delay:-14s;--dx:-22px;--dy:-32px}
+.v53-hero-smoke span:nth-child(9){width:30%;height:10%;left:35%;top:20%;--dur:24s;--delay:-11s;--dx:6px;--dy:-30px}
+
+/* Existing title/side haze becomes slow and coherent instead of pulsing quickly. */
+.v5-title-smoke{opacity:.24!important;filter:blur(15px)!important;animation:v53-title-float 20s var(--v53-ease) infinite!important}
+.v5-side-smoke{opacity:.14!important;filter:blur(20px)!important;animation:v53-side-float 26s var(--v53-ease) infinite!important}
+
+/* Exact glass sphere region from the approved hero. */
+.v5-orb-mask{
+  left:25.4%!important;
+  top:39.1%!important;
+  width:49.2%!important;
+  height:auto!important;
+  aspect-ratio:1 / 1!important;
+  border-radius:50%!important;
+  z-index:5!important;
+  opacity:.70!important;
+  background:
+    radial-gradient(circle at 50% 52%,rgba(1,11,21,.78) 0%,rgba(2,14,25,.70) 46%,rgba(2,17,29,.38) 68%,rgba(3,23,38,.10) 83%,transparent 92%)!important;
+  box-shadow:inset 0 0 52px rgba(53,167,229,.10)!important;
+  transition:opacity .9s var(--v53-ease),background .9s var(--v53-ease),box-shadow .9s var(--v53-ease)!important;
+}
+.orb-wrap.thinking .v5-orb-mask{opacity:.80!important;box-shadow:inset 0 0 62px rgba(71,185,241,.18)!important}
+.orb-wrap.phase-phrase .v5-orb-mask,.orb-wrap.phase-reveal .v5-orb-mask{opacity:.86!important}
+.v5-orb-smoke{display:none!important}
+
+/* New living smoke inside the glass. */
+.v53-orb-interior{
+  position:absolute;
+  left:25.4%;
+  top:39.1%;
+  width:49.2%;
+  aspect-ratio:1 / 1;
+  z-index:6;
+  border-radius:50%;
+  overflow:hidden;
+  pointer-events:none;
+  isolation:isolate;
+  transition:filter .9s var(--v53-ease),opacity .9s var(--v53-ease);
+}
+.v53-orb-interior::before{
+  content:'';
+  position:absolute;
+  inset:5%;
+  border-radius:50%;
+  z-index:0;
+  background:
+    radial-gradient(circle at 50% 54%,rgba(27,112,170,.13),transparent 54%),
+    radial-gradient(circle at 30% 22%,rgba(232,250,255,.10),transparent 22%),
+    radial-gradient(circle at 73% 72%,rgba(71,181,237,.08),transparent 28%);
+  animation:v53-inner-light 9.5s var(--v53-ease) infinite;
+}
+.v53-orb-vortex{
+  position:absolute;
+  inset:3%;
+  border-radius:50%;
+  z-index:1;
+  mix-blend-mode:screen;
+  animation:v53-vortex-spin 30s linear infinite;
+  transition:opacity .8s var(--v53-ease),filter .8s var(--v53-ease);
+}
+.v53-orb-vortex.v53-orb-vortex--reverse{animation-direction:reverse;animation-duration:38s;opacity:.72}
+.v53-orb-vortex span{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(8px);
+  background:radial-gradient(ellipse,rgba(237,251,255,.58) 0%,rgba(122,211,250,.23) 34%,rgba(47,138,199,.06) 58%,transparent 76%);
+  opacity:.34;
+  animation:v53-inner-breathe 7s var(--v53-ease) infinite;
+}
+.v53-orb-vortex span:nth-child(1){width:56%;height:19%;left:4%;top:60%;transform:rotate(-18deg);animation-delay:-1s}
+.v53-orb-vortex span:nth-child(2){width:48%;height:18%;right:2%;top:43%;transform:rotate(17deg);animation-delay:-3.5s}
+.v53-orb-vortex span:nth-child(3){width:40%;height:17%;left:28%;top:21%;transform:rotate(-6deg);animation-delay:-5s}
+.v53-orb-vortex span:nth-child(4){width:34%;height:16%;left:17%;top:38%;transform:rotate(13deg);animation-delay:-2.2s}
+.v53-orb-vortex span:nth-child(5){width:38%;height:17%;right:15%;top:67%;transform:rotate(-11deg);animation-delay:-4.6s}
+.v53-orb-vortex--reverse span{opacity:.23;filter:blur(11px)}
+.orb-wrap.thinking .v53-orb-vortex{animation-duration:12s;filter:brightness(1.28) saturate(1.08);opacity:1}
+.orb-wrap.thinking .v53-orb-vortex--reverse{animation-duration:16s;opacity:.9}
+.orb-wrap.phase-phrase .v53-orb-vortex{opacity:.72;animation-duration:22s}
+.orb-wrap.phase-reveal .v53-orb-vortex{opacity:.48;animation-duration:28s}
+
+/* Fine mist above the text so words feel embedded in the glass rather than pasted on top. */
+.v53-front-haze{
+  position:absolute;
+  left:27.2%;
+  top:41.0%;
+  width:45.6%;
+  aspect-ratio:1 / 1;
+  z-index:9;
+  border-radius:50%;
+  overflow:hidden;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  opacity:.22;
+  transition:opacity .8s var(--v53-ease);
+}
+.v53-front-haze::before,.v53-front-haze::after{
+  content:'';
+  position:absolute;
+  width:70%;
+  height:18%;
+  border-radius:50%;
+  filter:blur(9px);
+  background:radial-gradient(ellipse,rgba(214,244,255,.30),rgba(90,190,239,.09) 48%,transparent 75%);
+  animation:v53-front-drift 12s var(--v53-ease) infinite;
+}
+.v53-front-haze::before{left:-12%;top:58%;transform:rotate(-12deg)}
+.v53-front-haze::after{right:-13%;top:31%;transform:rotate(14deg);animation-delay:-6s}
+.orb-wrap.thinking .v53-front-haze{opacity:.36}
+.orb-wrap.phase-phrase .v53-front-haze{opacity:.18}
+.orb-wrap.phase-reveal .v53-front-haze{opacity:.10}
+
+/* Glass layer is aligned to the true sphere and only breathes via light, never via geometry. */
+.v5-glass-front{
+  left:25.4%!important;
+  top:39.1%!important;
+  width:49.2%!important;
+  height:auto!important;
+  aspect-ratio:1 / 1!important;
+  z-index:10!important;
+  border-radius:50%!important;
+  opacity:.82!important;
+  background:
+    radial-gradient(ellipse 35% 15% at 35% 14%,rgba(255,255,255,.20),transparent 75%),
+    radial-gradient(circle at 83% 43%,rgba(168,231,255,.08),transparent 30%),
+    linear-gradient(145deg,rgba(255,255,255,.025),transparent 42%)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(224,248,255,.09),
+    inset 10px 4px 25px rgba(244,253,255,.04),
+    0 0 20px rgba(80,190,245,.07)!important;
+  animation:v53-glass-breathe 8.8s var(--v53-ease) infinite;
+}
+.orb-wrap.thinking .v5-glass-front{box-shadow:inset 0 0 0 1px rgba(232,250,255,.14),0 0 32px rgba(90,201,252,.15)!important}
+
+/* PROTECTED: text stays completely outside animated/transformed visual layers. */
+.screen{
+  left:29.8%!important;
+  top:50.5%!important;
+  width:40.4%!important;
+  height:27.5%!important;
+  z-index:8!important;
+  transform:none!important;
+  filter:none!important;
+  overflow:visible!important;
+  transition:opacity .62s var(--v53-ease)!important;
+}
+.screen-content{width:94%!important;max-height:92%!important}
+.oracle-phrase,.mix-name{transition:text-shadow .7s var(--v53-ease),opacity .4s var(--v53-ease)!important}
+.ch{transition:opacity .18s ease!important}
+.mix-name{font-size:22px!important;line-height:1.13!important;margin-bottom:8px!important}
+.mix-name--long{font-size:18.5px!important}.mix-name--very-long{font-size:16.5px!important}
+.mix-desc{font-size:10.5px!important;line-height:1.42!important}
+
+/* Smooth touch charge around the sphere. */
+.v53-orb-touch{
+  position:absolute;
+  left:25.4%;
+  top:39.1%;
+  width:49.2%;
+  aspect-ratio:1 / 1;
+  z-index:11;
+  border-radius:50%;
+  pointer-events:none;
+  opacity:0;
+  box-shadow:0 0 0 1px rgba(215,247,255,.20),0 0 38px rgba(76,190,247,.20),inset 0 0 36px rgba(124,217,255,.10);
+}
+.orb-wrap.v53-touching .v53-orb-touch{animation:v53-touch-pulse .72s var(--v53-ease) both}
+
+/* Keep lower UI in the same depth and tone as the reference. */
+.mix-card,.next-mix-btn,.sheet{backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+.hint{color:#7895a8!important;text-shadow:0 1px 12px rgba(0,0,0,.72)}
+.footer-motto{color:#86a9bd!important;text-shadow:0 1px 10px rgba(0,0,0,.76)}
+
+@keyframes v53-room-drift{
+  0%,100%{transform:translate3d(0,8vh,0) scale(.90);opacity:0}
+  18%{opacity:.20}
+  55%{transform:translate3d(var(--dx),var(--dy),0) scale(1.08);opacity:.15}
+  86%{opacity:.08}
+}
+@keyframes v53-hero-wisp{
+  0%,100%{transform:translate3d(0,8px,0) scale(.88);opacity:.08}
+  20%{opacity:.28}
+  58%{transform:translate3d(var(--dx),var(--dy),0) scale(1.12);opacity:.31}
+  84%{opacity:.12}
+}
+@keyframes v53-title-float{
+  0%,100%{transform:translate3d(0,2px,0) scale(.98);opacity:.18}
+  45%{transform:translate3d(-5px,-9px,0) scale(1.05,1.09);opacity:.30}
+  72%{transform:translate3d(4px,-5px,0) scale(1.02,1.05);opacity:.22}
+}
+@keyframes v53-side-float{
+  0%,100%{transform:translate3d(0,6px,0) scale(.96);opacity:.10}
+  50%{transform:translate3d(7px,-11px,0) scale(1.05);opacity:.19}
+}
+@keyframes v53-vortex-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes v53-inner-breathe{
+  0%,100%{opacity:.20;transform:scale(.88)}
+  50%{opacity:.46;transform:scale(1.08)}
+}
+@keyframes v53-inner-light{
+  0%,100%{opacity:.62;transform:scale(.98)}
+  50%{opacity:.94;transform:scale(1.035)}
+}
+@keyframes v53-front-drift{
+  0%,100%{translate:0 8px;scale:.90;opacity:.12}
+  50%{translate:8px -16px;scale:1.08;opacity:.30}
+}
+@keyframes v53-glass-breathe{
+  0%,100%{opacity:.74}
+  50%{opacity:.90}
+}
+@keyframes v53-touch-pulse{
+  0%{opacity:0;transform:scale(.96)}
+  35%{opacity:.86;transform:scale(1.01)}
+  100%{opacity:0;transform:scale(1.055)}
+}
+
+@media(max-width:390px){
+  .stage{padding-left:8px!important;padding-right:8px!important}
+  .orb-wrap{width:min(calc(100vw - 10px),470px)!important}
+  .screen{left:29.4%!important;width:41.2%!important}
+  .mix-name{font-size:20px!important}.mix-name--long{font-size:17px!important}.mix-name--very-long{font-size:15.5px!important}
+  .mix-desc{font-size:9.8px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .v53-ambient-smoke span,.v53-hero-smoke span,.v5-title-smoke,.v5-side-smoke,
+  .v53-orb-vortex,.v53-orb-vortex span,.v53-orb-interior::before,.v53-front-haze::before,.v53-front-haze::after,.v5-glass-front{animation:none!important}
+  .v53-ambient-smoke{opacity:.24}
+}
