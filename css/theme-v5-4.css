@@ -24,9 +24,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;background:#0105
 }
 .v5-hero-art{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;transform:none!important}
 
-/* v5.3 CSS smoke is disabled: motion now comes from actual frame-by-frame rendering. */
-.v53-ambient-smoke,.v53-hero-smoke,.v53-orb-interior,.v53-front-haze{display:none!important}
-.v5-orb-smoke{display:none!important}
+/* Previous fake/CSS smoke is disabled: motion now comes from actual frame-by-frame rendering. */
+.v53-ambient-smoke,.v53-hero-smoke,.v53-orb-interior,.v53-front-haze,
+.v5-title-smoke,.v5-side-smoke,.v5-orb-smoke{display:none!important}
 
 /* One continuous background scene. */
 .v54-backdrop{
@@ -46,15 +46,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden!important;background:#0105
 
 /* GPU smoke canvases. */
 .v54-smoke-canvas{pointer-events:none;display:block;mix-blend-mode:screen;will-change:opacity}
-.v54-scene-smoke{
-  position:fixed;inset:0;width:100vw;height:100dvh;z-index:1;opacity:.72;
-}
-.v54-hero-smoke{
-  position:absolute;inset:0;width:100%;height:100%;z-index:4;opacity:.82;
-}
+.v54-scene-smoke{position:fixed;inset:0;width:100vw;height:100dvh;z-index:1;opacity:.84}
+.v54-hero-smoke{position:absolute;inset:0;width:100%;height:100%;z-index:4;opacity:.90}
 .v54-orb-smoke{
   position:absolute;left:25.4%;top:39.1%;width:49.2%;aspect-ratio:1/1;height:auto;
-  z-index:6;border-radius:50%;overflow:hidden;opacity:.96;
+  z-index:6;border-radius:50%;overflow:hidden;opacity:1;
   filter:drop-shadow(0 0 14px rgba(91,196,247,.12));
 }
 
