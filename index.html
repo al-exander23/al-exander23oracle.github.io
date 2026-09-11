@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="css/theme-v5.css?v=5.0.0">
 <link rel="stylesheet" href="css/theme-v5-3.css?v=5.3.0">
 <link rel="stylesheet" href="css/theme-v5-3-fixes.css?v=5.3.0">
+<link rel="stylesheet" href="css/theme-v5-4.css?v=5.4.0">
 </head>
 <body>
 
@@ -29,20 +30,17 @@
   </div>
   <div class="counter" id="counter"></div>
 
-  <!-- v5: the approved reference is the actual hero surface, not a CSS imitation. -->
   <div class="orb-wrap phase-idle" id="orbWrap" aria-label="Коснись шара, чтобы узнать микс">
     <img class="v5-hero-art" id="v5HeroArt" alt="" aria-hidden="true" draggable="false">
     <div class="v5-title-smoke" aria-hidden="true"></div>
     <div class="v5-side-smoke" aria-hidden="true"></div>
 
-    <!-- Compatibility-only surface for the existing rotator API. It is visually hidden. -->
     <div class="orb-surface" id="orbSurface" aria-hidden="true"></div>
 
-    <!-- Dynamic mask is aligned with the photographed glass sphere. -->
     <div class="v5-orb-mask" aria-hidden="true"></div>
     <div class="orb-smoke v5-orb-smoke" id="orbSmoke" aria-hidden="true"></div>
 
-    <!-- PROTECTED: live text remains outside any rotating/transformed orb subtree. -->
+    <!-- PROTECTED: live text remains a stable sibling, never inside a transformed smoke/glass layer. -->
     <div class="screen" id="screen">
       <div class="screen-content" id="screenContent">
         <div class="idle-icon">✦</div>
@@ -73,6 +71,6 @@
 <script type="module" src="js/app.js?v=5.0.0"></script>
 <script type="module" src="js/taste.js?v=5.0.0"></script>
 <script type="module" src="js/theme-v5.js?v=5.0.0"></script>
-<script type="module" src="js/theme-v5-3.js?v=5.3.0"></script>
+<script type="module" src="js/theme-v5-4.js?v=5.4.0"></script>
 </body>
 </html>
