@@ -1,14 +1,8 @@
 /* v5.5 integration fixes — remove the hard rectangle and keep live smoke restrained. */
 .v5-hero-art{
   opacity:0!important;
-  -webkit-mask-image:
-    linear-gradient(to bottom,transparent 0%,#000 7%,#000 91%,transparent 100%),
-    linear-gradient(to right,transparent 0%,#000 8%,#000 92%,transparent 100%)!important;
-  -webkit-mask-composite:source-in!important;
-  mask-image:
-    linear-gradient(to bottom,transparent 0%,#000 7%,#000 91%,transparent 100%),
-    linear-gradient(to right,transparent 0%,#000 8%,#000 92%,transparent 100%)!important;
-  mask-composite:intersect!important;
+  -webkit-mask-image:radial-gradient(ellipse 76% 98% at 50% 49%,#000 0%,#000 58%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.60) 82%,transparent 100%)!important;
+  mask-image:radial-gradient(ellipse 76% 98% at 50% 49%,#000 0%,#000 58%,rgba(0,0,0,.94) 68%,rgba(0,0,0,.60) 82%,transparent 100%)!important;
   filter:saturate(.93) contrast(1.01) brightness(.90)!important;
 }
 .v5-art-ready .v5-hero-art{opacity:.94!important}
