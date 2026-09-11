@@ -1,0 +1,131 @@
+/* ALX Oracle v5.5 — integrated live reference scene.
+   The approved art is a transparent hero cutout over one continuous ambient background.
+   Live smoke is restrained and phase-reactive; #screen remains stable and untransformed. */
+
+:root{--v55-ease:cubic-bezier(.22,.61,.36,1)}
+
+html,body{width:100%;max-width:100%;overflow-x:hidden!important;background:#01050a!important}
+.stage{
+  position:relative!important;
+  width:100%!important;
+  max-width:100vw!important;
+  min-height:100dvh!important;
+  overflow:hidden!important;
+  padding-top:max(58px,calc(env(safe-area-inset-top) + 12px))!important;
+  padding-right:max(8px,env(safe-area-inset-right))!important;
+  padding-bottom:max(34px,calc(env(safe-area-inset-bottom) + 20px))!important;
+  padding-left:max(8px,env(safe-area-inset-left))!important;
+  background:#01050a!important;
+  isolation:isolate;
+}
+
+/* One room, one background — no rectangular hero panel. */
+.v55-backdrop{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#01050a}
+.v55-backdrop img{
+  position:absolute;inset:-3%;width:106%;height:106%;object-fit:cover;object-position:50% 42%;
+  filter:blur(10px) brightness(.38) saturate(.86) contrast(1.08);
+  transform:scale(1.035);opacity:.95;user-select:none;-webkit-user-drag:none;
+}
+.v55-backdrop::before{content:'';position:absolute;inset:0;z-index:1;background:
+  radial-gradient(ellipse 70% 42% at 50% 32%,rgba(42,132,186,.16),transparent 72%),
+  linear-gradient(180deg,rgba(0,3,7,.06),rgba(0,5,10,.26) 58%,rgba(0,4,8,.62));}
+.v55-backdrop::after{content:'';position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse at 50% 40%,transparent 22%,rgba(0,0,0,.18) 62%,rgba(0,0,0,.58) 100%)}
+.stage>*:not(.v55-backdrop):not(.v55-scene-smoke){z-index:2}
+
+/* Hero is a transparent title/orb/stand cutout, not a full rectangular image. */
+.orb-wrap{
+  position:relative!important;
+  width:min(calc(100vw - 18px),470px)!important;
+  max-width:470px!important;
+  height:auto!important;
+  aspect-ratio:700/676!important;
+  margin:0 auto!important;
+  overflow:visible!important;
+  transform:none!important;
+  filter:none!important;
+  isolation:isolate;
+}
+.v5-hero-art{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  object-fit:contain!important;object-position:center!important;background:none!important;
+  transform:none!important;filter:saturate(.98) contrast(1.03)!important;
+  opacity:0;transition:opacity .55s var(--v55-ease)!important;
+}
+.v5-art-ready .v5-hero-art{opacity:1}
+
+/* Disable every older fake smoke/optics layer. */
+.v53-ambient-smoke,.v53-hero-smoke,.v53-orb-interior,.v53-front-haze,
+.v54-backdrop,.v54-scene-smoke,.v54-hero-smoke,.v54-orb-smoke,.v54-touch-ring,
+.v5-title-smoke,.v5-side-smoke,.v5-orb-smoke,.v5-orb-motion,.v5-orb-caustics,.v5-orb-live-rim,.v5-orb-glint{display:none!important}
+
+/* Real-time canvases. Scene smoke stays behind the content; hero smoke is subtle. */
+.v55-smoke-canvas{pointer-events:none;display:block;mix-blend-mode:screen}
+.v55-scene-smoke{position:fixed;inset:0;width:100vw;height:100dvh;z-index:1;opacity:.38}
+.v55-hero-smoke{position:absolute;inset:0;width:100%;height:100%;z-index:3;opacity:.34}
+.v55-orb-smoke{
+  position:absolute;left:25.1%;top:38.8%;width:49.8%;aspect-ratio:1/1;height:auto;
+  z-index:6;border-radius:50%;overflow:hidden;opacity:.78;
+}
+
+/* Remove the baked question mark without bleaching the glass. */
+.v5-orb-mask{
+  position:absolute!important;left:25.1%!important;top:38.8%!important;width:49.8%!important;height:auto!important;aspect-ratio:1/1!important;
+  z-index:5!important;border-radius:50%!important;pointer-events:none!important;
+  opacity:.72!important;
+  background:radial-gradient(circle at 50% 51%,rgba(0,8,16,.80) 0%,rgba(1,11,20,.70) 48%,rgba(3,20,32,.34) 72%,rgba(7,31,46,.08) 88%,transparent 95%)!important;
+  box-shadow:inset 0 0 42px rgba(60,170,226,.09)!important;
+  transition:opacity .85s var(--v55-ease),box-shadow .85s var(--v55-ease)!important;
+}
+.orb-wrap.thinking .v5-orb-mask{opacity:.79!important;box-shadow:inset 0 0 54px rgba(70,187,240,.14)!important}
+.orb-wrap.phase-phrase .v5-orb-mask,.orb-wrap.phase-reveal .v5-orb-mask{opacity:.83!important}
+
+/* Glass front stays above both smoke and text, giving depth without white wash. */
+.v5-glass-front{
+  position:absolute!important;left:25.1%!important;top:38.8%!important;width:49.8%!important;height:auto!important;aspect-ratio:1/1!important;
+  z-index:9!important;border-radius:50%!important;pointer-events:none!important;opacity:.66!important;
+  background:
+    radial-gradient(ellipse 31% 12% at 34% 13%,rgba(255,255,255,.16),transparent 74%),
+    radial-gradient(ellipse 16% 34% at 83% 34%,rgba(173,232,255,.07),transparent 80%),
+    radial-gradient(circle at 50% 50%,transparent 67%,rgba(122,212,255,.035) 82%,transparent 94%)!important;
+  box-shadow:inset 0 0 0 1px rgba(221,247,255,.055),inset 10px 3px 21px rgba(247,254,255,.035),inset -12px -12px 26px rgba(0,5,12,.08)!important;
+  animation:v55-glass-breathe 9s var(--v55-ease) infinite!important;
+}
+
+/* Protected text remains a non-transformed sibling, visually inside the glass. */
+.screen{
+  position:absolute!important;left:29.1%!important;top:47.4%!important;width:41.8%!important;height:23%!important;
+  z-index:8!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;
+  transform:none!important;filter:none!important;pointer-events:none!important;
+  transition:opacity .55s var(--v55-ease)!important;
+}
+.screen-content{width:94%!important;max-width:none!important;max-height:92%!important;text-align:center!important}
+.oracle-phrase,.mix-name{color:#f8fdff!important;text-shadow:0 0 2px rgba(255,255,255,.88),0 0 8px rgba(184,232,255,.66),0 0 17px rgba(72,178,235,.38)!important}
+.mix-name{font-size:20px!important;line-height:1.14!important;margin-bottom:7px!important}
+.mix-name--long{font-size:17.5px!important}.mix-name--very-long{font-size:15.5px!important}
+.mix-desc{font-size:10.3px!important;line-height:1.4!important;color:#a8d9ee!important;text-shadow:0 0 8px rgba(69,168,220,.18)!important}
+
+/* Make utility controls secondary instead of breaking the cinematic composition. */
+.hint{max-width:330px!important;margin:7px auto 0!important;font-size:10.5px!important;line-height:1.5!important;color:#6f8ea1!important}
+.permission-btn,.lock-btn{
+  width:auto!important;min-width:0!important;margin:8px auto 0!important;padding:7px 12px!important;
+  border-radius:999px!important;border:1px solid rgba(127,199,235,.22)!important;
+  background:rgba(2,15,25,.48)!important;color:#84aebf!important;font:500 10px/1 'Inter',sans-serif!important;
+  box-shadow:none!important;opacity:.86;
+}
+.lock-btn.active{color:#c6ebfa!important;border-color:rgba(134,214,250,.36)!important}
+
+/* Result stays elegant, but does not compete with the living orb. */
+.mix-card{margin-top:16px!important;box-shadow:0 20px 48px rgba(0,0,0,.46),0 0 22px rgba(65,174,230,.10),inset 0 1px rgba(245,253,255,.07)!important}
+.next-mix-btn{margin-top:17px!important}
+.footer-motto{margin-top:20px!important}
+
+@keyframes v55-glass-breathe{0%,100%{opacity:.60}50%{opacity:.71}}
+
+@media(max-width:390px){
+  .stage{padding-left:5px!important;padding-right:5px!important}
+  .orb-wrap{width:min(calc(100vw - 10px),465px)!important}
+  .screen{left:28.5%!important;width:43%!important}
+}
+
+@media(prefers-reduced-motion:reduce){.v55-smoke-canvas{opacity:.16!important}.v5-glass-front{animation:none!important}}
