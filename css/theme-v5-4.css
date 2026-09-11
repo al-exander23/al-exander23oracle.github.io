@@ -1,0 +1,118 @@
+/* ALX Oracle v5.4 — real-time smoke engine presentation layer.
+   The moving smoke is rendered by WebGL canvases. #screen remains untouched and untransformed. */
+
+:root{--v54-ease:cubic-bezier(.22,.61,.36,1)}
+
+/* Keep the approved composition inside the Telegram viewport. */
+html,body{width:100%;max-width:100%;overflow-x:hidden!important;background:#01050a!important}
+.stage{
+  width:100%!important;
+  max-width:100vw!important;
+  min-height:100dvh!important;
+  overflow:hidden!important;
+  padding-left:max(8px,env(safe-area-inset-left))!important;
+  padding-right:max(8px,env(safe-area-inset-right))!important;
+}
+.orb-wrap{
+  width:min(calc(100vw - 16px),470px)!important;
+  max-width:470px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  transform:none!important;
+  filter:none!important;
+  overflow:visible!important;
+}
+.v5-hero-art{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;transform:none!important}
+
+/* v5.3 CSS smoke is disabled: motion now comes from actual frame-by-frame rendering. */
+.v53-ambient-smoke,.v53-hero-smoke,.v53-orb-interior,.v53-front-haze{display:none!important}
+.v5-orb-smoke{display:none!important}
+
+/* One continuous background scene. */
+.v54-backdrop{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:linear-gradient(180deg,#02070d 0%,#03101b 47%,#01050a 100%);
+}
+.v54-backdrop img{
+  position:absolute;inset:-1.5%;width:103%;height:103%;object-fit:cover;object-position:center;
+  opacity:.90;filter:brightness(.52) saturate(.88) contrast(1.06) blur(1.5px);
+  transform:scale(1.015);user-select:none;-webkit-user-drag:none;
+}
+.v54-backdrop::after{
+  content:'';position:absolute;inset:0;background:
+  linear-gradient(180deg,rgba(0,4,8,.08),rgba(0,4,9,.26) 56%,rgba(0,4,8,.58)),
+  radial-gradient(ellipse at 50% 34%,transparent 18%,rgba(0,0,0,.16) 62%,rgba(0,0,0,.52) 100%);
+}
+
+/* GPU smoke canvases. */
+.v54-smoke-canvas{pointer-events:none;display:block;mix-blend-mode:screen;will-change:opacity}
+.v54-scene-smoke{
+  position:fixed;inset:0;width:100vw;height:100dvh;z-index:1;opacity:.72;
+}
+.v54-hero-smoke{
+  position:absolute;inset:0;width:100%;height:100%;z-index:4;opacity:.82;
+}
+.v54-orb-smoke{
+  position:absolute;left:25.4%;top:39.1%;width:49.2%;aspect-ratio:1/1;height:auto;
+  z-index:6;border-radius:50%;overflow:hidden;opacity:.96;
+  filter:drop-shadow(0 0 14px rgba(91,196,247,.12));
+}
+
+/* Hide the baked question-mark area and let live smoke own the glass interior. */
+.v5-orb-mask{
+  left:25.4%!important;top:39.1%!important;width:49.2%!important;height:auto!important;aspect-ratio:1/1!important;
+  z-index:5!important;border-radius:50%!important;opacity:.84!important;
+  background:radial-gradient(circle at 50% 52%,rgba(1,10,19,.88) 0%,rgba(2,14,25,.78) 48%,rgba(2,18,30,.43) 70%,rgba(4,25,39,.12) 86%,transparent 94%)!important;
+  box-shadow:inset 0 0 54px rgba(64,180,239,.13)!important;
+  transition:opacity .8s var(--v54-ease),box-shadow .8s var(--v54-ease)!important;
+}
+.orb-wrap.thinking .v5-orb-mask{opacity:.90!important;box-shadow:inset 0 0 70px rgba(87,199,249,.22)!important}
+.orb-wrap.phase-phrase .v5-orb-mask,.orb-wrap.phase-reveal .v5-orb-mask{opacity:.88!important}
+
+/* Glass remains above live smoke and live text. */
+.v5-glass-front{
+  left:25.4%!important;top:39.1%!important;width:49.2%!important;height:auto!important;aspect-ratio:1/1!important;
+  z-index:9!important;border-radius:50%!important;opacity:.80!important;
+  background:
+    radial-gradient(ellipse 34% 14% at 34% 14%,rgba(255,255,255,.18),transparent 73%),
+    radial-gradient(ellipse 17% 38% at 82% 37%,rgba(171,230,255,.08),transparent 78%),
+    radial-gradient(circle at 50% 50%,transparent 63%,rgba(124,215,255,.045) 79%,transparent 92%)!important;
+  box-shadow:inset 0 0 0 1px rgba(218,246,255,.07),inset 11px 5px 24px rgba(244,253,255,.045),inset -14px -12px 30px rgba(0,5,12,.10)!important;
+  animation:v54-glass-breathe 8s var(--v54-ease) infinite;
+}
+
+/* Protected live text sits inside the same glass coordinates without transform/filter. */
+.screen{
+  left:29%!important;top:48.7%!important;width:42%!important;height:22%!important;
+  z-index:8!important;transform:none!important;filter:none!important;background:transparent!important;
+  transition:opacity .52s var(--v54-ease)!important;
+}
+.screen-content{width:94%!important;max-width:none!important}
+.oracle-phrase,.mix-name{text-shadow:0 0 3px #fff,0 0 11px rgba(199,240,255,.95),0 0 25px rgba(81,190,246,.65)!important}
+.mix-desc{color:#b6e7fb!important;text-shadow:0 0 10px rgba(75,178,233,.24)!important}
+
+/* Interaction pulse is optical only; the sphere container never transforms. */
+.v54-touch-ring{
+  position:absolute;left:25.4%;top:39.1%;width:49.2%;aspect-ratio:1/1;z-index:10;border-radius:50%;pointer-events:none;
+  opacity:0;border:1px solid rgba(209,245,255,.22);box-shadow:0 0 28px rgba(110,211,255,.18),inset 0 0 35px rgba(113,210,255,.10);
+}
+.orb-wrap.v54-touch .v54-touch-ring{animation:v54-touch .7s var(--v54-ease) both}
+
+/* Text/result motion is intentionally slower and coherent with smoke. */
+.mix-card{transition:opacity .55s var(--v54-ease),transform .55s var(--v54-ease)!important}
+.mix-card.show{animation:v54-card-in .58s var(--v54-ease) both}
+.next-mix-btn{transition:filter .3s ease,box-shadow .4s var(--v54-ease),transform .25s ease!important}
+
+@keyframes v54-glass-breathe{0%,100%{opacity:.74}50%{opacity:.88}}
+@keyframes v54-touch{0%{opacity:0;transform:scale(.97)}34%{opacity:.9;transform:scale(1.01)}100%{opacity:0;transform:scale(1.055)}}
+@keyframes v54-card-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:390px){
+  .orb-wrap{width:min(calc(100vw - 10px),465px)!important}
+  .screen{left:28.5%!important;width:43%!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .v54-smoke-canvas{opacity:.38!important}
+  .v5-glass-front{animation:none!important}
+}
