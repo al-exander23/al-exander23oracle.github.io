@@ -1,0 +1,9 @@
+/* v5.3 compatibility/polish overrides. */
+.stage > .top-toolbar{z-index:30!important}
+.stage > .counter{z-index:29!important}
+.grain,.motes{z-index:1!important}
+
+@keyframes v53-front-drift{
+  0%,100%{transform:translate3d(0,8px,0) scale(.90);opacity:.12}
+  50%{transform:translate3d(8px,-16px,0) scale(1.08);opacity:.30}
+}
