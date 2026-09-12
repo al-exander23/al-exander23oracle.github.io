@@ -10,6 +10,7 @@ import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
 import { initScene, requestOracle } from './scene.js';
 import { getSettings } from './profile.js';
 import { recordVisit } from './daily.js?v=1.10.0';
+import { recordOracleResult, syncAchievements } from './achievements.js?v=1.11.0';
 
 // ---------------------------------------------------------------
 // ALX VISUAL FORENSICS (v1.2.5) — временный диагностический код.
@@ -89,6 +90,12 @@ initScene(
       counterEl.textContent = '№ ' + String(count).padStart(3, '0');
       lockBtn.style.display = 'inline-block';
       haptic('light');
+
+      const unlocked = recordOracleResult();
+      if (unlocked.length) {
+        const extra = unlocked.length > 1 ? ` +${unlocked.length - 1}` : '';
+        setTimeout(() => showToast(`🏆 ${unlocked[0].title}${extra}`), 420);
+      }
     },
   },
   rotator,
@@ -197,6 +204,7 @@ document.getElementById('sheetOverlay').addEventListener('click', (e) => {
 // Старт
 // ---------------------------------------------------------------
 recordVisit();
+syncAchievements();
 renderIdleState(screenContent);
 initMotion();
 initMixes().catch((err) => {
