@@ -9,6 +9,7 @@ import { createGlobeRotator, spawnMotes } from './effects.js';
 import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
 import { initScene, requestOracle } from './scene.js';
 import { getSettings } from './profile.js';
+import { recordVisit } from './daily.js?v=1.10.0';
 
 // ---------------------------------------------------------------
 // ALX VISUAL FORENSICS (v1.2.5) — временный диагностический код.
@@ -195,6 +196,7 @@ document.getElementById('sheetOverlay').addEventListener('click', (e) => {
 // ---------------------------------------------------------------
 // Старт
 // ---------------------------------------------------------------
+recordVisit();
 renderIdleState(screenContent);
 initMotion();
 initMixes().catch((err) => {
