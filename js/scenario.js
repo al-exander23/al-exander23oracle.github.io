@@ -3,6 +3,7 @@
 
 import { getItem, setItem } from './storage.js';
 import { buildDerivedProfile, calculateMixScore } from './personalization.js';
+import { isPremiumCollection, isProActive } from './pro.js?v=1.13.0';
 
 const KEY = 'alx_oracle_scenario';
 
@@ -45,6 +46,10 @@ export const COLLECTION_OPTIONS = [
   { id: 'tropical', label: 'Тропические' },
   { id: 'sour', label: 'С кислинкой' },
   { id: 'strong', label: 'Крепкие' },
+  { id: 'signature', label: 'ALX Signature', pro: true },
+  { id: 'date-night', label: 'Для двоих', pro: true },
+  { id: 'after-dark', label: 'После полуночи', pro: true },
+  { id: 'experimental', label: 'Эксперимент', pro: true },
 ];
 
 const BERRY_WORDS = [
@@ -81,13 +86,13 @@ function includesAny(names, words) {
 export function collectionMatches(mix, collectionId) {
   if (!mix || collectionId === 'any') return true;
   const names = recipeNames(mix);
+  const mood = normalize(mix.mood);
 
   switch (collectionId) {
     case 'fresh':
       return Number(mix.freshness) >= 2 || includesAny(names, ['мята', 'эвкалипт', 'лед', 'айс', 'ментол']);
     case 'dessert':
-      return Number(mix.sweetness) >= 2 && includesAny(names, DESSERT_WORDS)
-        || includesAny(names, DESSERT_WORDS);
+      return includesAny(names, DESSERT_WORDS) || Number(mix.sweetness) >= 3;
     case 'berry':
       return includesAny(names, BERRY_WORDS);
     case 'tropical':
@@ -96,6 +101,18 @@ export function collectionMatches(mix, collectionId) {
       return Number(mix.sourness) >= 2 || includesAny(names, ['лимон', 'лайм', 'грейпфрут', 'клюква', 'кисл']);
     case 'strong':
       return Number(mix.strength) >= 3;
+    case 'signature':
+      return Number(mix.popularity) >= 78 && Number(mix.difficulty || 1) <= 3;
+    case 'date-night':
+      return ['уют', 'вечер'].includes(mood)
+        || (Number(mix.sweetness) >= 2 && Number(mix.freshness) <= 2);
+    case 'after-dark':
+      return mood === 'вечер'
+        || (Number(mix.popularity) >= 72 && Number(mix.strength) >= 2);
+    case 'experimental':
+      return Number(mix.sourness) >= 2
+        || Number(mix.freshness) >= 2
+        || Number(mix.difficulty) >= 3;
     default:
       return true;
   }
@@ -109,6 +126,10 @@ function validCollection(value) {
   return COLLECTION_OPTIONS.some((item) => item.id === value);
 }
 
+function collectionAllowed(value) {
+  return validCollection(value) && (!isPremiumCollection(value) || isProActive());
+}
+
 export function getScenario() {
   const raw = getItem(KEY, null);
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
@@ -119,17 +140,18 @@ export function getScenario() {
     mood: validOption('mood', raw.mood) ? raw.mood : DEFAULT_SCENARIO.mood,
     company: validOption('company', raw.company) ? raw.company : DEFAULT_SCENARIO.company,
     time: validOption('time', raw.time) ? raw.time : DEFAULT_SCENARIO.time,
-    collection: validCollection(raw.collection) ? raw.collection : DEFAULT_SCENARIO.collection,
+    collection: collectionAllowed(raw.collection) ? raw.collection : DEFAULT_SCENARIO.collection,
   };
 }
 
 export function setScenario(patch = {}) {
   const current = getScenario();
+  const requestedCollection = patch.collection;
   const next = {
     mood: validOption('mood', patch.mood) ? patch.mood : current.mood,
     company: validOption('company', patch.company) ? patch.company : current.company,
     time: validOption('time', patch.time) ? patch.time : current.time,
-    collection: validCollection(patch.collection) ? patch.collection : current.collection,
+    collection: collectionAllowed(requestedCollection) ? requestedCollection : current.collection,
   };
   setItem(KEY, next);
   return next;
@@ -243,6 +265,11 @@ function scenarioBonus(mix, scenario) {
   if (scenario.collection !== 'any' && collectionMatches(mix, scenario.collection)) {
     bonus += 3;
   }
+
+  if (scenario.collection === 'signature' && Number(mix.popularity) >= 85) bonus += 3;
+  if (scenario.collection === 'date-night' && ['уют', 'вечер'].includes(mood)) bonus += 3;
+  if (scenario.collection === 'after-dark' && Number(mix.strength) >= 3) bonus += 3;
+  if (scenario.collection === 'experimental' && Number(mix.sourness) >= 2 && Number(mix.freshness) >= 2) bonus += 2.5;
 
   return bonus;
 }
