@@ -11,7 +11,12 @@ import {
   describeScenario,
   getCollectionCounts,
   hasActiveScenario,
-} from './scenario.js?v=1.12.0';
+} from './scenario.js?v=1.13.0';
+import {
+  isProActive,
+  isPremiumCollection,
+  requestProPaywall,
+} from './pro.js?v=1.13.0';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
@@ -28,16 +33,25 @@ function optionButtons(group, options, selected) {
 }
 
 function collectionButtons(selected, counts) {
-  return COLLECTION_OPTIONS.map((collection) => `
-    <button
-      class="scenario-choice scenario-choice--collection${selected === collection.id ? ' active' : ''}"
-      type="button"
-      data-scenario-collection="${collection.id}"
-      aria-pressed="${selected === collection.id}"
-    >
-      <span>${collection.label}</span>
-      <small>${counts[collection.id] || 0}</small>
-    </button>`).join('');
+  const proActive = isProActive();
+
+  return COLLECTION_OPTIONS.map((collection) => {
+    const premium = isPremiumCollection(collection.id);
+    const locked = premium && !proActive;
+
+    return `
+      <button
+        class="scenario-choice scenario-choice--collection${selected === collection.id ? ' active' : ''}${locked ? ' pro-locked' : ''}"
+        type="button"
+        data-scenario-collection="${collection.id}"
+        data-scenario-premium="${premium}"
+        aria-pressed="${selected === collection.id}"
+        aria-label="${collection.label}${locked ? ', ALX PRO' : ''}"
+      >
+        <span>${collection.label}${locked ? ' <span class="pro-lock">PRO</span>' : ''}</span>
+        <small>${counts[collection.id] || 0}</small>
+      </button>`;
+  }).join('');
 }
 
 function buildSection(mixes) {
@@ -92,7 +106,16 @@ function buildSection(mixes) {
 
   section.querySelectorAll('[data-scenario-collection]').forEach((button) => {
     button.addEventListener('click', () => {
-      setScenario({ collection: button.dataset.scenarioCollection });
+      const collectionId = button.dataset.scenarioCollection;
+      const premium = isPremiumCollection(collectionId);
+
+      if (premium && !isProActive()) {
+        const collection = COLLECTION_OPTIONS.find((item) => item.id === collectionId);
+        requestProPaywall(collection?.label || 'PRO-коллекция');
+        return;
+      }
+
+      setScenario({ collection: collectionId });
       renderScenarioSection();
     });
   });
@@ -150,6 +173,7 @@ function initScenarioUi() {
   if (!content || !tasteBtn) return;
 
   tasteBtn.addEventListener('click', () => setTimeout(queueRender, 0));
+  window.addEventListener('alx-pro-change', queueRender);
 
   const observer = new MutationObserver(() => {
     const overlay = document.getElementById('tasteOverlay');
