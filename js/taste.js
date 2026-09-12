@@ -12,6 +12,7 @@ import {
   toggleDislike,
 } from './profile.js';
 import { getOrCreateDailyMix, getVisitStats } from './daily.js?v=1.10.0';
+import { getAchievementState, getStreakRewardState } from './achievements.js?v=1.11.0';
 
 const LEVELS = [
   { max: 0, label: 'Новый профиль', note: 'Поставь ❤️ или 👎 нескольким миксам — Оракул начнёт подстраиваться.', progress: 0 },
@@ -110,6 +111,57 @@ function buildDailyCard(mix, visitStats, isNew) {
     </div>`;
 }
 
+function buildStreakRewards(state) {
+  const next = state.next;
+  const nextCopy = next
+    ? `До «${next.title}» — ${Math.max(0, next.days - state.currentStreak)} ${streakDayWord(Math.max(0, next.days - state.currentStreak))}`
+    : 'Все награды серии открыты';
+
+  return `
+    <div class="taste-section taste-rewards-section">
+      <div class="taste-section-title taste-section-title--row">
+        <span>Награды серии</span>
+        <span>${state.bestStreak} ${streakDayWord(state.bestStreak)} · рекорд</span>
+      </div>
+      <div class="taste-reward-card">
+        <div class="taste-reward-track">
+          ${state.rewards.map((reward) => `
+            <div class="taste-reward${reward.unlocked ? ' unlocked' : ''}">
+              <div class="taste-reward-icon">${reward.icon}</div>
+              <div class="taste-reward-days">${reward.days}</div>
+              <div class="taste-reward-name">${reward.title}</div>
+            </div>`).join('')}
+        </div>
+        <div class="taste-reward-next-row">
+          <span>${nextCopy}</span>
+          <b>${state.currentStreak} ${streakDayWord(state.currentStreak)} сейчас</b>
+        </div>
+        <div class="taste-reward-progress"><span style="width:${state.nextProgress}%"></span></div>
+      </div>
+    </div>`;
+}
+
+function buildAchievements(state) {
+  return `
+    <div class="taste-section taste-achievements-section">
+      <div class="taste-section-title taste-section-title--row">
+        <span>Достижения</span>
+        <span>${state.unlockedCount}/${state.totalCount}</span>
+      </div>
+      <div class="taste-achievement-grid">
+        ${state.achievements.map((item) => `
+          <div class="taste-achievement${item.unlocked ? ' unlocked' : ''}">
+            <div class="taste-achievement-icon">${item.unlocked ? item.icon : '·'}</div>
+            <div class="taste-achievement-body">
+              <div class="taste-achievement-title">${item.title}</div>
+              <div class="taste-achievement-note">${item.unlocked ? item.note : `${Math.min(item.current, item.target)}/${item.target} · ${item.note}`}</div>
+              <div class="taste-achievement-progress"><span style="width:${item.progress}%"></span></div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
 function ensureTasteUi() {
   if (document.getElementById('tasteBtnTop')) return;
 
@@ -165,6 +217,8 @@ async function renderTasteProfile() {
   const dislikesCount = Array.isArray(raw.dislikedIds) ? raw.dislikedIds.length : 0;
   const favoritesCount = Array.isArray(raw.favoriteIds) ? raw.favoriteIds.length : 0;
   const visitStats = getVisitStats();
+  const streakRewards = getStreakRewardState();
+  const achievementState = getAchievementState();
 
   content.innerHTML = `
     <div class="taste-level-card">
@@ -180,6 +234,8 @@ async function renderTasteProfile() {
     </div>
 
     ${buildDailyCard(dailyResult.mix, visitStats, dailyResult.isNew)}
+    ${buildStreakRewards(streakRewards)}
+    ${buildAchievements(achievementState)}
 
     <div class="taste-stats">
       <div><b>${favoritesCount}</b><span>❤️ нравится</span></div>
@@ -201,7 +257,7 @@ async function renderTasteProfile() {
 
     <div class="taste-explain">История используется только для защиты от повторов. Сам вкус Оракул изучает по твоим ❤️ и 👎.</div>
     <button class="taste-reset" id="tasteReset" type="button" ${dislikesCount ? '' : 'disabled'}>Сбросить отметки 👎</button>
-    <div class="taste-privacy">Профиль, Микс дня и серия посещений хранятся локально на этом устройстве.</div>
+    <div class="taste-privacy">Профиль, Микс дня, серия и достижения хранятся локально на этом устройстве.</div>
   `;
 
   const dailyMix = dailyResult.mix;
