@@ -3,6 +3,7 @@
 
 import { getMixes } from './mixes.js';
 import { selectWeightedMix } from './personalization.js';
+import { selectScenarioMix } from './scenario.js?v=1.12.0';
 
 export const oracleMessages = {
   mysterious: [
@@ -185,10 +186,22 @@ export function oracleChooseMix(context = {}) {
   }
 
   let mix = null;
+
+  // Если пользователь включил ситуационный режим, он становится первым
+  // слоем выбора. Внутри него всё равно учитывается существующий taste-profile.
   try {
-    mix = selectWeightedMix(mixes, lastMixId);
+    mix = selectScenarioMix(mixes, lastMixId);
   } catch (e) {
-    // Fallback if scoring fails
+    console.warn('[ALX Scenario] fallback to regular oracle:', e);
+  }
+
+  // Без активного сценария — прежнее поведение 1:1.
+  if (!mix) {
+    try {
+      mix = selectWeightedMix(mixes, lastMixId);
+    } catch (e) {
+      // Fallback if scoring fails
+    }
   }
 
   if (!mix) {
