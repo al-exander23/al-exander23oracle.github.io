@@ -1,124 +1,76 @@
-/* ALX Oracle v1.8.9 — live smoke as its own visual layer.
-   Static app background is preserved. Smoke is rendered from a muted looping video,
-   once behind the UI and once across the front surface of the orb, below #screen text. */
+/* ALX Oracle v1.9.0 — procedural smoke layers.
+   The stable app background and original orb rim are not altered. */
 
 .stage{
   isolation:isolate;
 }
 
-/* ===== BACK SMOKE — independent from the background ===== */
+/* ===== BACK SMOKE =====
+   A transparent canvas sits behind the orb area, not inside the stage background. */
 .ambient-smoke--back{
   position:fixed;
-  inset:0;
+  left:0;
+  right:0;
+  top:16vh;
+  height:62vh;
   z-index:0;
   overflow:hidden;
   pointer-events:none;
   background:transparent;
+  -webkit-mask-image:radial-gradient(ellipse 86% 60% at 50% 49%, #000 30%, rgba(0,0,0,.96) 58%, rgba(0,0,0,.56) 78%, transparent 100%);
+  mask-image:radial-gradient(ellipse 86% 60% at 50% 49%, #000 30%, rgba(0,0,0,.96) 58%, rgba(0,0,0,.56) 78%, transparent 100%);
 }
 
-.ambient-smoke-video{
-  position:absolute;
+.ambient-smoke-canvas--back{
+  width:100%;
+  height:100%;
   display:block;
-  width:180vw;
-  min-width:760px;
-  max-width:none;
-  height:auto;
-  left:50%;
-  object-fit:cover;
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
+  opacity:.94;
   mix-blend-mode:screen;
-  filter:grayscale(1) contrast(1.55) brightness(1.72);
-  will-change:transform,opacity;
+  pointer-events:none;
 }
 
-.ambient-smoke-video--a{
-  top:5vh;
-  opacity:.62;
-  transform:translate3d(-55%,0,0) scale(1.04);
-  animation:smoke-back-a 24s ease-in-out infinite alternate;
+/* Current UI remains above the back smoke. */
+.grain,.motes{z-index:1;}
+.brand,.brand-divider,.orb-wrap,.hint,.permission-btn,.lock-btn,.mix-card{
+  position:relative;
+  z-index:2;
 }
-
-.ambient-smoke-video--b{
-  top:38vh;
-  opacity:.44;
-  transform:translate3d(-45%,0,0) scaleX(-1) scale(1.12);
-  filter:grayscale(1) contrast(1.42) brightness(1.58) blur(1px);
-  animation:smoke-back-b 31s ease-in-out infinite alternate;
-}
-
-/* Soft edge fades keep the video from ever reading as a rectangle. */
-.ambient-smoke--back{
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 10%,#000 82%,transparent 100%);
-  mask-image:linear-gradient(to bottom,transparent 0%,#000 10%,#000 82%,transparent 100%);
-}
-
-/* Keep the existing app above the background smoke. */
-.grain,.motes{position:fixed;z-index:1;}
-.brand,.brand-divider,.orb-wrap,.hint,.permission-btn,.lock-btn,.mix-card{position:relative;z-index:2;}
 .top-toolbar,.counter{z-index:8;}
 
-/* ===== FRONT SMOKE — literally passes in front of the orb shell =====
-   It is INSIDE orb-wrap, after orb-frame but before #screen.
-   Therefore the smoke crosses the glass/sphere but live text remains perfectly readable. */
-.orb-smoke-front{
+/* ===== FRONT SMOKE =====
+   This canvas lives INSIDE .orb, which already clips to the sphere.
+   Therefore it cannot touch the outer gold ring. */
+.orb-smoke-front-canvas{
   position:absolute;
-  left:50%;
-  top:50%;
-  width:420px;
-  height:350px;
-  transform:translate(-50%,-50%);
-  z-index:1;
-  overflow:hidden;
-  pointer-events:none;
+  inset:6px;
+  width:calc(100% - 12px);
+  height:calc(100% - 12px);
   border-radius:50%;
-  opacity:.72;
-  -webkit-mask-image:radial-gradient(ellipse at center,#000 18%,rgba(0,0,0,.98) 48%,rgba(0,0,0,.60) 68%,transparent 88%);
-  mask-image:radial-gradient(ellipse at center,#000 18%,rgba(0,0,0,.98) 48%,rgba(0,0,0,.60) 68%,transparent 88%);
-}
-
-.orb-smoke-front-video{
-  position:absolute;
-  left:-24%;
-  top:2%;
-  width:148%;
-  height:96%;
-  object-fit:cover;
   pointer-events:none;
+  z-index:2;
+  opacity:.74;
   mix-blend-mode:screen;
-  opacity:.34;
-  filter:grayscale(1) contrast(1.58) brightness(1.72) blur(.4px);
-  transform:scale(1.08);
-  will-change:transform,opacity;
-  animation:smoke-front-drift 18s ease-in-out infinite alternate;
+  -webkit-mask-image:radial-gradient(circle at center,#000 0%,#000 74%,rgba(0,0,0,.72) 86%,transparent 99%);
+  mask-image:radial-gradient(circle at center,#000 0%,#000 74%,rgba(0,0,0,.72) 86%,transparent 99%);
 }
 
-/* #screen is the protected stable text overlay and stays ABOVE the front smoke. */
-.orb-wrap .screen{z-index:2;}
-
-@keyframes smoke-back-a{
-  0%{transform:translate3d(-57%,-2%,0) scale(1.03);opacity:.54;}
-  45%{transform:translate3d(-50%,2%,0) scale(1.12);opacity:.70;}
-  100%{transform:translate3d(-43%,-1%,0) scale(1.06);opacity:.60;}
+/* Keep the original volume/highlight treatment above the moving smoke. */
+.orb-edge-shade,
+.orb-highlight,
+.orb-highlight-sharp,
+.orb-rim,
+.orb-sheen{
+  z-index:3;
 }
 
-@keyframes smoke-back-b{
-  0%{transform:translate3d(-43%,2%,0) scaleX(-1) scale(1.08);opacity:.36;}
-  50%{transform:translate3d(-51%,-2%,0) scaleX(-1) scale(1.17);opacity:.50;}
-  100%{transform:translate3d(-57%,1%,0) scaleX(-1) scale(1.11);opacity:.40;}
-}
-
-@keyframes smoke-front-drift{
-  0%{transform:translate3d(-4%,2%,0) scale(1.06);opacity:.26;}
-  45%{transform:translate3d(2%,-3%,0) scale(1.15);opacity:.40;}
-  100%{transform:translate3d(5%,1%,0) scale(1.09);opacity:.30;}
+/* Protected text remains the top stable sibling and is never transformed. */
+.orb-wrap .screen{
+  z-index:5;
 }
 
 @media(max-width:390px){
-  .ambient-smoke-video{width:205vw;min-width:700px;}
-  .ambient-smoke-video--a{top:7vh;opacity:.66;}
-  .ambient-smoke-video--b{top:40vh;opacity:.46;}
-  .orb-smoke-front{width:380px;height:330px;opacity:.76;}
-  .orb-smoke-front-video{opacity:.37;}
+  .ambient-smoke--back{top:17vh;height:60vh;}
+  .ambient-smoke-canvas--back{opacity:.98;}
+  .orb-smoke-front-canvas{inset:7px;width:calc(100% - 14px);height:calc(100% - 14px);opacity:.78;}
 }
