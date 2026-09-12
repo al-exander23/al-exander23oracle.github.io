@@ -1,16 +1,20 @@
-// pro-ui.js — ALX PRO presentation/paywall layer.
-// Не создаёт entitlement и не хранит платёжные секреты.
+// pro-ui.js — ALX PRO + native Telegram Stars subscription flow.
 
 import {
   PRO_BENEFITS,
   getProState,
-  getCheckoutUrl,
+  getProOffer,
   requestProPaywall,
-} from './pro.js?v=1.13.0';
+  isTelegramPaymentContext,
+  syncProEntitlement,
+  createStarsInvoice,
+  waitForProActivation,
+} from './pro.js?v=1.14.0-stars';
 
 const CARD_ID = 'alxProCard';
 const OVERLAY_ID = 'alxProOverlay';
 let renderQueued = false;
+let checkoutBusy = false;
 
 function formatExpiry(timestamp) {
   if (!Number.isFinite(timestamp)) return '';
@@ -25,6 +29,7 @@ function formatExpiry(timestamp) {
 
 function buildProCard() {
   const state = getProState();
+  const offer = getProOffer();
   const card = document.createElement('div');
   card.id = CARD_ID;
   card.className = `taste-section pro-card-section${state.active ? ' pro-card-section--active' : ''}`;
@@ -44,7 +49,7 @@ function buildProCard() {
         <div class="pro-card-title">${state.active ? 'PRO открыт' : 'Открой глубже Оракула'}</div>
         <div class="pro-card-text">${state.active
           ? 'Авторские коллекции доступны в ситуационном режиме.'
-          : 'Закрытые подборки ALX и премиальные сценарии уже встроены в приложение.'}</div>
+          : `Закрытые подборки ALX · ${offer.priceStars} ⭐ за ${offer.periodDays} дней.`}</div>
       </div>
       ${state.active
         ? '<div class="pro-card-badge">PRO</div>'
@@ -80,7 +85,7 @@ function ensurePaywall() {
         <div><b>После полуночи</b><span>более насыщенные подборки</span></div>
         <div><b>Эксперимент</b><span>смелые и нестандартные сочетания</span></div>
       </div>
-      <button class="pro-checkout" id="proCheckout" type="button">Подключить PRO</button>
+      <button class="pro-checkout" id="proCheckout" type="button"></button>
       <div class="pro-checkout-note" id="proCheckoutNote"></div>
     </section>`;
   document.body.appendChild(overlay);
@@ -94,42 +99,170 @@ function ensurePaywall() {
     if (event.key === 'Escape' && overlay.classList.contains('show')) close();
   });
 
-  overlay.querySelector('#proCheckout')?.addEventListener('click', () => {
-    const url = getCheckoutUrl();
-    if (!url) return;
-    const tg = window.Telegram && window.Telegram.WebApp;
-    if (tg && typeof tg.openLink === 'function') {
-      try { tg.openLink(url); return; } catch (error) { /* fallback below */ }
-    }
-    window.location.href = url;
+  overlay.querySelector('#proCheckout')?.addEventListener('click', () => beginStarsCheckout(overlay));
+  return overlay;
+}
+
+function updateCheckoutUi(overlay, { busy = false, text, note, disabled } = {}) {
+  const checkout = overlay.querySelector('#proCheckout');
+  const noteEl = overlay.querySelector('#proCheckoutNote');
+  if (!checkout || !noteEl) return;
+
+  checkoutBusy = busy;
+  checkout.disabled = disabled ?? busy;
+  checkout.classList.toggle('loading', busy);
+  if (text) checkout.textContent = text;
+  if (note !== undefined) noteEl.textContent = note;
+}
+
+function resetCheckoutUi(overlay) {
+  const state = getProState();
+  const offer = getProOffer();
+
+  if (state.active) {
+    updateCheckoutUi(overlay, {
+      text: `PRO активен${state.expiresAt ? ` до ${formatExpiry(state.expiresAt)}` : ''}`,
+      note: 'Подписка подтверждена Telegram Stars.',
+      disabled: true,
+    });
+    return;
+  }
+
+  if (!isTelegramPaymentContext()) {
+    updateCheckoutUi(overlay, {
+      text: `Подключить PRO · ${offer.priceStars} ⭐`,
+      note: 'Оплата Stars доступна, когда ALX Oracle открыт внутри Telegram.',
+      disabled: false,
+    });
+    return;
+  }
+
+  updateCheckoutUi(overlay, {
+    text: `Подключить PRO · ${offer.priceStars} ⭐`,
+    note: `Автопродление каждые ${offer.periodDays} дней через Telegram Stars. Отменить можно в Telegram.`,
+    disabled: false,
+  });
+}
+
+async function confirmActivation(overlay) {
+  updateCheckoutUi(overlay, {
+    busy: true,
+    text: 'Подтверждаю подписку…',
+    note: 'Telegram уже принял оплату. Проверяю доступ ALX PRO.',
   });
 
-  return overlay;
+  try {
+    const state = await waitForProActivation();
+    if (!state.active) throw new Error('Подписка ещё не появилась в Stars ledger.');
+    updateCheckoutUi(overlay, {
+      text: 'ALX PRO активирован ✓',
+      note: 'Закрытые коллекции уже разблокированы.',
+      disabled: true,
+    });
+    renderCard();
+    window.dispatchEvent(new CustomEvent('alx-pro-change', { detail: state }));
+    setTimeout(() => closeProPaywall(), 900);
+  } catch (error) {
+    updateCheckoutUi(overlay, {
+      text: `Проверить PRO · ${getProOffer().priceStars} ⭐`,
+      note: 'Платёж мог уже пройти. Закрой и снова открой ALX Oracle — доступ восстановится автоматически.',
+      disabled: false,
+    });
+  } finally {
+    checkoutBusy = false;
+  }
+}
+
+async function beginStarsCheckout(overlay) {
+  if (checkoutBusy) return;
+  const tg = window.Telegram?.WebApp;
+
+  if (!isTelegramPaymentContext()) {
+    updateCheckoutUi(overlay, {
+      text: `Подключить PRO · ${getProOffer().priceStars} ⭐`,
+      note: 'Открой приложение из Telegram и повтори оплату.',
+      disabled: false,
+    });
+    return;
+  }
+
+  updateCheckoutUi(overlay, {
+    busy: true,
+    text: 'Создаю счёт…',
+    note: 'Счёт формируется напрямую через Telegram Stars.',
+  });
+
+  try {
+    const invoice = await createStarsInvoice();
+
+    if (tg && typeof tg.openInvoice === 'function') {
+      updateCheckoutUi(overlay, {
+        busy: false,
+        text: `Подключить PRO · ${invoice.priceStars} ⭐`,
+        note: 'Подтверди подписку в окне Telegram.',
+        disabled: false,
+      });
+
+      tg.openInvoice(invoice.invoiceLink, (status) => {
+        if (status === 'paid' || status === 'pending') {
+          confirmActivation(overlay);
+          return;
+        }
+        if (status === 'cancelled') {
+          resetCheckoutUi(overlay);
+          overlay.querySelector('#proCheckoutNote').textContent = 'Оплата отменена — ничего не списано.';
+          return;
+        }
+        resetCheckoutUi(overlay);
+        overlay.querySelector('#proCheckoutNote').textContent = 'Telegram не завершил оплату. Попробуй ещё раз.';
+      });
+      return;
+    }
+
+    // Old clients: open the Telegram invoice deep link. Access is restored on
+    // the next app activation by syncProEntitlement().
+    if (tg && typeof tg.openTelegramLink === 'function') {
+      tg.openTelegramLink(invoice.invoiceLink);
+    } else {
+      window.location.href = invoice.invoiceLink;
+    }
+    updateCheckoutUi(overlay, {
+      text: 'Проверить подписку',
+      note: 'После оплаты вернись в ALX Oracle — PRO проверится автоматически.',
+      disabled: false,
+    });
+  } catch (error) {
+    console.warn('[ALX PRO Stars]', error);
+    updateCheckoutUi(overlay, {
+      text: `Подключить PRO · ${getProOffer().priceStars} ⭐`,
+      note: error?.message || 'Не удалось открыть Telegram Stars. Попробуй ещё раз.',
+      disabled: false,
+    });
+  } finally {
+    checkoutBusy = false;
+  }
 }
 
 export function openProPaywall(feature = 'ALX PRO') {
   const overlay = ensurePaywall();
-  const checkout = overlay.querySelector('#proCheckout');
-  const note = overlay.querySelector('#proCheckoutNote');
   const featureText = overlay.querySelector('#proFeatureText');
-  const url = getCheckoutUrl();
 
   featureText.textContent = feature && feature !== 'ALX PRO'
     ? `«${feature}» входит в ALX PRO.`
     : 'Больше контроля над тем, что покажет Оракул.';
 
-  if (url) {
-    checkout.disabled = false;
-    checkout.textContent = 'Подключить PRO';
-    note.textContent = 'Оплата откроется в защищённом checkout.';
-  } else {
-    checkout.disabled = true;
-    checkout.textContent = 'Оплата — следующий этап';
-    note.textContent = 'PRO-логика уже готова. Безопасный платёжный слой подключается отдельно.';
-  }
-
+  resetCheckoutUi(overlay);
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
+
+  if (isTelegramPaymentContext()) {
+    syncProEntitlement().then(() => {
+      renderCard();
+      resetCheckoutUi(overlay);
+    }).catch(() => {
+      // Keep cached state/UI. Checkout will show the concrete backend error if used.
+    });
+  }
 }
 
 export function closeProPaywall() {
@@ -156,11 +289,8 @@ function renderCard() {
   }
 
   const daily = content.querySelector('.taste-daily-card');
-  if (daily) {
-    daily.insertAdjacentElement('afterend', fresh);
-  } else {
-    content.prepend(fresh);
-  }
+  if (daily) daily.insertAdjacentElement('afterend', fresh);
+  else content.prepend(fresh);
 }
 
 function queueRender() {
@@ -174,6 +304,15 @@ function queueRender() {
   });
 }
 
+function syncOnReturn() {
+  if (document.visibilityState !== 'visible' || !isTelegramPaymentContext()) return;
+  syncProEntitlement().then(() => {
+    queueRender();
+    const overlay = document.getElementById(OVERLAY_ID);
+    if (overlay?.classList.contains('show')) resetCheckoutUi(overlay);
+  }).catch(() => {});
+}
+
 function initProUi() {
   ensurePaywall();
 
@@ -181,20 +320,24 @@ function initProUi() {
     openProPaywall(event.detail?.feature || 'ALX PRO');
   });
   window.addEventListener('alx-pro-change', queueRender);
+  window.addEventListener('alx-pro-offer-change', queueRender);
+  document.addEventListener('visibilitychange', syncOnReturn);
 
   const content = document.getElementById('tasteContent');
   const tasteBtn = document.getElementById('tasteBtnTop');
-  if (!content || !tasteBtn) return;
+  if (content && tasteBtn) {
+    tasteBtn.addEventListener('click', () => setTimeout(queueRender, 0));
+    const observer = new MutationObserver(() => {
+      const overlay = document.getElementById('tasteOverlay');
+      if (overlay?.classList.contains('show') && !document.getElementById(CARD_ID)) queueRender();
+    });
+    observer.observe(content, { childList: true });
+  }
 
-  tasteBtn.addEventListener('click', () => setTimeout(queueRender, 0));
-
-  const observer = new MutationObserver(() => {
-    const overlay = document.getElementById('tasteOverlay');
-    if (overlay?.classList.contains('show') && !document.getElementById(CARD_ID)) {
-      queueRender();
-    }
-  });
-  observer.observe(content, { childList: true });
+  // Restore a verified subscription when the app is opened again.
+  if (isTelegramPaymentContext()) {
+    syncProEntitlement().then(queueRender).catch(() => {});
+  }
 }
 
 initProUi();
