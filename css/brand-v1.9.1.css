@@ -1,13 +1,13 @@
-/* ALX Oracle v1.9.2 — smoky volumetric brand title.
-   Keeps the approved 19px size. Only the title/divider styling is affected. */
+/* ALX Oracle v1.9.3 — premium smoky volumetric brand title.
+   Keeps the approved 19px size and all previous visual decisions, but makes motion clearer and richer. */
 
 .brand{
   position:relative;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:38px;
-  padding:0 10px 9px;
+  min-height:40px;
+  padding:0 12px 9px;
   margin-top:0;
   margin-bottom:7px;
   isolation:isolate;
@@ -16,7 +16,7 @@
 
 .brand-text{
   position:relative;
-  z-index:3;
+  z-index:4;
   font-family:'Sora',sans-serif;
   font-size:19px;
   font-weight:700;
@@ -25,24 +25,49 @@
   text-transform:uppercase;
   white-space:nowrap;
   color:transparent;
-  background:linear-gradient(180deg,#fff4dc 0%,#ead7ae 34%,#cfaa67 72%,#9d7c45 100%);
-  background-size:100% 145%;
-  background-position:50% 10%;
+  background:
+    linear-gradient(180deg,#fff7e6 0%,#f1ddb5 25%,#d9b66f 55%,#aa7f42 79%,#6f4f2b 100%);
+  background-size:100% 170%;
+  background-position:50% 5%;
   -webkit-background-clip:text;
   background-clip:text;
-  -webkit-text-stroke:.22px rgba(255,246,225,.28);
+  -webkit-text-stroke:.26px rgba(255,247,229,.32);
   text-shadow:
-    0 1px 0 rgba(82,54,24,.28),
-    0 2px 2px rgba(0,0,0,.28),
-    0 0 6px rgba(243,227,191,.20),
-    0 0 15px rgba(217,184,120,.10);
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.24));
+    0 1px 0 rgba(84,55,25,.34),
+    0 2px 2px rgba(0,0,0,.30),
+    0 0 8px rgba(255,237,202,.24),
+    0 0 18px rgba(217,184,120,.14);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.28));
   font-kerning:normal;
-  animation:brand-letter-breathe 7.2s ease-in-out infinite;
+  animation:brand-letter-breathe 5.8s ease-in-out infinite;
 }
 
-/* Blurred copies are intentionally very soft: they read as vapor emitted by the
-   lettering rather than as a second readable title. */
+/* A thin travelling gold highlight makes the lettering feel metallic instead of flat. */
+.brand-text::after{
+  content:'МИКС ОРАКУЛ';
+  position:absolute;
+  inset:0;
+  color:transparent;
+  background:linear-gradient(105deg,
+    transparent 0%,
+    transparent 34%,
+    rgba(255,255,255,.08) 40%,
+    rgba(255,248,225,.72) 47%,
+    rgba(255,226,169,.34) 52%,
+    transparent 60%,
+    transparent 100%);
+  background-size:240% 100%;
+  background-position:130% 0;
+  -webkit-background-clip:text;
+  background-clip:text;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  opacity:.72;
+  animation:brand-gold-sweep 7.4s cubic-bezier(.45,0,.25,1) infinite;
+}
+
+/* Blurred copies stay unreadable as copies; they are intentionally offset and softened
+   so they read as animated vapor lifting from the wordmark. */
 .brand::before,
 .brand::after{
   content:attr(data-text);
@@ -60,73 +85,115 @@
   white-space:nowrap;
   pointer-events:none;
   user-select:none;
-  color:rgba(244,232,207,.24);
+  color:rgba(246,233,208,.26);
   mix-blend-mode:screen;
 }
 
 .brand::before{
-  z-index:2;
-  filter:blur(3.2px);
-  opacity:.32;
+  z-index:3;
+  filter:blur(4px);
+  opacity:.42;
   text-shadow:
-    -3px -5px 8px rgba(230,221,207,.16),
-    4px -8px 12px rgba(243,227,191,.14),
-    0 -13px 18px rgba(205,194,218,.11);
-  animation:brand-smoke-near 6.8s ease-in-out infinite;
+    -4px -5px 10px rgba(239,229,215,.22),
+    5px -9px 15px rgba(255,229,184,.20),
+    0 -16px 23px rgba(203,193,221,.18);
+  animation:brand-smoke-near 5.4s ease-in-out infinite;
 }
 
 .brand::after{
-  z-index:1;
-  filter:blur(7px);
-  opacity:.18;
+  z-index:2;
+  filter:blur(9px);
+  opacity:.27;
   text-shadow:
-    -8px -7px 15px rgba(222,224,235,.14),
-    8px -12px 19px rgba(235,222,197,.12),
-    1px -20px 25px rgba(189,181,211,.10);
-  animation:brand-smoke-far 10.5s ease-in-out infinite;
+    -10px -10px 20px rgba(218,220,235,.17),
+    11px -16px 26px rgba(241,224,193,.16),
+    0 -28px 38px rgba(185,177,211,.15);
+  animation:brand-smoke-far 8.6s ease-in-out infinite;
 }
 
 @keyframes brand-letter-breathe{
   0%,100%{
-    background-position:50% 10%;
-    filter:drop-shadow(0 2px 2px rgba(0,0,0,.24)) brightness(.98);
+    transform:translateY(0) scale(1);
+    background-position:50% 5%;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,.28)) brightness(.98);
     text-shadow:
-      0 1px 0 rgba(82,54,24,.28),
-      0 2px 2px rgba(0,0,0,.28),
-      0 0 6px rgba(243,227,191,.18),
-      0 0 14px rgba(217,184,120,.09);
+      0 1px 0 rgba(84,55,25,.34),
+      0 2px 2px rgba(0,0,0,.30),
+      0 0 7px rgba(255,237,202,.22),
+      0 0 16px rgba(217,184,120,.12);
   }
-  50%{
-    background-position:50% 58%;
-    filter:drop-shadow(0 2px 3px rgba(0,0,0,.28)) brightness(1.08);
+  48%{
+    transform:translateY(-.7px) scale(1.006);
+    background-position:50% 72%;
+    filter:drop-shadow(0 3px 3px rgba(0,0,0,.30)) brightness(1.12);
     text-shadow:
-      0 1px 0 rgba(82,54,24,.32),
-      0 3px 3px rgba(0,0,0,.30),
-      0 0 8px rgba(255,239,208,.28),
-      0 0 20px rgba(217,184,120,.15);
+      0 1px 0 rgba(84,55,25,.38),
+      0 3px 3px rgba(0,0,0,.32),
+      0 0 10px rgba(255,242,213,.36),
+      0 0 25px rgba(224,188,121,.22);
   }
+}
+
+@keyframes brand-gold-sweep{
+  0%,18%{background-position:135% 0;opacity:0;}
+  24%{opacity:.30;}
+  43%{background-position:-25% 0;opacity:.82;}
+  50%,100%{background-position:-35% 0;opacity:0;}
 }
 
 @keyframes brand-smoke-near{
-  0%,100%{transform:translate(-50%,1px) scale(1.002);opacity:.20;filter:blur(3.2px);}
-  28%{transform:translate(calc(-50% + 1px),-2px) scale(1.008);opacity:.34;filter:blur(3.8px);}
-  58%{transform:translate(calc(-50% - 1px),-4px) scale(1.014);opacity:.25;filter:blur(4.4px);}
-  82%{transform:translate(calc(-50% + .5px),-2px) scale(1.009);opacity:.31;filter:blur(3.6px);}
+  0%,100%{
+    transform:translate(-50%,1px) scale(1.004);
+    opacity:.28;
+    filter:blur(3.8px);
+  }
+  22%{
+    transform:translate(calc(-50% + 2px),-3px) scale(1.016);
+    opacity:.48;
+    filter:blur(4.4px);
+  }
+  52%{
+    transform:translate(calc(-50% - 2px),-7px) scale(1.032);
+    opacity:.36;
+    filter:blur(5.3px);
+  }
+  78%{
+    transform:translate(calc(-50% + 1px),-4px) scale(1.020);
+    opacity:.44;
+    filter:blur(4.6px);
+  }
 }
 
 @keyframes brand-smoke-far{
-  0%,100%{transform:translate(-50%,0) scale(1.01);opacity:.10;filter:blur(7px);}
-  25%{transform:translate(calc(-50% - 2px),-5px) scale(1.025);opacity:.20;filter:blur(8px);}
-  55%{transform:translate(calc(-50% + 2px),-9px) scale(1.04);opacity:.14;filter:blur(10px);}
-  80%{transform:translate(calc(-50% - 1px),-4px) scale(1.028);opacity:.19;filter:blur(8.5px);}
+  0%,100%{
+    transform:translate(-50%,1px) scale(1.015);
+    opacity:.15;
+    filter:blur(8px);
+  }
+  26%{
+    transform:translate(calc(-50% - 4px),-6px) scale(1.055);
+    opacity:.30;
+    filter:blur(9.5px);
+  }
+  57%{
+    transform:translate(calc(-50% + 4px),-14px) scale(1.09);
+    opacity:.22;
+    filter:blur(12px);
+  }
+  82%{
+    transform:translate(calc(-50% - 2px),-7px) scale(1.06);
+    opacity:.28;
+    filter:blur(10px);
+  }
 }
 
 .brand-divider{
   width:60px;
   height:1px;
   margin-bottom:20px;
-  background:linear-gradient(90deg,transparent,rgba(217,184,120,.54),transparent);
+  background:linear-gradient(90deg,transparent,rgba(217,184,120,.58),transparent);
   position:relative;
+  box-shadow:0 0 8px rgba(217,184,120,.08);
 }
 
 .brand-divider::before{
@@ -137,14 +204,24 @@
   width:5px;
   height:5px;
   transform:translateX(-50%) rotate(45deg);
-  background:#ead7ae;
-  box-shadow:0 0 5px rgba(243,227,191,.34);
+  background:#f0ddb4;
+  box-shadow:
+    0 0 5px rgba(243,227,191,.40),
+    0 0 12px rgba(217,184,120,.20);
+  animation:brand-divider-pulse 4.8s ease-in-out infinite;
+}
+
+@keyframes brand-divider-pulse{
+  0%,100%{opacity:.76;box-shadow:0 0 5px rgba(243,227,191,.34),0 0 10px rgba(217,184,120,.14);}
+  50%{opacity:1;box-shadow:0 0 8px rgba(255,240,210,.58),0 0 18px rgba(217,184,120,.28);}
 }
 
 @media(prefers-reduced-motion:reduce){
   .brand-text,
+  .brand-text::after,
   .brand::before,
-  .brand::after{animation:none!important;}
+  .brand::after,
+  .brand-divider::before{animation:none!important;}
 }
 
 @media(max-width:360px){
