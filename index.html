@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="css/animations.css?v=1.8.6-restored">
 <link rel="stylesheet" href="css/cards.css?v=1.8.6-restored">
 <link rel="stylesheet" href="css/taste.css?v=1.8.6-restored">
-<link rel="stylesheet" href="css/ambient-smoke.css?v=1.8.8-live">
+<link rel="stylesheet" href="css/ambient-smoke.css?v=1.8.9-video">
 </head>
 <body>
 
@@ -21,16 +21,13 @@
   <div class="grain"></div>
   <div class="motes" id="motes"></div>
 
-  <div class="ambient-smoke" aria-hidden="true">
-    <div class="ambient-smoke-plane ambient-smoke-plane--top">
-      <img src="assets/ambient-smoke.webp?v=1.8.8" alt="" draggable="false">
-    </div>
-    <div class="ambient-smoke-plane ambient-smoke-plane--mid">
-      <img src="assets/ambient-smoke.webp?v=1.8.8" alt="" draggable="false">
-    </div>
-    <div class="ambient-smoke-plane ambient-smoke-plane--bottom">
-      <img src="assets/ambient-smoke.webp?v=1.8.8" alt="" draggable="false">
-    </div>
+  <div class="ambient-smoke ambient-smoke--back" aria-hidden="true">
+    <video class="ambient-smoke-video ambient-smoke-video--a" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture>
+      <source src="assets/smoke-loop.mp4?v=1.8.9" type="video/mp4">
+    </video>
+    <video class="ambient-smoke-video ambient-smoke-video--b" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture>
+      <source src="assets/smoke-loop.mp4?v=1.8.9" type="video/mp4">
+    </video>
   </div>
 
   <div class="top-toolbar" id="topToolbar" aria-label="Быстрые действия">
@@ -58,6 +55,13 @@
         <div class="orb-sheen"></div>
       </div>
     </div>
+
+    <div class="orb-smoke-front" aria-hidden="true">
+      <video class="orb-smoke-front-video" autoplay muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture>
+        <source src="assets/smoke-loop.mp4?v=1.8.9" type="video/mp4">
+      </video>
+    </div>
+
     <div class="screen" id="screen">
       <div class="screen-content" id="screenContent">
         <div class="idle-icon">✦</div>
@@ -83,6 +87,7 @@
   </div>
 </div>
 
+<script type="module" src="js/smoke.js?v=1.8.9-video"></script>
 <script type="module" src="js/app.js?v=1.8.6-restored"></script>
 <script type="module" src="js/taste.js?v=1.8.6-restored"></script>
 </body>
