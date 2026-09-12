@@ -176,8 +176,25 @@ export async function createStarsInvoice() {
   return data;
 }
 
-export async function waitForProActivation() {
-  // Webhook/Stars ledger propagation is normally quick, but not guaranteed to
-  // be instant when invoice_closed reports paid/pending.
-  return syncProEntitlement({ attempts: 10, delayMs: 1200 });
+export async function waitForProActivation({ attempts = 10, delayMs = 1200 } = {}) {
+  // A successful invoice can arrive in the Stars ledger a moment after
+  // invoice_closed=paid/pending. Poll the verified backend until it appears.
+  let lastState = getProState();
+  let lastError = null;
+
+  for (let attempt = 0; attempt < Math.max(1, attempts); attempt += 1) {
+    if (attempt > 0 && delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    try {
+      lastState = await syncProEntitlement();
+      if (lastState.active) return lastState;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError && !lastState.active) throw lastError;
+  return lastState;
 }
