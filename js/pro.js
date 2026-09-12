@@ -1,10 +1,12 @@
-// pro.js — foundation для ALX PRO.
-// Entitlement хранится локально только как клиентский кэш. Реальный платёжный
-// backend подключается отдельным этапом и должен подтверждать/обновлять этот кэш.
+// pro.js — ALX PRO entitlement + Telegram Stars client.
+// LocalStorage is only a cache. Telegram's verified Stars ledger on the backend
+// is the source of truth and can restore PRO on another session/device.
 
 import { getItem, setItem } from './storage.js';
 
 const KEY = 'alx_oracle_pro_entitlement';
+const DEFAULT_OFFER = Object.freeze({ priceStars: 149, periodDays: 30, recurring: true });
+let offer = { ...DEFAULT_OFFER };
 
 export const PREMIUM_COLLECTION_IDS = Object.freeze([
   'signature',
@@ -41,11 +43,7 @@ export function getProState(now = Date.now()) {
   const entitlement = cleanEntitlement(getItem(KEY, null));
   const notExpired = !entitlement.expiresAt || entitlement.expiresAt > now;
   const active = entitlement.plan === 'pro' && entitlement.status === 'active' && notExpired;
-
-  return {
-    ...entitlement,
-    active,
-  };
+  return { ...entitlement, active };
 }
 
 export function isProActive() {
@@ -56,14 +54,28 @@ export function isPremiumCollection(collectionId) {
   return PREMIUM_COLLECTION_IDS.includes(collectionId);
 }
 
-// Этот метод предназначен для будущего проверенного ответа backend/payment layer.
-// UI покупки сам entitlement не создаёт.
+export function getProOffer() {
+  return { ...offer };
+}
+
+function updateOffer(next) {
+  if (!next || typeof next !== 'object') return;
+  const priceStars = Number(next.priceStars);
+  const periodDays = Number(next.periodDays);
+  offer = {
+    priceStars: Number.isFinite(priceStars) && priceStars > 0 ? Math.floor(priceStars) : offer.priceStars,
+    periodDays: Number.isFinite(periodDays) && periodDays > 0 ? Math.floor(periodDays) : offer.periodDays,
+    recurring: next.recurring !== false,
+  };
+  window.dispatchEvent(new CustomEvent('alx-pro-offer-change', { detail: getProOffer() }));
+}
+
 export function cacheVerifiedProEntitlement(entitlement = {}) {
   const next = cleanEntitlement({
     plan: entitlement.plan,
     status: entitlement.status,
     expiresAt: entitlement.expiresAt,
-    source: entitlement.source,
+    source: entitlement.source || 'telegram-stars',
   });
   setItem(KEY, next);
   window.dispatchEvent(new CustomEvent('alx-pro-change', { detail: getProState() }));
@@ -82,11 +94,99 @@ export function requestProPaywall(feature = 'ALX PRO') {
   }));
 }
 
-// Checkout URL будет устанавливаться платёжным слоем. Токены/секреты сюда
-// никогда не помещаются. Это только публичная ссылка на уже созданный checkout.
-export function getCheckoutUrl() {
-  const url = typeof window.ALX_PRO_CHECKOUT_URL === 'string'
-    ? window.ALX_PRO_CHECKOUT_URL.trim()
+function telegramInitData() {
+  return String(window.Telegram?.WebApp?.initData || '').trim();
+}
+
+export function isTelegramPaymentContext() {
+  return Boolean(telegramInitData());
+}
+
+function apiBase() {
+  const configured = typeof window.ALX_API_BASE === 'string'
+    ? window.ALX_API_BASE.trim().replace(/\/$/, '')
     : '';
-  return /^https:\/\//i.test(url) ? url : '';
+  return configured;
+}
+
+function apiUrl(path) {
+  const base = apiBase();
+  if (!base && /(^|\.)github\.io$/i.test(window.location.hostname)) {
+    throw new Error('Платёжный сервер ALX PRO ещё не подключён.');
+  }
+  return `${base}${path}`;
+}
+
+async function postApi(path, payload, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(apiUrl(path), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data?.ok) throw new Error(data?.error || `HTTP ${response.status}`);
+    return data;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function requireInitData() {
+  const initData = telegramInitData();
+  if (!initData) throw new Error('Открой ALX Oracle внутри Telegram, чтобы использовать оплату Stars.');
+  return initData;
+}
+
+export async function syncProEntitlement({ attempts = 1, delayMs = 0 } = {}) {
+  const initData = requireInitData();
+  let lastError = null;
+
+  for (let attempt = 0; attempt < Math.max(1, attempts); attempt += 1) {
+    if (attempt > 0 && delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    try {
+      const data = await postApi('/api/stars-status', { initData });
+      updateOffer(data.offer);
+      if (data.entitlement?.active) return cacheVerifiedProEntitlement(data.entitlement);
+      clearProEntitlement();
+      return getProState();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error('Не удалось проверить ALX PRO.');
+}
+
+export async function createStarsInvoice() {
+  const initData = requireInitData();
+  const data = await postApi('/api/stars-create-invoice', { initData });
+  updateOffer({
+    priceStars: data.priceStars,
+    periodDays: data.periodDays,
+    recurring: data.recurring,
+  });
+  if (!data.invoiceLink) throw new Error('Telegram не вернул ссылку на счёт.');
+  return data;
+}
+
+export async function waitForProActivation({ attempts = 10, delayMs = 1200 } = {}) {
+  let lastState = getProState();
+  let lastError = null;
+
+  for (let attempt = 0; attempt < Math.max(1, attempts); attempt += 1) {
+    if (attempt > 0 && delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    try {
+      lastState = await syncProEntitlement();
+      if (lastState.active) return lastState;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError && !lastState.active) throw lastError;
+  return lastState;
 }

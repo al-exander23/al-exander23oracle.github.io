@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/stars-status.js": { "maxDuration": 30 },
+    "api/stars-create-invoice.js": { "maxDuration": 20 },
+    "api/telegram-webhook.js": { "maxDuration": 10 },
+    "api/health.js": { "maxDuration": 5 }
+  }
+}
