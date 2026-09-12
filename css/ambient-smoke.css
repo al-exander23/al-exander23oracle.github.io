@@ -1,0 +1,89 @@
+/* ALX Oracle v1.8.7 — dense ambient smoke behind the existing UI.
+   This is intentionally isolated from the orb/text lifecycle. */
+
+.stage{
+  isolation:isolate;
+}
+
+.stage::before,
+.stage::after{
+  content:'';
+  position:fixed;
+  inset:-12%;
+  pointer-events:none;
+  z-index:0;
+  background-image:url('../assets/ambient-smoke.gif?v=1.8.7');
+  background-repeat:repeat-y;
+  background-position:center top;
+  mix-blend-mode:screen;
+  will-change:transform,background-position,opacity;
+}
+
+.stage::before{
+  background-size:118vw auto;
+  opacity:.52;
+  filter:contrast(1.36) brightness(1.42) saturate(.72) blur(1px);
+  animation:ambient-smoke-drift-a 24s ease-in-out infinite alternate;
+}
+
+.stage::after{
+  background-size:145vw auto;
+  background-position:35% 10vh;
+  opacity:.38;
+  filter:contrast(1.28) brightness(1.30) saturate(.64) blur(4px);
+  animation:ambient-smoke-drift-b 31s ease-in-out infinite alternate;
+}
+
+/* Keep every existing interactive/visual element above the smoke. */
+.grain,.motes{z-index:1;}
+.brand,.brand-divider,.orb-wrap,.hint,.permission-btn,.lock-btn,.mix-card,.top-toolbar,.counter{z-index:2;}
+
+/* Extra soft cloud directly behind the orb so the smoke is unmistakably visible there. */
+.orb-wrap::before{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:430px;
+  height:430px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:-1;
+  background-image:url('../assets/ambient-smoke.gif?v=1.8.7');
+  background-size:auto 100%;
+  background-position:center;
+  background-repeat:repeat-x;
+  mix-blend-mode:screen;
+  opacity:.46;
+  filter:contrast(1.30) brightness(1.34) saturate(.66) blur(5px);
+  animation:ambient-orb-smoke 20s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-smoke-drift-a{
+  0%{transform:translate3d(-3%,-1%,0) scale(1.04);background-position:48% 0;opacity:.46;}
+  50%{transform:translate3d(2%,1.5%,0) scale(1.09);background-position:54% -5vh;opacity:.58;}
+  100%{transform:translate3d(5%,-1%,0) scale(1.05);background-position:45% -10vh;opacity:.50;}
+}
+
+@keyframes ambient-smoke-drift-b{
+  0%{transform:scaleX(-1) translate3d(2%,2%,0) scale(1.08);background-position:30% 8vh;opacity:.32;}
+  50%{transform:scaleX(-1) translate3d(-3%,-1%,0) scale(1.13);background-position:42% 1vh;opacity:.44;}
+  100%{transform:scaleX(-1) translate3d(4%,1%,0) scale(1.10);background-position:24% -7vh;opacity:.36;}
+}
+
+@keyframes ambient-orb-smoke{
+  0%{transform:translate(-52%,-50%) scale(1.00) rotate(-2deg);opacity:.38;}
+  50%{transform:translate(-48%,-52%) scale(1.10) rotate(2deg);opacity:.52;}
+  100%{transform:translate(-51%,-48%) scale(1.04) rotate(-1deg);opacity:.42;}
+}
+
+@media(max-width:390px){
+  .stage::before{background-size:138vw auto;opacity:.56;}
+  .stage::after{background-size:168vw auto;opacity:.42;}
+  .orb-wrap::before{width:390px;height:390px;opacity:.50;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .stage::before,.stage::after,.orb-wrap::before{animation:none;}
+}
