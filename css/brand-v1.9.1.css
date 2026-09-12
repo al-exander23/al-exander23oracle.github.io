@@ -1,0 +1,71 @@
+/* ALX Oracle v1.9.1 — static brand refinement.
+   Only the title and its divider are changed. No orb/smoke/app logic changes. */
+
+.brand{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:0 10px 9px;
+  margin-top:0;
+  margin-bottom:7px;
+  isolation:auto;
+}
+
+/* Remove the old smoke/echo copies completely. */
+.brand::before,
+.brand::after{
+  content:none !important;
+  display:none !important;
+  animation:none !important;
+}
+
+.brand-text{
+  position:relative;
+  z-index:1;
+  font-family:'Sora',sans-serif;
+  font-size:19px;
+  font-weight:700;
+  line-height:1.12;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  color:#f0dfb8;
+  background:none !important;
+  -webkit-background-clip:initial;
+  background-clip:initial;
+  animation:none !important;
+  filter:none;
+  text-shadow:
+    0 0 5px rgba(243,227,191,.13),
+    0 0 13px rgba(217,184,120,.07);
+  font-kerning:normal;
+}
+
+.brand-divider{
+  width:60px;
+  height:1px;
+  margin-bottom:20px;
+  background:linear-gradient(90deg,transparent,rgba(217,184,120,.54),transparent);
+  position:relative;
+}
+
+.brand-divider::before{
+  content:'';
+  position:absolute;
+  top:-2px;
+  left:50%;
+  width:5px;
+  height:5px;
+  transform:translateX(-50%) rotate(45deg);
+  background:#ead7ae;
+  box-shadow:0 0 5px rgba(243,227,191,.34);
+}
+
+@media(max-width:360px){
+  .brand-text{
+    font-size:18px;
+    letter-spacing:.14em;
+  }
+}
