@@ -6,7 +6,7 @@ const {
   telegramApi,
   parseProPayload,
   verifyWebhookRequest,
-} = require('./_lib/telegram.js');
+} = require('../server/telegram.js');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -51,8 +51,6 @@ module.exports = async function handler(req, res) {
     res.status(200).json({ ok: true });
   } catch (error) {
     console.error('[ALX Telegram webhook]', error);
-    // Telegram may retry non-2xx webhook deliveries. Return 200 only after the
-    // pre-checkout branch has been attempted; operational errors should retry.
     res.status(500).json({ ok: false });
   }
 };
