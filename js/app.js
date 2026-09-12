@@ -7,7 +7,7 @@
 import { initMixes } from './mixes.js';
 import { createGlobeRotator, spawnMotes } from './effects.js';
 import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js';
-import { initScene, requestOracle } from './scene.js';
+import { initScene, requestOracle } from './scene.js?v=1.12.0';
 import { getSettings } from './profile.js';
 import { recordVisit } from './daily.js?v=1.10.0';
 import { recordOracleResult, syncAchievements } from './achievements.js?v=1.11.0';
