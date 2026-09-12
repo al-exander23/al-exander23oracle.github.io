@@ -1,12 +1,12 @@
 // POST /api/stars-status
 // Restores ALX PRO from Telegram's own Star transaction ledger.
 
-const { handleOptions, json, readJson } = require('./_lib/http.js');
+const { handleOptions, json, readJson } = require('../server/http.js');
 const {
   getPriceStars,
   validateInitData,
   findProEntitlement,
-} = require('./_lib/telegram.js');
+} = require('../server/telegram.js');
 
 module.exports = async function handler(req, res) {
   if (handleOptions(req, res)) return;
