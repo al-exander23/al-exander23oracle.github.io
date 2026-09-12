@@ -43,7 +43,6 @@ export function getProState(now = Date.now()) {
   const entitlement = cleanEntitlement(getItem(KEY, null));
   const notExpired = !entitlement.expiresAt || entitlement.expiresAt > now;
   const active = entitlement.plan === 'pro' && entitlement.status === 'active' && notExpired;
-
   return { ...entitlement, active };
 }
 
@@ -71,7 +70,6 @@ function updateOffer(next) {
   window.dispatchEvent(new CustomEvent('alx-pro-offer-change', { detail: getProOffer() }));
 }
 
-// Only call this with a response already verified by the payment backend.
 export function cacheVerifiedProEntitlement(entitlement = {}) {
   const next = cleanEntitlement({
     plan: entitlement.plan,
@@ -111,20 +109,26 @@ function apiBase() {
   return configured;
 }
 
+function apiUrl(path) {
+  const base = apiBase();
+  if (!base && /(^|\.)github\.io$/i.test(window.location.hostname)) {
+    throw new Error('Платёжный сервер ALX PRO ещё не подключён.');
+  }
+  return `${base}${path}`;
+}
+
 async function postApi(path, payload, timeoutMs = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(`${apiBase()}${path}`, {
+    const response = await fetch(apiUrl(path), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data?.ok) {
-      throw new Error(data?.error || `HTTP ${response.status}`);
-    }
+    if (!response.ok || !data?.ok) throw new Error(data?.error || `HTTP ${response.status}`);
     return data;
   } finally {
     clearTimeout(timer);
@@ -133,9 +137,7 @@ async function postApi(path, payload, timeoutMs = 12000) {
 
 function requireInitData() {
   const initData = telegramInitData();
-  if (!initData) {
-    throw new Error('Открой ALX Oracle внутри Telegram, чтобы использовать оплату Stars.');
-  }
+  if (!initData) throw new Error('Открой ALX Oracle внутри Telegram, чтобы использовать оплату Stars.');
   return initData;
 }
 
@@ -144,16 +146,11 @@ export async function syncProEntitlement({ attempts = 1, delayMs = 0 } = {}) {
   let lastError = null;
 
   for (let attempt = 0; attempt < Math.max(1, attempts); attempt += 1) {
-    if (attempt > 0 && delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-
+    if (attempt > 0 && delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
     try {
       const data = await postApi('/api/stars-status', { initData });
       updateOffer(data.offer);
-      if (data.entitlement?.active) {
-        return cacheVerifiedProEntitlement(data.entitlement);
-      }
+      if (data.entitlement?.active) return cacheVerifiedProEntitlement(data.entitlement);
       clearProEntitlement();
       return getProState();
     } catch (error) {
@@ -177,16 +174,11 @@ export async function createStarsInvoice() {
 }
 
 export async function waitForProActivation({ attempts = 10, delayMs = 1200 } = {}) {
-  // A successful invoice can arrive in the Stars ledger a moment after
-  // invoice_closed=paid/pending. Poll the verified backend until it appears.
   let lastState = getProState();
   let lastError = null;
 
   for (let attempt = 0; attempt < Math.max(1, attempts); attempt += 1) {
-    if (attempt > 0 && delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-
+    if (attempt > 0 && delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
     try {
       lastState = await syncProEntitlement();
       if (lastState.active) return lastState;
