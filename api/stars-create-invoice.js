@@ -1,7 +1,7 @@
 // POST /api/stars-create-invoice
 // Creates a 30-day recurring ALX PRO invoice in Telegram Stars.
 
-const { handleOptions, json, readJson } = require('./_lib/http.js');
+const { handleOptions, json, readJson } = require('../server/http.js');
 const {
   SUBSCRIPTION_PERIOD,
   getPriceStars,
@@ -9,7 +9,7 @@ const {
   validateInitData,
   createProPayload,
   ensureWebhook,
-} = require('./_lib/telegram.js');
+} = require('../server/telegram.js');
 
 module.exports = async function handler(req, res) {
   if (handleOptions(req, res)) return;
