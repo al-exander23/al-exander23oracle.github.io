@@ -1,5 +1,5 @@
-/* ALX Oracle v1.9.1 — static brand refinement.
-   Only the title and its divider are changed. No orb/smoke/app logic changes. */
+/* ALX Oracle v1.9.2 — smoky volumetric brand title.
+   Keeps the approved 19px size. Only the title/divider styling is affected. */
 
 .brand{
   position:relative;
@@ -10,20 +10,13 @@
   padding:0 10px 9px;
   margin-top:0;
   margin-bottom:7px;
-  isolation:auto;
-}
-
-/* Remove the old smoke/echo copies completely. */
-.brand::before,
-.brand::after{
-  content:none !important;
-  display:none !important;
-  animation:none !important;
+  isolation:isolate;
+  overflow:visible;
 }
 
 .brand-text{
   position:relative;
-  z-index:1;
+  z-index:3;
   font-family:'Sora',sans-serif;
   font-size:19px;
   font-weight:700;
@@ -31,16 +24,101 @@
   letter-spacing:.15em;
   text-transform:uppercase;
   white-space:nowrap;
-  color:#f0dfb8;
-  background:none !important;
-  -webkit-background-clip:initial;
-  background-clip:initial;
-  animation:none !important;
-  filter:none;
+  color:transparent;
+  background:linear-gradient(180deg,#fff4dc 0%,#ead7ae 34%,#cfaa67 72%,#9d7c45 100%);
+  background-size:100% 145%;
+  background-position:50% 10%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-stroke:.22px rgba(255,246,225,.28);
   text-shadow:
-    0 0 5px rgba(243,227,191,.13),
-    0 0 13px rgba(217,184,120,.07);
+    0 1px 0 rgba(82,54,24,.28),
+    0 2px 2px rgba(0,0,0,.28),
+    0 0 6px rgba(243,227,191,.20),
+    0 0 15px rgba(217,184,120,.10);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.24));
   font-kerning:normal;
+  animation:brand-letter-breathe 7.2s ease-in-out infinite;
+}
+
+/* Blurred copies are intentionally very soft: they read as vapor emitted by the
+   lettering rather than as a second readable title. */
+.brand::before,
+.brand::after{
+  content:attr(data-text);
+  position:absolute;
+  left:50%;
+  top:0;
+  width:max-content;
+  transform:translateX(-50%);
+  font-family:'Sora',sans-serif;
+  font-size:19px;
+  font-weight:700;
+  line-height:1.12;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  pointer-events:none;
+  user-select:none;
+  color:rgba(244,232,207,.24);
+  mix-blend-mode:screen;
+}
+
+.brand::before{
+  z-index:2;
+  filter:blur(3.2px);
+  opacity:.32;
+  text-shadow:
+    -3px -5px 8px rgba(230,221,207,.16),
+    4px -8px 12px rgba(243,227,191,.14),
+    0 -13px 18px rgba(205,194,218,.11);
+  animation:brand-smoke-near 6.8s ease-in-out infinite;
+}
+
+.brand::after{
+  z-index:1;
+  filter:blur(7px);
+  opacity:.18;
+  text-shadow:
+    -8px -7px 15px rgba(222,224,235,.14),
+    8px -12px 19px rgba(235,222,197,.12),
+    1px -20px 25px rgba(189,181,211,.10);
+  animation:brand-smoke-far 10.5s ease-in-out infinite;
+}
+
+@keyframes brand-letter-breathe{
+  0%,100%{
+    background-position:50% 10%;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,.24)) brightness(.98);
+    text-shadow:
+      0 1px 0 rgba(82,54,24,.28),
+      0 2px 2px rgba(0,0,0,.28),
+      0 0 6px rgba(243,227,191,.18),
+      0 0 14px rgba(217,184,120,.09);
+  }
+  50%{
+    background-position:50% 58%;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.28)) brightness(1.08);
+    text-shadow:
+      0 1px 0 rgba(82,54,24,.32),
+      0 3px 3px rgba(0,0,0,.30),
+      0 0 8px rgba(255,239,208,.28),
+      0 0 20px rgba(217,184,120,.15);
+  }
+}
+
+@keyframes brand-smoke-near{
+  0%,100%{transform:translate(-50%,1px) scale(1.002);opacity:.20;filter:blur(3.2px);}
+  28%{transform:translate(calc(-50% + 1px),-2px) scale(1.008);opacity:.34;filter:blur(3.8px);}
+  58%{transform:translate(calc(-50% - 1px),-4px) scale(1.014);opacity:.25;filter:blur(4.4px);}
+  82%{transform:translate(calc(-50% + .5px),-2px) scale(1.009);opacity:.31;filter:blur(3.6px);}
+}
+
+@keyframes brand-smoke-far{
+  0%,100%{transform:translate(-50%,0) scale(1.01);opacity:.10;filter:blur(7px);}
+  25%{transform:translate(calc(-50% - 2px),-5px) scale(1.025);opacity:.20;filter:blur(8px);}
+  55%{transform:translate(calc(-50% + 2px),-9px) scale(1.04);opacity:.14;filter:blur(10px);}
+  80%{transform:translate(calc(-50% - 1px),-4px) scale(1.028);opacity:.19;filter:blur(8.5px);}
 }
 
 .brand-divider{
@@ -63,8 +141,16 @@
   box-shadow:0 0 5px rgba(243,227,191,.34);
 }
 
+@media(prefers-reduced-motion:reduce){
+  .brand-text,
+  .brand::before,
+  .brand::after{animation:none!important;}
+}
+
 @media(max-width:360px){
-  .brand-text{
+  .brand-text,
+  .brand::before,
+  .brand::after{
     font-size:18px;
     letter-spacing:.14em;
   }
