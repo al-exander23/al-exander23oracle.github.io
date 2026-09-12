@@ -90,6 +90,114 @@
 }
 .taste-level-card p{ margin:0; font-size:11.5px; line-height:1.5; color:var(--text-muted); }
 
+.taste-daily-card{
+  position:relative;
+  margin-top:12px;
+  padding:15px;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(217,184,120,.30);
+  background:
+    radial-gradient(circle at 85% 0%,rgba(165,139,255,.12),transparent 40%),
+    linear-gradient(145deg,rgba(217,184,120,.11),rgba(255,255,255,.025) 55%,rgba(165,139,255,.055));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 10px 26px rgba(0,0,0,.16);
+}
+.taste-daily-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(105deg,transparent 15%,rgba(255,244,217,.035) 50%,transparent 82%);
+}
+.taste-daily-card--empty{ opacity:.72; }
+.taste-daily-top{
+  position:relative;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.taste-daily-kicker{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  letter-spacing:.18em;
+  color:var(--gold-soft);
+}
+.taste-daily-streak{
+  margin-top:5px;
+  font-size:10.5px;
+  color:#d7c7aa;
+}
+.taste-daily-badge{
+  flex:0 0 auto;
+  padding:5px 8px;
+  border-radius:100px;
+  border:1px solid rgba(217,184,120,.18);
+  background:rgba(217,184,120,.055);
+  color:var(--text-dim);
+  font-size:9px;
+  white-space:nowrap;
+}
+.taste-daily-name{
+  position:relative;
+  margin-top:13px;
+  font-family:'Lora',serif;
+  font-size:19px;
+  line-height:1.15;
+  color:#fff7e7;
+  font-weight:600;
+}
+.taste-daily-recipe{
+  position:relative;
+  margin-top:6px;
+  color:var(--gold-soft);
+  font-size:10.5px;
+  line-height:1.45;
+}
+.taste-daily-desc{
+  position:relative;
+  margin-top:9px;
+  color:var(--text-muted);
+  font-size:11px;
+  line-height:1.5;
+}
+.taste-daily-actions{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:13px;
+}
+.taste-daily-action{
+  min-width:0;
+  padding:9px 8px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.025);
+  color:var(--text-muted);
+  font-family:'Inter',sans-serif;
+  font-size:10.5px;
+}
+.taste-daily-action--favorite.active{
+  border-color:rgba(217,184,120,.34);
+  background:rgba(217,184,120,.09);
+  color:#fff1d2;
+}
+.taste-daily-action--dislike.active{
+  border-color:rgba(255,138,156,.26);
+  background:rgba(255,138,156,.075);
+  color:#f3bcc4;
+}
+.taste-daily-memory{
+  position:relative;
+  margin-top:10px;
+  padding-top:9px;
+  border-top:1px solid rgba(255,255,255,.05);
+  color:var(--text-dim);
+  font-size:9px;
+  line-height:1.45;
+}
+
 .taste-stats{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -165,4 +273,5 @@
   #favBtnTop{ left:16px; }
   #historyBtnTop{ left:58px; }
   .taste-traits{ grid-template-columns:1fr; }
+  .taste-daily-actions{ grid-template-columns:1fr; }
 }
