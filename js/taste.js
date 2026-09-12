@@ -3,7 +3,15 @@
 
 import { initMixes, getMixes } from './mixes.js';
 import { buildDerivedProfile } from './personalization.js';
-import { getTasteProfile, resetTaste } from './profile.js';
+import {
+  getTasteProfile,
+  resetTaste,
+  isFavorite,
+  isDisliked,
+  toggleFavorite,
+  toggleDislike,
+} from './profile.js';
+import { getOrCreateDailyMix, getVisitStats } from './daily.js?v=1.10.0';
 
 const LEVELS = [
   { max: 0, label: 'Новый профиль', note: 'Поставь ❤️ или 👎 нескольким миксам — Оракул начнёт подстраиваться.', progress: 0 },
@@ -53,6 +61,55 @@ function buildTraitRows(profile) {
   `).join('')}</div>`;
 }
 
+function streakDayWord(count) {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'день';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'дня';
+  return 'дней';
+}
+
+function dailyRecipe(mix) {
+  if (!Array.isArray(mix?.recipe)) return '';
+  return mix.recipe
+    .map((item) => `${item.flavor}${item.percent ? ` ${item.percent}%` : ''}`)
+    .join(' · ');
+}
+
+function buildDailyCard(mix, visitStats, isNew) {
+  if (!mix) {
+    return `
+      <div class="taste-daily-card taste-daily-card--empty">
+        <div class="taste-daily-kicker">МИКС ДНЯ</div>
+        <div class="taste-daily-name">Оракул пока молчит</div>
+        <div class="taste-daily-desc">Не удалось загрузить сегодняшний микс. Открой профиль чуть позже.</div>
+      </div>`;
+  }
+
+  const fav = isFavorite(mix.id);
+  const disliked = isDisliked(mix.id);
+  const streak = visitStats.currentStreak || 0;
+
+  return `
+    <div class="taste-daily-card">
+      <div class="taste-daily-top">
+        <div>
+          <div class="taste-daily-kicker">МИКС ДНЯ</div>
+          <div class="taste-daily-streak">🔥 ${streak} ${streakDayWord(streak)} подряд</div>
+        </div>
+        <div class="taste-daily-badge">${isNew ? 'Новый сегодня' : 'До завтра'}</div>
+      </div>
+      <div class="taste-daily-name">${mix.name}</div>
+      <div class="taste-daily-recipe">${dailyRecipe(mix)}</div>
+      <div class="taste-daily-desc">${mix.description || 'Сегодня Оракул выбрал именно этот микс.'}</div>
+      <div class="taste-daily-actions">
+        <button class="taste-daily-action taste-daily-action--dislike${disliked ? ' active' : ''}" id="dailyDislike" type="button" aria-pressed="${disliked}">👎 Не моё</button>
+        <button class="taste-daily-action taste-daily-action--favorite${fav ? ' active' : ''}" id="dailyFavorite" type="button" aria-pressed="${fav}">${fav ? '♥ В избранном' : '♡ В избранное'}</button>
+      </div>
+      <div class="taste-daily-memory">Оракул сохранит этот выбор до смены дня · посещений ${visitStats.totalDays} · рекорд ${visitStats.bestStreak} ${streakDayWord(visitStats.bestStreak)}</div>
+    </div>`;
+}
+
 function ensureTasteUi() {
   if (document.getElementById('tasteBtnTop')) return;
 
@@ -98,6 +155,7 @@ async function renderTasteProfile() {
   content.innerHTML = '<div class="taste-loading">Считываю сигналы вкуса…</div>';
 
   await initMixes();
+  const dailyResult = await getOrCreateDailyMix();
   const mixes = getMixes();
   const raw = getTasteProfile();
   const derived = buildDerivedProfile(mixes);
@@ -106,6 +164,7 @@ async function renderTasteProfile() {
   const ingredients = topIngredients(derived);
   const dislikesCount = Array.isArray(raw.dislikedIds) ? raw.dislikedIds.length : 0;
   const favoritesCount = Array.isArray(raw.favoriteIds) ? raw.favoriteIds.length : 0;
+  const visitStats = getVisitStats();
 
   content.innerHTML = `
     <div class="taste-level-card">
@@ -119,6 +178,8 @@ async function renderTasteProfile() {
       <div class="taste-progress"><span style="width:${level.progress}%"></span></div>
       <p>${level.note}</p>
     </div>
+
+    ${buildDailyCard(dailyResult.mix, visitStats, dailyResult.isNew)}
 
     <div class="taste-stats">
       <div><b>${favoritesCount}</b><span>❤️ нравится</span></div>
@@ -140,8 +201,20 @@ async function renderTasteProfile() {
 
     <div class="taste-explain">История используется только для защиты от повторов. Сам вкус Оракул изучает по твоим ❤️ и 👎.</div>
     <button class="taste-reset" id="tasteReset" type="button" ${dislikesCount ? '' : 'disabled'}>Сбросить отметки 👎</button>
-    <div class="taste-privacy">Профиль хранится локально на этом устройстве.</div>
+    <div class="taste-privacy">Профиль, Микс дня и серия посещений хранятся локально на этом устройстве.</div>
   `;
+
+  const dailyMix = dailyResult.mix;
+  if (dailyMix) {
+    document.getElementById('dailyFavorite')?.addEventListener('click', () => {
+      toggleFavorite(dailyMix.id);
+      renderTasteProfile().catch((error) => console.warn('[ALX Daily]', error));
+    });
+    document.getElementById('dailyDislike')?.addEventListener('click', () => {
+      toggleDislike(dailyMix.id);
+      renderTasteProfile().catch((error) => console.warn('[ALX Daily]', error));
+    });
+  }
 
   const resetBtn = document.getElementById('tasteReset');
   resetBtn.addEventListener('click', () => {
