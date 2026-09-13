@@ -1,5 +1,5 @@
 name = "alx-pay"
-main = "cloudflare/worker.js"
+main = "cloudflare/worker-v2.js"
 compatibility_date = "2026-09-13"
 keep_vars = true
 
