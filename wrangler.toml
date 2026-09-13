@@ -2,6 +2,7 @@ name = "alx-pay"
 main = "cloudflare/worker.js"
 compatibility_date = "2026-09-13"
 
+# Deployment refresh: rebuild Worker after dashboard secrets were configured.
 [assets]
 directory = "./pay"
 binding = "ASSETS"
