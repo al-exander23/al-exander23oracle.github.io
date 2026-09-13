@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0811">
+  <title>ALX PRO — оплата картой или СБП</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Lora:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./pay.css?v=1.15.0">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="kicker">ALX ORACLE</div>
+      <div class="mark">✦</div>
+      <h1>ALX PRO</h1>
+      <p class="lead">Отдельная официальная страница оплаты PRO вне Telegram.</p>
+      <div class="price" id="price">— ₽ <span>/ 30 дней</span></div>
+      <div class="trust">Карта или СБП · доступ привязывается к Telegram</div>
+    </section>
+
+    <section class="panel" id="authPanel">
+      <div class="panel-title">1. Подтверди Telegram</div>
+      <p>Это нужно только для того, чтобы после оплаты PRO автоматически появился в твоём Микс Оракуле.</p>
+      <button class="primary" id="telegramLogin" type="button">Войти через Telegram</button>
+      <div class="status" id="authStatus"></div>
+    </section>
+
+    <section class="panel disabled" id="paymentPanel" aria-disabled="true">
+      <div class="panel-title">2. Выбери способ оплаты</div>
+      <div class="methods">
+        <button class="method" data-method="sbp" type="button">
+          <span class="method-icon">СБП</span>
+          <span><b>Система быстрых платежей</b><small>Оплата через банковское приложение</small></span>
+        </button>
+        <button class="method" data-method="bank_card" type="button">
+          <span class="method-icon">▣</span>
+          <span><b>Банковская карта</b><small>МИР и другие карты, доступные в ЮKassa</small></span>
+        </button>
+      </div>
+      <div class="status" id="paymentStatus"></div>
+    </section>
+
+    <section class="benefits">
+      <h2>Что открывает PRO</h2>
+      <div class="benefit">◆ Авторские коллекции ALX Signature</div>
+      <div class="benefit">◆ Сценарии «Для двоих» и «После полуночи»</div>
+      <div class="benefit">◆ Экспериментальные подборки</div>
+      <div class="benefit">◆ Новые PRO-функции по мере развития Оракула</div>
+    </section>
+
+    <section class="fineprint">
+      <p>Оплата проходит на защищённой странице ЮKassa. Данные банковской карты ALX Oracle не получает и не хранит.</p>
+      <p>Эта страница является отдельным внешним каналом покупки. Внутри Telegram Mini App цифровая подписка оплачивается Telegram Stars.</p>
+    </section>
+  </main>
+
+  <script type="module" src="./pay.js?v=1.15.0"></script>
+</body>
+</html>
