@@ -5,36 +5,49 @@ on:
     paths:
       - '.github/workflows/alx-pay-smoke.yml'
       - 'wrangler.toml'
+      - 'cloudflare/worker-v2.js'
   workflow_dispatch:
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Check ALX Pay root and config
+      - name: Check ALX Pay live payment stack
         shell: bash
         run: |
           set -euo pipefail
           BASE='https://alx-pay.sashaswag23.workers.dev'
+
           echo 'Checking root...'
           curl -fsS -o /tmp/root.html "$BASE/"
           test -s /tmp/root.html
 
-          echo 'Checking config...'
+          echo 'Checking config and payment dependencies...'
           passed=0
           for i in {1..12}; do
-            curl -fsS "$BASE/api/config" -o /tmp/config.json
-            cat /tmp/config.json
+            curl -fsS "$BASE/api/config" -o /tmp/config.json || true
+            curl -fsS "$BASE/api/_smoke/payment-health" -o /tmp/health.json || true
+            echo 'config:'; cat /tmp/config.json 2>/dev/null || true; echo
+            echo 'health:'; cat /tmp/health.json 2>/dev/null || true; echo
+
             if python3 - <<'PY'
           import json
-          with open('/tmp/config.json', encoding='utf-8') as f:
-              data = json.load(f)
-          offer = data.get('offer') or {}
+          try:
+              with open('/tmp/config.json', encoding='utf-8') as f:
+                  cfg = json.load(f)
+              with open('/tmp/health.json', encoding='utf-8') as f:
+                  health = json.load(f)
+          except Exception:
+              raise SystemExit(1)
+          offer = cfg.get('offer') or {}
           ok = (
-              data.get('ok') is True
+              cfg.get('ok') is True
               and offer.get('priceRub') == 1
               and offer.get('periodDays') == 30
               and offer.get('enabled') is True
+              and health.get('ok') is True
+              and health.get('d1') is True
+              and health.get('yookassa') is True
           )
           raise SystemExit(0 if ok else 1)
           PY
@@ -46,8 +59,8 @@ jobs:
           done
 
           if [ "$passed" -ne 1 ]; then
-            echo 'FAIL: live Worker did not reach priceRub=1 / enabled=true'
+            echo 'FAIL: live ALX Pay payment stack is not healthy'
             exit 1
           fi
 
-          echo 'PASS: live Worker priceRub=1, periodDays=30, enabled=true'
+          echo 'PASS: price=1, D1 reachable, YooKassa credentials accepted'
