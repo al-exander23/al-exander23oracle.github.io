@@ -1,0 +1,19 @@
+name = "alx-pay"
+main = "cloudflare/worker.js"
+compatibility_date = "2026-09-13"
+
+[assets]
+directory = "./pay"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "alx-pay"
+database_id = "PASTE_D1_DATABASE_ID_HERE"
+
+# Public/non-secret vars can be set here or in the Cloudflare dashboard.
+# Prefer dashboard Secrets for all credentials.
+[vars]
+ALX_EXTERNAL_PRICE_RUB = ""
+ALX_ALLOWED_ORIGIN = "https://al-exander23.github.io"
+ALX_PAY_ORIGIN = ""
