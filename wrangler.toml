@@ -1,0 +1,17 @@
+name = "alx-pay"
+main = "cloudflare/worker.js"
+compatibility_date = "2026-09-13"
+
+[assets]
+directory = "./pay"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "alx-pay"
+database_id = "956ce216-014e-443b-9899-437ab4f44b72"
+
+[vars]
+ALX_EXTERNAL_PRICE_RUB = ""
+ALX_ALLOWED_ORIGIN = "https://al-exander23.github.io"
+ALX_PAY_ORIGIN = ""
