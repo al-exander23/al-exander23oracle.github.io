@@ -85,10 +85,39 @@ async function sdkLogin(request, env) {
   }
 }
 
+async function paymentHealth(env) {
+  let d1 = false;
+  let yookassa = false;
+
+  try {
+    const row = await env.DB.prepare('SELECT 1 AS ok').first();
+    d1 = Number(row?.ok) === 1;
+  } catch (error) {
+    console.error('[ALX Pay health D1]', error);
+  }
+
+  try {
+    if (env.YOOKASSA_SHOP_ID && env.YOOKASSA_SECRET_KEY) {
+      const auth = btoa(`${env.YOOKASSA_SHOP_ID}:${env.YOOKASSA_SECRET_KEY}`);
+      const response = await fetch('https://api.yookassa.ru/v3/payments?limit=1', {
+        method: 'GET',
+        headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' },
+      });
+      yookassa = response.ok;
+    }
+  } catch (error) {
+    console.error('[ALX Pay health YooKassa]', error);
+  }
+
+  const ok = d1 && yookassa;
+  return json({ ok, d1, yookassa }, ok ? 200 : 503);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') return sdkLogin(request, env);
+    if (url.pathname === '/api/_smoke/payment-health' && request.method === 'GET') return paymentHealth(env);
     return base.fetch(request, env, ctx);
   },
 };
