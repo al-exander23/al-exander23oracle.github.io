@@ -1,0 +1,40 @@
+name: ALX Pay smoke test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-pay-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check ALX Pay root and config
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://alx-pay.sashaswag23.workers.dev'
+          echo 'Checking root...'
+          curl -fsS -o /tmp/root.html "$BASE/"
+          test -s /tmp/root.html
+
+          echo 'Checking config...'
+          CONFIG="$(curl -fsS "$BASE/api/config")"
+          echo "$CONFIG"
+
+          python3 - <<'PY'
+          import json, os, sys
+          import urllib.request
+
+          url = 'https://alx-pay.sashaswag23.workers.dev/api/config'
+          with urllib.request.urlopen(url, timeout=20) as r:
+              data = json.load(r)
+
+          offer = data.get('offer') or {}
+          assert data.get('ok') is True, data
+          assert offer.get('priceRub') == 1, data
+          assert offer.get('periodDays') == 30, data
+          assert offer.get('enabled') is True, data
+          print('PASS: priceRub=1, periodDays=30, enabled=true')
+          PY
