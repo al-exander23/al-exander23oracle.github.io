@@ -60,7 +60,7 @@ async function load() {
     offer = config.offer;
     renderOffer();
     if (offer?.enabled === false) {
-      setStatus(paymentStatus, 'Тестовый платёжный канал ещё не настроен владельцем.', 'error');
+      setStatus(paymentStatus, 'Платёжный канал временно недоступен. Попробуй позже.', 'error');
     }
   } catch (error) {
     setStatus(paymentStatus, 'Не удалось загрузить настройки оплаты.', 'error');
