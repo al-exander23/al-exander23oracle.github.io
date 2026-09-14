@@ -85,10 +85,33 @@ async function sdkLogin(request, env) {
   }
 }
 
+function splitOAuthCookies(response) {
+  const combined = response.headers.get('Set-Cookie') || '';
+  const marker = ', alx_auth_state=';
+  const markerIndex = combined.indexOf(marker);
+  if (!combined.includes('alx_pay_session=') || markerIndex < 0) return response;
+
+  const sessionCookie = combined.slice(0, markerIndex);
+  const authStateCookie = combined.slice(markerIndex + 2);
+  const headers = new Headers(response.headers);
+  headers.delete('Set-Cookie');
+  headers.append('Set-Cookie', sessionCookie);
+  headers.append('Set-Cookie', authStateCookie);
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') return sdkLogin(request, env);
-    return base.fetch(request, env, ctx);
+
+    const response = await base.fetch(request, env, ctx);
+    if (url.pathname === '/auth/telegram/callback') return splitOAuthCookies(response);
+    return response;
   },
 };
