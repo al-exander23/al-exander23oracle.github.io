@@ -105,13 +105,43 @@ function splitOAuthCookies(response) {
   });
 }
 
+function paymentMode(env) {
+  return String(env.ALX_PAYMENT_MODE || 'test').trim().toLowerCase() === 'live' ? 'live' : 'test';
+}
+
+function effectivePaymentEnv(env) {
+  const mode = paymentMode(env);
+  if (mode !== 'live') return env;
+
+  const effective = Object.create(env);
+  effective.YOOKASSA_SHOP_ID = String(env.YOOKASSA_LIVE_SHOP_ID || '').trim();
+  effective.YOOKASSA_SECRET_KEY = String(env.YOOKASSA_LIVE_SECRET_KEY || '').trim();
+  effective.ALX_EXTERNAL_PRICE_RUB = String(env.ALX_LIVE_PRICE_RUB || '').trim();
+  return effective;
+}
+
+function withPaymentMode(response, mode) {
+  const headers = new Headers(response.headers);
+  headers.set('X-ALX-Payment-Mode', mode);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') return sdkLogin(request, env);
+    const mode = paymentMode(env);
+    const effectiveEnv = effectivePaymentEnv(env);
 
-    const response = await base.fetch(request, env, ctx);
-    if (url.pathname === '/auth/telegram/callback') return splitOAuthCookies(response);
-    return response;
+    if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') {
+      return withPaymentMode(await sdkLogin(request, effectiveEnv), mode);
+    }
+
+    let response = await base.fetch(request, effectiveEnv, ctx);
+    if (url.pathname === '/auth/telegram/callback') response = splitOAuthCookies(response);
+    return withPaymentMode(response, mode);
   },
 };
