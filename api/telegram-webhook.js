@@ -1,5 +1,5 @@
 // Telegram webhook for ALX Oracle + ALX PRO Stars.
-// Handles the bot welcome flow and answers pre_checkout_query within Telegram's deadline.
+// Handles the branded bot storefront and answers pre_checkout_query within Telegram's deadline.
 
 const {
   getPriceStars,
@@ -10,11 +10,22 @@ const {
 } = require('../server/telegram.js');
 
 const DEFAULT_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
+const DEFAULT_API_URL = 'https://al-exander23oracle-github-io.vercel.app';
+const ALX_PAY_SUPPORT_URL = 'https://alx-pay.sashaswag23.workers.dev/support/';
 let botProfilePromise = null;
 
 function miniAppUrl() {
   const configured = String(process.env.ALX_MINI_APP_URL || '').trim();
   return /^https:\/\//i.test(configured) ? configured : DEFAULT_MINI_APP_URL;
+}
+
+function apiOrigin() {
+  const configured = String(process.env.ALX_PUBLIC_API_URL || '').trim().replace(/\/$/, '');
+  return /^https:\/\//i.test(configured) ? configured : DEFAULT_API_URL;
+}
+
+function botVisualUrl() {
+  return `${apiOrigin()}/api/bot-visual`;
 }
 
 function escapeHtml(value) {
@@ -29,32 +40,69 @@ function launchKeyboard() {
     inline_keyboard: [
       [{ text: '🔮 Запустить Оракул', web_app: { url: miniAppUrl() } }],
       [
-        { text: '⭐ Что даёт ALX PRO', callback_data: 'alx_pro_info' },
-        { text: '❓ Помощь', callback_data: 'alx_help' },
+        { text: '✦ ALX PRO', callback_data: 'alx_pro_info' },
+        { text: 'Как это работает', callback_data: 'alx_help' },
       ],
-      [{ text: '🛟 Поддержка оплаты', callback_data: 'alx_pay_support' }],
+      [
+        { text: '🛟 Оплата и поддержка', callback_data: 'alx_pay_support' },
+        { text: 'Условия', callback_data: 'alx_terms' },
+      ],
     ],
   };
+}
+
+async function setBotProfilePhotoIfMissing() {
+  const token = String(process.env.TELEGRAM_BOT_TOKEN || '').trim();
+  if (!token) return false;
+
+  const me = await telegramApi('getMe');
+  const photos = await telegramApi('getUserProfilePhotos', { user_id: me.id, limit: 1 });
+  if (Number(photos?.total_count || 0) > 0) return false;
+
+  const imageResponse = await fetch(botVisualUrl());
+  if (!imageResponse.ok) throw new Error(`BOT_VISUAL_HTTP_${imageResponse.status}`);
+  const imageBytes = await imageResponse.arrayBuffer();
+  const form = new FormData();
+  form.append('photo', JSON.stringify({ type: 'static', photo: 'attach://avatar' }));
+  form.append('avatar', new Blob([imageBytes], { type: 'image/jpeg' }), 'alx-oracle.jpg');
+
+  const response = await fetch(`https://api.telegram.org/bot${token}/setMyProfilePhoto`, {
+    method: 'POST',
+    body: form,
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.ok) throw new Error(data?.description || `setMyProfilePhoto failed (${response.status})`);
+  return true;
 }
 
 async function configureBot(req, chatId) {
   if (!botProfilePromise) {
     botProfilePromise = Promise.allSettled([
       ensureWebhook(req),
+      telegramApi('setMyName', { name: 'ALX Oracle' }),
       telegramApi('setMyCommands', {
         commands: [
-          { command: 'start', description: 'Открыть ALX Oracle' },
-          { command: 'pro', description: 'Что входит в ALX PRO' },
-          { command: 'help', description: 'Помощь по Оракулу' },
-          { command: 'paysupport', description: 'Поддержка по оплате' },
+          { command: 'start', description: 'Главная и запуск Оракула' },
+          { command: 'pro', description: 'Возможности ALX PRO' },
+          { command: 'help', description: 'Как пользоваться Оракулом' },
+          { command: 'paysupport', description: 'Оплата и поддержка' },
+          { command: 'terms', description: 'Условия использования' },
         ],
       }),
       telegramApi('setMyDescription', {
-        description: 'ALX Oracle — персональный Оракул вкуса. Подбирай миксы под настроение, сохраняй любимое и открывай закрытые коллекции ALX PRO.',
+        description: 'ALX Oracle — персональный Оракул авторских миксов. Подбор по настроению, история, избранное, сценарии и закрытые коллекции ALX PRO. 18+.',
       }),
       telegramApi('setMyShortDescription', {
-        short_description: 'Персональный Оракул вкуса и авторских миксов ALX.',
+        short_description: 'Персональный Оракул авторских миксов ALX · 18+',
       }),
+      telegramApi('setChatMenuButton', {
+        menu_button: {
+          type: 'web_app',
+          text: 'Открыть Oracle',
+          web_app: { url: miniAppUrl() },
+        },
+      }),
+      setBotProfilePhotoIfMissing(),
     ]).catch((error) => {
       botProfilePromise = null;
       throw error;
@@ -75,34 +123,50 @@ async function configureBot(req, chatId) {
   }
 }
 
-async function sendWelcome(chatId, user = {}) {
+function welcomeCaption(user = {}) {
   const name = escapeHtml(user.first_name || user.username || '');
   const greeting = name ? `, ${name}` : '';
   const price = getPriceStars();
+  return [
+    `<b>ALX ORACLE</b>${greeting}`,
+    '<i>Твой персональный Оракул вкуса.</i>',
+    '',
+    'Подбирай сочетания под настроение и ситуацию, сохраняй любимое и постепенно формируй собственный вкусовой профиль.',
+    '',
+    '✦ персональные рекомендации',
+    '✦ история и избранное',
+    '✦ Daily Oracle',
+    '✦ сценарии и достижения',
+    '✦ закрытые коллекции ALX PRO',
+    '',
+    `<b>ALX PRO · ${price} ⭐ / 30 дней</b>`,
+    'Внутри Telegram цифровой PRO оформляется через Telegram Stars.',
+    '',
+    '<i>18+ · ALX Oracle не продаёт табачную продукцию.</i>',
+  ].join('\n');
+}
 
-  await telegramApi('sendMessage', {
+async function sendWelcome(chatId, user = {}) {
+  const payload = {
     chat_id: chatId,
+    photo: botVisualUrl(),
+    caption: welcomeCaption(user),
     parse_mode: 'HTML',
-    disable_web_page_preview: true,
-    text: [
-      `<b>ALX ORACLE</b>${greeting}`,
-      '',
-      'Твой персональный Оракул вкуса.',
-      'Он подбирает миксы под настроение и ситуацию, запоминает предпочтения и помогает находить новые сочетания.',
-      '',
-      '✦ персональные рекомендации',
-      '✦ история и избранное',
-      '✦ Daily Oracle',
-      '✦ сценарии и достижения',
-      '✦ закрытые коллекции ALX PRO',
-      '',
-      `<b>ALX PRO · ${price} ⭐ / 30 дней</b>`,
-      'Расширенные коллекции, сценарии и новые PRO-возможности открываются прямо внутри Telegram.',
-      '',
-      'Нажми кнопку ниже — Оракул уже готов.',
-    ].join('\n'),
     reply_markup: launchKeyboard(),
-  });
+  };
+
+  try {
+    await telegramApi('sendPhoto', payload);
+  } catch (error) {
+    console.warn('[ALX Bot welcome photo]', error);
+    await telegramApi('sendMessage', {
+      chat_id: chatId,
+      text: welcomeCaption(user),
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+      reply_markup: launchKeyboard(),
+    });
+  }
 }
 
 async function sendProInfo(chatId) {
@@ -111,21 +175,23 @@ async function sendProInfo(chatId) {
     chat_id: chatId,
     parse_mode: 'HTML',
     text: [
-      '<b>ALX PRO</b>',
+      '<b>✦ ALX PRO</b>',
+      '<i>Глубже Оракула — больше контроля над подбором.</i>',
       '',
-      'PRO открывает закрытые авторские коллекции и расширенные сценарии Оракула:',
-      '',
-      '◆ ALX Signature',
-      '◆ «Для двоих»',
-      '◆ «После полуночи»',
-      '◆ экспериментальные подборки',
+      '◆ <b>ALX Signature</b> — отбор самых сильных авторских сочетаний',
+      '◆ <b>Для двоих</b> — мягкие вечерние сценарии',
+      '◆ <b>После полуночи</b> — более насыщенные подборки',
+      '◆ <b>Эксперимент</b> — смелые и нестандартные сочетания',
       '◆ новые PRO-функции по мере развития проекта',
       '',
       `<b>${price} ⭐ / 30 дней</b>`,
-      'Оплата цифрового доступа внутри Telegram проходит через Telegram Stars.',
+      'Цифровой доступ внутри Telegram оплачивается через Telegram Stars.',
     ].join('\n'),
     reply_markup: {
-      inline_keyboard: [[{ text: '🔮 Открыть ALX Oracle', web_app: { url: miniAppUrl() } }]],
+      inline_keyboard: [
+        [{ text: `Открыть PRO · ${price} ⭐`, web_app: { url: miniAppUrl() } }],
+        [{ text: '🛟 Вопрос по оплате', callback_data: 'alx_pay_support' }],
+      ],
     },
   });
 }
@@ -135,13 +201,18 @@ async function sendHelp(chatId) {
     chat_id: chatId,
     parse_mode: 'HTML',
     text: [
-      '<b>Помощь ALX Oracle</b>',
+      '<b>Как работает ALX Oracle</b>',
       '',
-      '🔮 /start — главная и запуск Оракула',
-      '⭐ /pro — возможности ALX PRO',
-      '🛟 /paysupport — вопросы по оплате',
+      '1. Открой Оракул кнопкой ниже.',
+      '2. Встряхни телефон или коснись шара.',
+      '3. Получи сочетание и оцени его — Оракул постепенно запоминает твой вкус.',
+      '4. Сохраняй удачные варианты в избранное и используй сценарии под ситуацию.',
       '',
-      'Если Mini App уже открыт, встряхни телефон или коснись шара, чтобы получить новый микс.',
+      '<b>Команды</b>',
+      '/start — главная',
+      '/pro — ALX PRO',
+      '/paysupport — оплата и поддержка',
+      '/terms — условия',
     ].join('\n'),
     reply_markup: {
       inline_keyboard: [[{ text: '🔮 Запустить Оракул', web_app: { url: miniAppUrl() } }]],
@@ -153,17 +224,44 @@ async function sendPaySupport(chatId) {
   await telegramApi('sendMessage', {
     chat_id: chatId,
     parse_mode: 'HTML',
+    disable_web_page_preview: true,
     text: [
-      '<b>Поддержка по оплате</b>',
+      '<b>🛟 Оплата и поддержка</b>',
       '',
-      'Если Stars списались, а PRO не открылся:',
-      '1. Полностью закрой ALX Oracle.',
-      '2. Открой Mini App заново из этого бота.',
-      '3. Проверь карточку ALX PRO — доступ восстанавливается по подтверждённой Telegram-транзакции.',
+      '<b>Telegram Stars</b>',
+      'Если Stars списались, а PRO не открылся — полностью закрой ALX Oracle и открой Mini App заново. Доступ восстанавливается по подтверждённой Telegram-транзакции.',
       '',
-      'Если проблема осталась, сохрани скриншот оплаты и время операции. Не отправляй номер банковской карты, CVC, пароли или коды подтверждения.',
+      '<b>ALX Pay</b>',
+      'Если вопрос связан с покупкой, которую ты ранее оформлял на официальном сайте ALX Pay, открой центр поддержки. Там можно проверить привязку Telegram и состояние PRO.',
       '',
-      'Контакт для ручной поддержки будет добавлен отдельно.',
+      'Никогда не отправляй номер карты, CVC, пароль, SMS-код или код подтверждения.',
+      '',
+      '<i>Telegram Support не обрабатывает покупки, совершённые через этого бота. По вопросам ALX используй этот раздел и официальный Support Center.</i>',
+    ].join('\n'),
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '🌐 Support Center ALX Pay', url: ALX_PAY_SUPPORT_URL }],
+        [{ text: '🔮 Открыть ALX Oracle', web_app: { url: miniAppUrl() } }],
+      ],
+    },
+  });
+}
+
+async function sendTerms(chatId) {
+  await telegramApi('sendMessage', {
+    chat_id: chatId,
+    parse_mode: 'HTML',
+    text: [
+      '<b>Условия ALX Oracle</b>',
+      '',
+      '• сервис предназначен для пользователей 18+;',
+      '• ALX Oracle предоставляет рекомендации и цифровой функционал, но не продаёт табачную продукцию;',
+      '• ALX PRO открывает цифровые функции на срок оплаченного периода;',
+      '• покупки цифрового PRO внутри Telegram оформляются в Telegram Stars;',
+      '• доступ привязывается к подтверждённому Telegram-аккаунту;',
+      '• вопросы по платежам и восстановлению доступа принимаются через /paysupport.',
+      '',
+      'Продолжая пользоваться сервисом, пользователь принимает эти условия и правила Telegram.',
     ].join('\n'),
     reply_markup: {
       inline_keyboard: [[{ text: '🔮 Открыть ALX Oracle', web_app: { url: miniAppUrl() } }]],
@@ -179,6 +277,7 @@ async function handleCallback(callback) {
   if (callback.data === 'alx_pro_info') await sendProInfo(chatId);
   else if (callback.data === 'alx_help') await sendHelp(chatId);
   else if (callback.data === 'alx_pay_support') await sendPaySupport(chatId);
+  else if (callback.data === 'alx_terms') await sendTerms(chatId);
 }
 
 async function handleMessage(req, message) {
@@ -203,6 +302,10 @@ async function handleMessage(req, message) {
   }
   if (command === '/paysupport') {
     await sendPaySupport(chatId);
+    return;
+  }
+  if (command === '/terms') {
+    await sendTerms(chatId);
   }
 }
 
