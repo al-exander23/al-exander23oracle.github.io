@@ -10,7 +10,7 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect current live ALX Pay after config fix
+      - name: Inspect current live ALX Pay again
         shell: bash
         run: |
           set -u
