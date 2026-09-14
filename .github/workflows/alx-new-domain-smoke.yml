@@ -1,0 +1,52 @@
+name: ALX new domain smoke
+
+on:
+  push:
+    paths:
+      - 'wrangler.toml'
+      - 'api/stars-status.js'
+      - 'api/telegram-webhook.js'
+      - '.github/workflows/alx-new-domain-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify branded domain migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          NEW='https://alx-pay.alxoracle.workers.dev'
+          VERCEL='https://al-exander23oracle-github-io.vercel.app'
+
+          if grep -RIn --exclude-dir=.git --exclude='probe-alx-pay-domain.yml' 'alx-pay\.sashaswag23\.workers\.dev' .; then
+            echo 'FAIL: old ALX Pay hostname remains in repository'
+            exit 1
+          fi
+
+          ok=0
+          for i in {1..18}; do
+            code=$(curl -sS -o /tmp/config.json -w '%{http_code}' "$NEW/api/config" || true)
+            support=$(curl -sS -o /tmp/support.html -w '%{http_code}' "$NEW/support/" || true)
+            if [ "$code" = '200' ] && [ "$support" = '200' ] && grep -q '"ok":true' /tmp/config.json; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ok" = '1'
+
+          headers=$(curl -sS -D - -o /dev/null "$NEW/auth/telegram/start" || true)
+          printf '%s\n' "$headers" > /tmp/auth-headers.txt
+          grep -qi '^location: https://oauth.telegram.org/' /tmp/auth-headers.txt
+          grep -q 'alx-pay.alxoracle.workers.dev' /tmp/auth-headers.txt
+
+          mini=$(curl -sS -o /tmp/mini.json -w '%{http_code}' -X POST "$NEW/api/miniapp/status" -H 'Content-Type: application/json' --data '{}')
+          test "$mini" = '401'
+
+          stars=$(curl -sS -o /tmp/stars.json -w '%{http_code}' -X POST "$VERCEL/api/stars-status" -H 'Content-Type: application/json' --data '{}')
+          test "$stars" = '401'
+
+          echo 'PASS: branded ALX Pay domain is live, OAuth origin migrated, auth protections intact'
