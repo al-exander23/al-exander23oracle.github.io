@@ -1,0 +1,40 @@
+name: ALX OIDC live check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-oidc-live-check.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live ALX Pay OIDC login
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAY='https://alx-pay.alxoracle.workers.dev'
+
+          for i in {1..24}; do
+            root=$(curl -fsS "$PAY/" || true)
+            js=$(curl -fsS "$PAY/pay.js?v=1.16.0-oidc" || true)
+            if printf '%s' "$root" | grep -q 'pay.js?v=1.16.0-oidc' && printf '%s' "$js" | grep -q "window.location.assign('/auth/telegram/start')"; then
+              break
+            fi
+            if [ "$i" = '24' ]; then
+              echo 'FAIL: new ALX Pay frontend is not live'
+              exit 1
+            fi
+            sleep 10
+          done
+
+          headers=$(mktemp)
+          curl -sS -D "$headers" -o /dev/null "$PAY/auth/telegram/start"
+          grep -qi '^location: https://oauth.telegram.org/auth?' "$headers"
+          grep -q 'redirect_uri=https%3A%2F%2Falx-pay.alxoracle.workers.dev%2Fauth%2Ftelegram%2Fcallback' "$headers"
+          grep -q 'response_type=code' "$headers"
+          grep -q 'code_challenge=' "$headers"
+          grep -q 'code_challenge_method=S256' "$headers"
+
+          echo 'PASS: live ALX Pay uses server OIDC with redirect_uri and PKCE'
