@@ -6,6 +6,7 @@ on:
       - 'wrangler.toml'
       - 'api/stars-status.js'
       - 'api/telegram-webhook.js'
+      - '.github/workflows/alx-bot-live-setup.yml'
       - '.github/workflows/alx-new-domain-smoke.yml'
   workflow_dispatch:
 
