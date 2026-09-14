@@ -1,0 +1,44 @@
+name: ALX polish smoke
+
+on:
+  push:
+    paths:
+      - 'api/bot-visual.js'
+      - 'api/telegram-webhook.js'
+      - 'pay/support/**'
+      - 'pay/index.html'
+      - '.github/workflows/alx-polish-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify branded bot API and ALX Pay support center
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERCEL='https://al-exander23oracle-github-io.vercel.app'
+          PAY='https://alx-pay.sashaswag23.workers.dev'
+          ok=0
+          for i in {1..18}; do
+            echo "Attempt $i"
+            visual=$(curl -sS -o /tmp/bot.jpg -w '%{http_code}' "$VERCEL/api/bot-visual" || true)
+            support=$(curl -sS -o /tmp/support.html -w '%{http_code}' "$PAY/support/" || true)
+            if [ "$visual" = '200' ] && [ "$support" = '200' ] && \
+               grep -q 'Support Center' /tmp/support.html && \
+               test "$(wc -c < /tmp/bot.jpg)" -gt 5000; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "FAIL: visual=$visual support=$support"
+            head -30 /tmp/support.html 2>/dev/null || true
+            exit 1
+          fi
+
+          webhook=$(curl -sS -o /tmp/webhook.json -w '%{http_code}' -X POST "$VERCEL/api/telegram-webhook" -H 'Content-Type: application/json' --data '{}')
+          test "$webhook" = '401'
+          echo 'PASS: bot visual deployed, webhook auth enforced, ALX Pay support center live'
