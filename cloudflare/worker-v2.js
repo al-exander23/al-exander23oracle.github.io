@@ -85,42 +85,10 @@ async function sdkLogin(request, env) {
   }
 }
 
-async function aggregatePaymentResult(env) {
-  try {
-    const row = await env.DB.prepare(`
-      SELECT
-        p.status AS payment_status,
-        p.amount_rub AS amount_rub,
-        EXISTS(
-          SELECT 1 FROM entitlements e
-          WHERE e.telegram_user_id = p.telegram_user_id
-            AND e.provider_payment_id = p.id
-            AND e.status = 'active'
-            AND e.expires_at > ?
-        ) AS active_linked_entitlement
-      FROM payments p
-      ORDER BY p.created_at DESC
-      LIMIT 1
-    `).bind(Date.now()).first();
-
-    return json({
-      ok: true,
-      paymentFound: Boolean(row),
-      latestPaymentSucceeded: row?.payment_status === 'succeeded',
-      amountRub: row ? Number(row.amount_rub) : null,
-      activeLinkedEntitlement: Boolean(row?.active_linked_entitlement),
-    });
-  } catch (error) {
-    console.error('[ALX Pay aggregate payment diagnostic]', error);
-    return json({ ok: false }, 500);
-  }
-}
-
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') return sdkLogin(request, env);
-    if (url.pathname === '/api/_smoke/payment-result' && request.method === 'GET') return aggregatePaymentResult(env);
     return base.fetch(request, env, ctx);
   },
 };
