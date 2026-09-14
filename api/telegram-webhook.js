@@ -11,8 +11,8 @@ const {
 
 const DEFAULT_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
 const DEFAULT_API_URL = 'https://al-exander23oracle-github-io.vercel.app';
-const ALX_PAY_URL = 'https://alx-pay.sashaswag23.workers.dev/';
-const ALX_PAY_SUPPORT_URL = 'https://alx-pay.sashaswag23.workers.dev/support/';
+const ALX_PAY_URL = 'https://alx-pay.alxoracle.workers.dev/';
+const ALX_PAY_SUPPORT_URL = 'https://alx-pay.alxoracle.workers.dev/support/';
 let botProfilePromise = null;
 
 function miniAppUrl() {
