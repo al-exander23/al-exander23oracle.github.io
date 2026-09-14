@@ -18,3 +18,4 @@ jobs:
           echo "HTTP=$status"
           cat /tmp/setup.json 2>/dev/null || true
           echo
+          # Diagnostic only: response contains no bot token or secret values.
