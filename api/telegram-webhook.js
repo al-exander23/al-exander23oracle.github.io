@@ -52,17 +52,17 @@ function launchKeyboard() {
   };
 }
 
-async function setBotProfilePhotoIfMissing() {
+async function loadBotVisualBytes() {
+  const response = await fetch(botVisualUrl());
+  if (!response.ok) throw new Error(`BOT_VISUAL_HTTP_${response.status}`);
+  return response.arrayBuffer();
+}
+
+async function setBotProfilePhoto() {
   const token = String(process.env.TELEGRAM_BOT_TOKEN || '').trim();
   if (!token) return false;
 
-  const me = await telegramApi('getMe');
-  const photos = await telegramApi('getUserProfilePhotos', { user_id: me.id, limit: 1 });
-  if (Number(photos?.total_count || 0) > 0) return false;
-
-  const imageResponse = await fetch(botVisualUrl());
-  if (!imageResponse.ok) throw new Error(`BOT_VISUAL_HTTP_${imageResponse.status}`);
-  const imageBytes = await imageResponse.arrayBuffer();
+  const imageBytes = await loadBotVisualBytes();
   const form = new FormData();
   form.append('photo', JSON.stringify({ type: 'static', photo: 'attach://avatar' }));
   form.append('avatar', new Blob([imageBytes], { type: 'image/jpeg' }), 'alx-oracle.jpg');
@@ -74,6 +74,27 @@ async function setBotProfilePhotoIfMissing() {
   const data = await response.json().catch(() => null);
   if (!response.ok || !data?.ok) throw new Error(data?.description || `setMyProfilePhoto failed (${response.status})`);
   return true;
+}
+
+async function sendBrandedPhoto(chatId, caption, replyMarkup) {
+  const token = String(process.env.TELEGRAM_BOT_TOKEN || '').trim();
+  if (!token) throw new Error('TELEGRAM_BOT_TOKEN is not configured');
+
+  const imageBytes = await loadBotVisualBytes();
+  const form = new FormData();
+  form.append('chat_id', String(chatId));
+  form.append('caption', caption);
+  form.append('parse_mode', 'HTML');
+  form.append('reply_markup', JSON.stringify(replyMarkup));
+  form.append('photo', new Blob([imageBytes], { type: 'image/jpeg' }), 'alx-oracle.jpg');
+
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+    method: 'POST',
+    body: form,
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.ok) throw new Error(data?.description || `sendPhoto failed (${response.status})`);
+  return data.result;
 }
 
 async function configureBot(req, chatId) {
@@ -103,7 +124,7 @@ async function configureBot(req, chatId) {
           web_app: { url: miniAppUrl() },
         },
       }),
-      setBotProfilePhotoIfMissing(),
+      setBotProfilePhoto(),
     ]).catch((error) => {
       botProfilePromise = null;
       throw error;
@@ -148,16 +169,8 @@ function welcomeCaption(user = {}) {
 }
 
 async function sendWelcome(chatId, user = {}) {
-  const payload = {
-    chat_id: chatId,
-    photo: botVisualUrl(),
-    caption: welcomeCaption(user),
-    parse_mode: 'HTML',
-    reply_markup: launchKeyboard(),
-  };
-
   try {
-    await telegramApi('sendPhoto', payload);
+    await sendBrandedPhoto(chatId, welcomeCaption(user), launchKeyboard());
   } catch (error) {
     console.warn('[ALX Bot welcome photo]', error);
     await telegramApi('sendMessage', {
@@ -172,29 +185,32 @@ async function sendWelcome(chatId, user = {}) {
 
 async function sendProInfo(chatId) {
   const price = getPriceStars();
-  await telegramApi('sendMessage', {
-    chat_id: chatId,
-    parse_mode: 'HTML',
-    text: [
-      '<b>✦ ALX PRO</b>',
-      '<i>Глубже Оракула — больше контроля над подбором.</i>',
-      '',
-      '◆ <b>ALX Signature</b> — отбор самых сильных авторских сочетаний',
-      '◆ <b>Для двоих</b> — мягкие вечерние сценарии',
-      '◆ <b>После полуночи</b> — более насыщенные подборки',
-      '◆ <b>Эксперимент</b> — смелые и нестандартные сочетания',
-      '◆ новые PRO-функции по мере развития проекта',
-      '',
-      `<b>${price} ⭐ / 30 дней</b>`,
-      'Цифровой доступ внутри Telegram оплачивается через Telegram Stars.',
-    ].join('\n'),
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: `Открыть PRO · ${price} ⭐`, web_app: { url: miniAppUrl() } }],
-        [{ text: '🛟 Вопрос по оплате', callback_data: 'alx_pay_support' }],
-      ],
-    },
-  });
+  const text = [
+    '<b>✦ ALX PRO</b>',
+    '<i>Глубже Оракула — больше контроля над подбором.</i>',
+    '',
+    '◆ <b>ALX Signature</b> — отбор самых сильных авторских сочетаний',
+    '◆ <b>Для двоих</b> — мягкие вечерние сценарии',
+    '◆ <b>После полуночи</b> — более насыщенные подборки',
+    '◆ <b>Эксперимент</b> — смелые и нестандартные сочетания',
+    '◆ новые PRO-функции по мере развития проекта',
+    '',
+    `<b>${price} ⭐ / 30 дней</b>`,
+    'Цифровой доступ внутри Telegram оплачивается через Telegram Stars.',
+  ].join('\n');
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [{ text: `Открыть PRO · ${price} ⭐`, web_app: { url: miniAppUrl() } }],
+      [{ text: '🛟 Вопрос по оплате', callback_data: 'alx_pay_support' }],
+    ],
+  };
+
+  try {
+    await sendBrandedPhoto(chatId, text, replyMarkup);
+  } catch (error) {
+    await telegramApi('sendMessage', { chat_id: chatId, parse_mode: 'HTML', text, reply_markup: replyMarkup });
+  }
 }
 
 async function sendHelp(chatId) {
@@ -233,15 +249,15 @@ async function sendPaySupport(chatId) {
       'Если Stars списались, а PRO не открылся — полностью закрой ALX Oracle и открой Mini App заново. Доступ восстанавливается по подтверждённой Telegram-транзакции.',
       '',
       '<b>ALX Pay</b>',
-      'ALX Pay — официальный внешний ресурс проекта. Там можно узнать об оплате картой или СБП, войти через Telegram и проверить уже оформленный внешний доступ ALX PRO.',
+      'ALX Pay — официальный внешний ресурс проекта. На нём можно ознакомиться с доступными внешними способами оплаты, войти через Telegram и проверить уже оформленный внешний доступ ALX PRO.',
       '',
-      'Если нужна диагностика уже совершённой покупки, используй Support Center. Если хочешь перейти на сам ресурс ALX Pay — нажми соответствующую кнопку ниже.',
+      'Для информации об ALX Pay и перехода на ресурс используй кнопку «Открыть ALX Pay». Для диагностики уже совершённой покупки — Support Center.',
       '',
       'Никогда не отправляй номер карты, CVC, пароль, SMS-код или код подтверждения.',
     ].join('\n'),
     reply_markup: {
       inline_keyboard: [
-        [{ text: '💳 Открыть ALX Pay', url: ALX_PAY_URL }],
+        [{ text: '🌐 Открыть ALX Pay', url: ALX_PAY_URL }],
         [{ text: '🛟 Support Center ALX Pay', url: ALX_PAY_SUPPORT_URL }],
         [{ text: '🔮 Открыть ALX Oracle', web_app: { url: miniAppUrl() } }],
       ],
