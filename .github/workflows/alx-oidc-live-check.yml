@@ -37,4 +37,13 @@ jobs:
           grep -q 'code_challenge=' "$headers"
           grep -q 'code_challenge_method=S256' "$headers"
 
-          echo 'PASS: live ALX Pay uses server OIDC with redirect_uri and PKCE'
+          auth_url=$(awk 'BEGIN{IGNORECASE=1} /^location: / {sub(/^location: /, ""); sub(/\r$/, ""); print; exit}' "$headers")
+          tg_code=$(curl -sS -o /tmp/tg-auth.html -w '%{http_code}' "$auth_url" || true)
+          if grep -Eqi 'redirect_uri[[:space:]_:-]*(required|invalid|not allowed)|invalid[[:space:]_:-]*redirect' /tmp/tg-auth.html; then
+            echo 'FAIL: Telegram rejected redirect_uri'
+            cat /tmp/tg-auth.html
+            exit 1
+          fi
+          test "$tg_code" != '400'
+
+          echo 'PASS: live ALX Pay uses server OIDC and Telegram accepted the redirect request'
