@@ -6,14 +6,12 @@ const {
   telegramApi,
   parseProPayload,
   verifyWebhookRequest,
-  ensureWebhook,
 } = require('../server/telegram.js');
 
 const DEFAULT_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
 const DEFAULT_API_URL = 'https://al-exander23oracle-github-io.vercel.app';
 const ALX_PAY_URL = 'https://alx-pay.alxoracle.workers.dev/';
 const ALX_PAY_SUPPORT_URL = 'https://alx-pay.alxoracle.workers.dev/support/';
-let botProfilePromise = null;
 
 function miniAppUrl() {
   const configured = String(process.env.ALX_MINI_APP_URL || '').trim();
@@ -58,24 +56,6 @@ async function loadBotVisualBytes() {
   return response.arrayBuffer();
 }
 
-async function setBotProfilePhoto() {
-  const token = String(process.env.TELEGRAM_BOT_TOKEN || '').trim();
-  if (!token) return false;
-
-  const imageBytes = await loadBotVisualBytes();
-  const form = new FormData();
-  form.append('photo', JSON.stringify({ type: 'static', photo: 'attach://avatar' }));
-  form.append('avatar', new Blob([imageBytes], { type: 'image/jpeg' }), 'alx-oracle.jpg');
-
-  const response = await fetch(`https://api.telegram.org/bot${token}/setMyProfilePhoto`, {
-    method: 'POST',
-    body: form,
-  });
-  const data = await response.json().catch(() => null);
-  if (!response.ok || !data?.ok) throw new Error(data?.description || `setMyProfilePhoto failed (${response.status})`);
-  return true;
-}
-
 async function sendBrandedPhoto(chatId, caption, replyMarkup) {
   const token = String(process.env.TELEGRAM_BOT_TOKEN || '').trim();
   if (!token) throw new Error('TELEGRAM_BOT_TOKEN is not configured');
@@ -95,54 +75,6 @@ async function sendBrandedPhoto(chatId, caption, replyMarkup) {
   const data = await response.json().catch(() => null);
   if (!response.ok || !data?.ok) throw new Error(data?.description || `sendPhoto failed (${response.status})`);
   return data.result;
-}
-
-async function configureBot(req, chatId) {
-  if (!botProfilePromise) {
-    botProfilePromise = Promise.allSettled([
-      ensureWebhook(req),
-      telegramApi('setMyName', { name: 'ALX Oracle' }),
-      telegramApi('setMyCommands', {
-        commands: [
-          { command: 'start', description: 'Главная и запуск Оракула' },
-          { command: 'pro', description: 'Возможности ALX PRO' },
-          { command: 'help', description: 'Как пользоваться Оракулом' },
-          { command: 'paysupport', description: 'Оплата и поддержка' },
-          { command: 'terms', description: 'Условия использования' },
-        ],
-      }),
-      telegramApi('setMyDescription', {
-        description: 'ALX Oracle — персональный Оракул авторских миксов. Подбор по настроению, история, избранное, сценарии и закрытые коллекции ALX PRO. 18+.',
-      }),
-      telegramApi('setMyShortDescription', {
-        short_description: 'Персональный Оракул авторских миксов ALX · 18+',
-      }),
-      telegramApi('setChatMenuButton', {
-        menu_button: {
-          type: 'web_app',
-          text: 'Открыть Oracle',
-          web_app: { url: miniAppUrl() },
-        },
-      }),
-      setBotProfilePhoto(),
-    ]).catch((error) => {
-      botProfilePromise = null;
-      throw error;
-    });
-  }
-
-  await botProfilePromise;
-
-  if (chatId) {
-    await telegramApi('setChatMenuButton', {
-      chat_id: chatId,
-      menu_button: {
-        type: 'web_app',
-        text: 'Открыть Oracle',
-        web_app: { url: miniAppUrl() },
-      },
-    }).catch((error) => console.warn('[ALX Bot menu button]', error));
-  }
 }
 
 function welcomeCaption(user = {}) {
@@ -298,7 +230,7 @@ async function handleCallback(callback) {
   else if (callback.data === 'alx_terms') await sendTerms(chatId);
 }
 
-async function handleMessage(req, message) {
+async function handleMessage(_req, message) {
   const chatId = message.chat?.id;
   if (!chatId) return;
 
@@ -306,7 +238,6 @@ async function handleMessage(req, message) {
   const command = text.split(/\s+/)[0].split('@')[0].toLowerCase();
 
   if (command === '/start') {
-    await configureBot(req, chatId);
     await sendWelcome(chatId, message.from || {});
     return;
   }
