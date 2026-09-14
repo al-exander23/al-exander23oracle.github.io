@@ -86,6 +86,26 @@ async function sdkLogin(request, env) {
   }
 }
 
+async function paymentSmoke(env) {
+  const now = Date.now();
+  const payment = await env.DB.prepare('SELECT status, amount_rub, updated_at FROM payments ORDER BY updated_at DESC LIMIT 1').first();
+  const entitlement = await env.DB.prepare('SELECT status, source, expires_at, updated_at FROM entitlements ORDER BY updated_at DESC LIMIT 1').first();
+  return json({
+    ok: true,
+    latestPayment: payment ? {
+      succeeded: payment.status === 'succeeded',
+      amountRub: Number(payment.amount_rub),
+      ageSeconds: Math.max(0, Math.round((now - Number(payment.updated_at || 0)) / 1000)),
+    } : null,
+    latestEntitlement: entitlement ? {
+      active: entitlement.status === 'active' && Number(entitlement.expires_at || 0) > now,
+      source: entitlement.source || null,
+      expiresAt: Number(entitlement.expires_at || 0) || null,
+      ageSeconds: Math.max(0, Math.round((now - Number(entitlement.updated_at || 0)) / 1000)),
+    } : null,
+  });
+}
+
 function splitOAuthCookies(response) {
   const combined = response.headers.get('Set-Cookie') || '';
   const marker = ', alx_auth_state=';
@@ -121,6 +141,9 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') {
       return withVersion(await sdkLogin(request, env));
+    }
+    if (url.pathname === '/api/_payment-smoke' && request.method === 'GET') {
+      return withVersion(await paymentSmoke(env));
     }
 
     let response = await base.fetch(request, env, ctx);
