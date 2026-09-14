@@ -11,6 +11,7 @@ const {
 
 const DEFAULT_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
 const DEFAULT_API_URL = 'https://al-exander23oracle-github-io.vercel.app';
+const ALX_PAY_URL = 'https://alx-pay.sashaswag23.workers.dev/';
 const ALX_PAY_SUPPORT_URL = 'https://alx-pay.sashaswag23.workers.dev/support/';
 let botProfilePromise = null;
 
@@ -232,15 +233,16 @@ async function sendPaySupport(chatId) {
       'Если Stars списались, а PRO не открылся — полностью закрой ALX Oracle и открой Mini App заново. Доступ восстанавливается по подтверждённой Telegram-транзакции.',
       '',
       '<b>ALX Pay</b>',
-      'Если вопрос связан с покупкой, которую ты ранее оформлял на официальном сайте ALX Pay, открой центр поддержки. Там можно проверить привязку Telegram и состояние PRO.',
+      'ALX Pay — официальный внешний ресурс проекта. Там можно узнать об оплате картой или СБП, войти через Telegram и проверить уже оформленный внешний доступ ALX PRO.',
+      '',
+      'Если нужна диагностика уже совершённой покупки, используй Support Center. Если хочешь перейти на сам ресурс ALX Pay — нажми соответствующую кнопку ниже.',
       '',
       'Никогда не отправляй номер карты, CVC, пароль, SMS-код или код подтверждения.',
-      '',
-      '<i>Telegram Support не обрабатывает покупки, совершённые через этого бота. По вопросам ALX используй этот раздел и официальный Support Center.</i>',
     ].join('\n'),
     reply_markup: {
       inline_keyboard: [
-        [{ text: '🌐 Support Center ALX Pay', url: ALX_PAY_SUPPORT_URL }],
+        [{ text: '💳 Открыть ALX Pay', url: ALX_PAY_URL }],
+        [{ text: '🛟 Support Center ALX Pay', url: ALX_PAY_SUPPORT_URL }],
         [{ text: '🔮 Открыть ALX Oracle', web_app: { url: miniAppUrl() } }],
       ],
     },
