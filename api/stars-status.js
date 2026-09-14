@@ -8,7 +8,7 @@ const {
   findProEntitlement,
 } = require('../server/telegram.js');
 
-const DEFAULT_EXTERNAL_PAY_API = 'https://alx-pay.sashaswag23.workers.dev';
+const DEFAULT_EXTERNAL_PAY_API = 'https://alx-pay.alxoracle.workers.dev';
 
 function inactiveEntitlement(source = null) {
   return {
