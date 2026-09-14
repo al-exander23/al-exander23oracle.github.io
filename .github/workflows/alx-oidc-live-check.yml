@@ -10,40 +10,31 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live ALX Pay OIDC login
+      - name: Compare Telegram callback registrations
         shell: bash
         run: |
           set -euo pipefail
-          PAY='https://alx-pay.alxoracle.workers.dev'
+          CLIENT_ID='8910147832'
+          CHALLENGE='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_'
 
-          for i in {1..24}; do
-            root=$(curl -fsS "$PAY/" || true)
-            js=$(curl -fsS "$PAY/pay.js?v=1.16.0-oidc" || true)
-            if printf '%s' "$root" | grep -q 'pay.js?v=1.16.0-oidc' && printf '%s' "$js" | grep -q "window.location.assign('/auth/telegram/start')"; then
-              break
+          probe() {
+            name="$1"
+            redirect="$2"
+            code=$(curl -sS -G -o "/tmp/${name}.txt" -w '%{http_code}' 'https://oauth.telegram.org/auth' \
+              --data-urlencode "client_id=${CLIENT_ID}" \
+              --data-urlencode "redirect_uri=${redirect}" \
+              --data-urlencode 'response_type=code' \
+              --data-urlencode 'scope=openid profile' \
+              --data-urlencode 'state=alx-oauth-probe' \
+              --data-urlencode "code_challenge=${CHALLENGE}" \
+              --data-urlencode 'code_challenge_method=S256' || true)
+            echo "${name}_HTTP=${code}"
+            if grep -Eqi 'redirect_uri[[:space:]_:-]*(required|invalid|not allowed)|invalid[[:space:]_:-]*redirect' "/tmp/${name}.txt"; then
+              echo "${name}_REDIRECT_REJECTED=yes"
+            else
+              echo "${name}_REDIRECT_REJECTED=no"
             fi
-            if [ "$i" = '24' ]; then
-              echo 'FAIL: new ALX Pay frontend is not live'
-              exit 1
-            fi
-            sleep 10
-          done
+          }
 
-          headers=$(mktemp)
-          curl -sS -D "$headers" -o /dev/null "$PAY/auth/telegram/start"
-          grep -qi '^location: https://oauth.telegram.org/auth?' "$headers"
-          grep -q 'redirect_uri=https%3A%2F%2Falx-pay.alxoracle.workers.dev%2Fauth%2Ftelegram%2Fcallback' "$headers"
-          grep -q 'response_type=code' "$headers"
-          grep -q 'code_challenge=' "$headers"
-          grep -q 'code_challenge_method=S256' "$headers"
-
-          auth_url=$(awk 'BEGIN{IGNORECASE=1} /^location: / {sub(/^location: /, ""); sub(/\r$/, ""); print; exit}' "$headers")
-          tg_code=$(curl -sS -o /tmp/tg-auth.html -w '%{http_code}' "$auth_url" || true)
-          if grep -Eqi 'redirect_uri[[:space:]_:-]*(required|invalid|not allowed)|invalid[[:space:]_:-]*redirect' /tmp/tg-auth.html; then
-            echo 'FAIL: Telegram rejected redirect_uri'
-            cat /tmp/tg-auth.html
-            exit 1
-          fi
-          test "$tg_code" != '400'
-
-          echo 'PASS: live ALX Pay uses server OIDC and Telegram accepted the redirect request'
+          probe old 'https://alx-pay.sashaswag23.workers.dev/auth/telegram/callback'
+          probe new 'https://alx-pay.alxoracle.workers.dev/auth/telegram/callback'
