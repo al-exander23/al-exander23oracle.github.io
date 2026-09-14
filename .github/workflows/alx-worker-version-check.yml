@@ -1,0 +1,34 @@
+name: ALX worker version check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-worker-version-check.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live worker version and session endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAY='https://alx-pay.alxoracle.workers.dev'
+          ok=0
+          for i in {1..24}; do
+            headers=$(mktemp)
+            code=$(curl -sS -D "$headers" -o /tmp/config.json -w '%{http_code}' "$PAY/api/config" || true)
+            if [ "$code" = '200' ] && grep -qi '^x-alx-worker-version: oauth-cookie-v2' "$headers"; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ok" = '1'
+
+          session_code=$(curl -sS -o /tmp/session.json -w '%{http_code}' "$PAY/api/session")
+          test "$session_code" = '200'
+          grep -q '"session":null' /tmp/session.json
+
+          echo 'PASS: oauth-cookie-v2 worker is live and session endpoint responds'
