@@ -1,0 +1,57 @@
+name: ALX PRO integration smoke
+
+on:
+  push:
+    paths:
+      - 'api/stars-status.js'
+      - 'api/health.js'
+      - '.github/workflows/alx-pro-integration-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deployment and verify integration flag
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://al-exander23oracle-github-io.vercel.app'
+          passed=0
+          for i in {1..18}; do
+            echo "Attempt $i"
+            if curl -fsS "$BASE/api/health" -o /tmp/health.json; then
+              cat /tmp/health.json
+              if python3 - <<'PY'
+          import json
+          with open('/tmp/health.json', encoding='utf-8') as f:
+              data = json.load(f)
+          ok = (
+              data.get('ok') is True
+              and data.get('service') == 'alx-oracle-stars'
+              and data.get('telegramConfigured') is True
+              and data.get('priceStars') == 149
+              and data.get('externalPayEntitlements') is True
+          )
+          raise SystemExit(0 if ok else 1)
+          PY
+              then
+                passed=1
+                break
+              fi
+            fi
+            sleep 10
+          done
+
+          if [ "$passed" -ne 1 ]; then
+            echo 'FAIL: Vercel deployment did not expose ALX Pay entitlement integration flag'
+            exit 1
+          fi
+
+          status=$(curl -sS -o /tmp/status.json -w '%{http_code}' \
+            -X POST "$BASE/api/stars-status" \
+            -H 'Content-Type: application/json' \
+            --data '{}')
+          cat /tmp/status.json
+          test "$status" = '401'
+          echo 'PASS: merged PRO status endpoint is deployed and Telegram auth remains enforced'
