@@ -1,0 +1,24 @@
+name: ALX live inspect
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-live-inspect.yml'
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect current live ALX Pay
+        shell: bash
+        run: |
+          set -u
+          PAY='https://alx-pay.alxoracle.workers.dev'
+          echo '--- CONFIG HEADERS ---'
+          curl -sS -D - -o /tmp/config "$PAY/api/config" || true
+          echo '--- CONFIG BODY ---'
+          cat /tmp/config || true
+          echo
+          echo '--- ROOT SCRIPT ---'
+          curl -fsS "$PAY/" | grep -o 'pay.js?v=[^"<]*' || true
