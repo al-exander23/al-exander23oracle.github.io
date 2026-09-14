@@ -18,7 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           VERCEL='https://al-exander23oracle-github-io.vercel.app'
-          PAY='https://alx-pay.sashaswag23.workers.dev'
+          PAY='https://alx-pay.alxoracle.workers.dev'
 
           setup_ok=0
           for i in {1..24}; do
