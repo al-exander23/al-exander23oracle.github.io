@@ -151,7 +151,7 @@ function ensureWebhook(req) {
   webhookPromise = telegramApi('setWebhook', {
     url: `${publicBaseUrl(req)}/api/telegram-webhook`,
     secret_token: getWebhookSecret(),
-    allowed_updates: ['pre_checkout_query', 'message'],
+    allowed_updates: ['pre_checkout_query', 'message', 'callback_query'],
     drop_pending_updates: false,
   }).catch((error) => {
     webhookPromise = null;
