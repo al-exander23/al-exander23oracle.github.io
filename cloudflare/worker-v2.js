@@ -2,6 +2,7 @@ import base from './worker.js';
 
 const TELEGRAM_ISSUER = 'https://oauth.telegram.org';
 const TELEGRAM_JWKS = 'https://oauth.telegram.org/.well-known/jwks.json';
+const WORKER_VERSION = 'oauth-cookie-v2';
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 let jwksCache = null;
@@ -105,13 +106,25 @@ function splitOAuthCookies(response) {
   });
 }
 
+function withVersion(response) {
+  const headers = new Headers(response.headers);
+  headers.set('X-ALX-Worker-Version', WORKER_VERSION);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') return sdkLogin(request, env);
+    if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') {
+      return withVersion(await sdkLogin(request, env));
+    }
 
-    const response = await base.fetch(request, env, ctx);
-    if (url.pathname === '/auth/telegram/callback') return splitOAuthCookies(response);
-    return response;
+    let response = await base.fetch(request, env, ctx);
+    if (url.pathname === '/auth/telegram/callback') response = splitOAuthCookies(response);
+    return withVersion(response);
   },
 };
