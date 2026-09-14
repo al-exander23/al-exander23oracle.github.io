@@ -6,13 +6,9 @@ const authStatus = document.getElementById('authStatus');
 const paymentStatus = document.getElementById('paymentStatus');
 const methodButtons = [...document.querySelectorAll('[data-method]')];
 
-const TELEGRAM_CLIENT_ID = 8910147832;
-const TELEGRAM_SDK_SRC = 'https://oauth.telegram.org/js/telegram-login.js?3';
-
 let session = null;
 let offer = null;
 let busy = false;
-let telegramSdkPromise = null;
 
 function setStatus(el, text = '', type = '') {
   el.textContent = text;
@@ -30,48 +26,6 @@ async function api(path, options = {}) {
     throw new Error(data.error || `HTTP ${response.status}`);
   }
   return data;
-}
-
-function loadTelegramSdk() {
-  if (window.Telegram?.Login?.auth) return Promise.resolve(window.Telegram);
-  if (telegramSdkPromise) return telegramSdkPromise;
-
-  telegramSdkPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector('script[data-alx-telegram-login]');
-    if (existing) {
-      existing.addEventListener('load', () => window.Telegram?.Login?.auth ? resolve(window.Telegram) : reject(new Error('Telegram Login SDK недоступен.')), { once: true });
-      existing.addEventListener('error', () => reject(new Error('Не удалось загрузить Telegram Login SDK.')), { once: true });
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = TELEGRAM_SDK_SRC;
-    script.async = true;
-    script.dataset.alxTelegramLogin = '1';
-    script.onload = () => window.Telegram?.Login?.auth ? resolve(window.Telegram) : reject(new Error('Telegram Login SDK недоступен.'));
-    script.onerror = () => reject(new Error('Не удалось загрузить Telegram Login SDK.'));
-    document.head.appendChild(script);
-  });
-  return telegramSdkPromise;
-}
-
-function telegramAuth() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const Telegram = await loadTelegramSdk();
-      Telegram.Login.auth({
-        client_id: TELEGRAM_CLIENT_ID,
-        scope: ['profile'],
-        lang: 'ru',
-      }, (result) => {
-        if (!result) return reject(new Error('Telegram не вернул результат авторизации.'));
-        if (result.error) return reject(new Error(result.error));
-        if (!result.id_token) return reject(new Error('Telegram не вернул ID token.'));
-        resolve(result);
-      });
-    } catch (error) {
-      reject(error);
-    }
-  });
 }
 
 function renderOffer() {
@@ -120,8 +74,6 @@ async function load() {
   }
   renderSession();
 
-  loadTelegramSdk().catch(() => {});
-
   const params = new URLSearchParams(location.search);
   if (params.get('payment') === 'return') {
     await refreshEntitlement();
@@ -143,25 +95,12 @@ async function refreshEntitlement() {
   }
 }
 
-loginBtn.addEventListener('click', async () => {
+loginBtn.addEventListener('click', () => {
   if (busy || session?.user?.id) return;
   busy = true;
   loginBtn.disabled = true;
-  setStatus(authStatus, 'Открываем безопасный вход через Telegram…');
-  try {
-    const result = await telegramAuth();
-    const data = await api('/api/auth/telegram-sdk', {
-      method: 'POST',
-      body: JSON.stringify({ id_token: result.id_token }),
-    });
-    session = { user: data.user };
-    setStatus(authStatus, 'Telegram подтверждён.', 'ok');
-  } catch (error) {
-    setStatus(authStatus, error.message || 'Не удалось войти через Telegram.', 'error');
-  } finally {
-    busy = false;
-    renderSession();
-  }
+  setStatus(authStatus, 'Переходим на защищённый вход Telegram…');
+  window.location.assign('/auth/telegram/start');
 });
 
 methodButtons.forEach((button) => {
