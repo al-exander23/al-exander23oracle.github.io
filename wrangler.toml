@@ -14,7 +14,7 @@ database_id = "956ce216-014e-443b-9899-437ab4f44b72"
 
 [vars]
 ALX_ALLOWED_ORIGIN = "https://al-exander23.github.io"
-ALX_PAY_ORIGIN = "https://alx-pay.sashaswag23.workers.dev"
+ALX_PAY_ORIGIN = "https://alx-pay.alxoracle.workers.dev"
 TELEGRAM_CLIENT_ID = "8910147832"
 YOOKASSA_SHOP_ID = "1464130"
 ALX_EXTERNAL_PRICE_RUB = "1"
