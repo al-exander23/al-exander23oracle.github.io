@@ -1,0 +1,132 @@
+name: ALX PRO library smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-pro-library-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Wait for live PRO library assets
+        run: |
+          set -e
+          for i in $(seq 1 30); do
+            HTML=$(curl -fsSL 'https://al-exander23.github.io/al-exander23oracle.github.io/?pro-library-smoke=1' || true)
+            if echo "$HTML" | grep -q 'pro-library.css?v=1.25.0-pro-library' && echo "$HTML" | grep -q 'originals-nav-hook.js?v=1.25.0-pro-library'; then
+              echo 'PRO library assets are live'
+              exit 0
+            fi
+            echo "waiting for Pages deploy: $i"
+            sleep 5
+          done
+          echo 'PRO library assets did not appear in time'
+          exit 1
+
+      - name: Prepare Playwright
+        run: |
+          mkdir -p /tmp/alx-pro-library-smoke && cd /tmp/alx-pro-library-smoke
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify FREE and PRO library flows
+        working-directory: /tmp/alx-pro-library-smoke
+        run: |
+          cat > smoke.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const APP = 'https://al-exander23.github.io/al-exander23oracle.github.io/?pro-library-smoke=v125';
+          const browser = await chromium.launch({ headless: true });
+
+          async function baseRoutes(page) {
+            await page.route('**/*', async route => {
+              const url = route.request().url();
+              if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com') || url.includes('telegram.org/js/telegram-web-app.js')) return route.abort();
+              return route.continue();
+            });
+          }
+
+          // FREE: PRO tab shows the library itself first, not the legacy paywall.
+          {
+            const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+            await context.addInitScript(() => {
+              localStorage.setItem('alx_oracle_onboarding_v1', 'done');
+              localStorage.removeItem('alx_oracle_pro_entitlement');
+            });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+            await baseRoutes(page);
+            await page.goto(APP+'&free=1', { waitUntil:'domcontentloaded', timeout:30000 });
+            await page.waitForSelector('#alxBottomNav [data-tab="pro"]', { timeout:15000 });
+            await page.click('#alxBottomNav [data-tab="pro"]');
+            await page.waitForFunction(() => document.querySelector('#alxProLibrary')?.classList.contains('show'), null, { timeout:10000 });
+            const libraryText = await page.locator('#alxProLibraryContent').textContent();
+            for (const label of ['ALX Originals','Parfum Lab','LIMITED 2026','ALX Signature','Для двоих','После полуночи','Эксперимент']) {
+              if (!libraryText?.includes(label)) throw new Error('Missing FREE library collection: '+label);
+            }
+            if (await page.locator('#alxProOverlay.show').count()) throw new Error('Legacy paywall opened before library');
+            await page.click('[data-pro-select="parfum"]');
+            await page.waitForFunction(() => document.querySelector('#alxProOverlay')?.classList.contains('show'), null, { timeout:10000 });
+            if (errors.length) throw new Error('FREE page errors: '+errors.join(' | '));
+            await context.close();
+          }
+
+          // PRO: full library, Originals catalog handoff, and collection selection.
+          {
+            const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+            await context.addInitScript(() => {
+              localStorage.setItem('alx_oracle_onboarding_v1', 'done');
+              localStorage.setItem('alx_oracle_pro_entitlement', JSON.stringify({ plan:'pro', status:'active', expiresAt:Date.now()+86400000, source:'smoke' }));
+              window.Telegram = { WebApp: { initData:'mock-init', platform:'android', openTelegramLink(){} } };
+            });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+            await baseRoutes(page);
+
+            const mixes = [
+              {id:'alx-original-001',name:'Bazar Night',description:'Авторский микс из закрытой коллекции ALX Originals.',recipe:[{flavor:'Пан-расс',percent:10},{flavor:'Блэк Афгано',percent:30},{flavor:'Индийский перец',percent:10},{flavor:'Чернослив',percent:50}],author:'ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-002',name:'Дорогая вишня',description:'Авторский микс из закрытой коллекции ALX Originals.',recipe:[{flavor:'Бакара Руж',percent:80},{flavor:'Вишня',percent:20}],author:'ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-003',name:'Мускус тайм',description:'Авторский микс из закрытой коллекции ALX Originals.',recipe:[{flavor:'Мускусная вишня',percent:60},{flavor:'Пан-расс',percent:20},{flavor:'Черешня',percent:20}],author:'ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-004',name:'Сапожник',description:'Авторский микс из закрытой коллекции ALX Originals.',recipe:[{flavor:'Замша',percent:30},{flavor:'Лесные ягоды',percent:70}],author:'ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-005',name:'Luxury Viski-Cola',description:'Авторский микс из закрытой коллекции ALX Originals.',recipe:[{flavor:'Мармеладная кола',percent:40},{flavor:'Виски',percent:30},{flavor:'Ганимед',percent:30}],author:'ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true}
+            ];
+
+            await page.route('**/api/originals', route => route.fulfill({ status:200, contentType:'application/json', body:JSON.stringify({ok:true,collection:'originals',author:'ALX Originals',mixes}) }));
+            await page.route('**/api/stars-status', route => route.fulfill({ status:200, contentType:'application/json', body:JSON.stringify({ok:true,entitlement:{plan:'pro',status:'active',active:true,expiresAt:Date.now()+86400000,source:'smoke'},offer:{priceStars:149,periodDays:30,recurring:true}}) }));
+
+            await page.goto(APP+'&pro=1', { waitUntil:'domcontentloaded', timeout:30000 });
+            await page.waitForSelector('#alxBottomNav [data-tab="pro"]', { timeout:15000 });
+            await page.click('#alxBottomNav [data-tab="pro"]');
+            await page.waitForFunction(() => document.querySelector('#alxProLibrary')?.classList.contains('show'), null, { timeout:10000 });
+            await page.waitForFunction(() => document.querySelectorAll('#alxProLibrary [data-pro-card]').length === 6, null, { timeout:10000 });
+
+            const hero = await page.locator('.pro-library-originals').textContent();
+            if (!hero?.includes('ALX Originals') || !hero?.includes('5 рецептов')) throw new Error('Originals hero incomplete: '+hero);
+
+            await page.click('#proLibraryOriginalsBrowse');
+            await page.waitForFunction(() => document.querySelector('#alxOriginalsCatalog')?.classList.contains('show'), null, { timeout:10000 });
+            await page.waitForFunction(() => document.querySelectorAll('#alxOriginalsCatalog [data-original-id]').length === 5, null, { timeout:10000 });
+            await page.click('#originalsClose');
+            await page.waitForFunction(() => !document.querySelector('#alxOriginalsCatalog')?.classList.contains('show'), null, { timeout:5000 });
+            if (!await page.locator('#alxProLibrary.show').count()) throw new Error('PRO library did not remain behind Originals catalog');
+
+            await page.click('[data-pro-select="parfum"]');
+            await page.waitForFunction(() => !document.querySelector('#alxProLibrary')?.classList.contains('show'), null, { timeout:5000 });
+            const scenario = await page.evaluate(() => JSON.parse(localStorage.getItem('alx_oracle_scenario') || '{}'));
+            if (scenario.collection !== 'parfum') throw new Error('Parfum collection was not selected: '+JSON.stringify(scenario));
+            if (!await page.locator('#alxBottomNav [data-tab="home"].active').count()) throw new Error('Did not return to Home after collection selection');
+
+            await page.click('#orbWrap');
+            await page.waitForFunction(() => /^№\s*\d+/.test(document.querySelector('#counter')?.textContent || ''), null, { timeout:25000 });
+            if (errors.length) throw new Error('PRO page errors: '+errors.join(' | '));
+            await context.close();
+          }
+
+          console.log('PASS: unified PRO library FREE + PRO + Originals + collection selection + orb.');
+          await browser.close();
+          JS
+          node smoke.mjs
