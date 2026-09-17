@@ -23,12 +23,12 @@ ALX_PAYMENT_MODE = "test"
 YOOKASSA_SHOP_ID = "1464130"
 ALX_EXTERNAL_PRICE_RUB = "1"
 
-# Production ALX PRO price is public configuration, not a secret.
+# Production ALX PRO configuration.
+YOOKASSA_LIVE_SHOP_ID = "1462630"
 ALX_LIVE_PRICE_RUB = "299"
 
-# LIVE credentials are intentionally not stored in GitHub:
-# YOOKASSA_LIVE_SHOP_ID      -> Cloudflare variable (or set here once known)
-# YOOKASSA_LIVE_SECRET_KEY   -> Cloudflare secret
+# Live Secret Key is intentionally not stored in GitHub:
+# YOOKASSA_LIVE_SECRET_KEY -> Cloudflare secret after YooKassa enables it.
 
 [secrets]
 required = ["SESSION_SECRET", "TELEGRAM_CLIENT_SECRET", "TELEGRAM_BOT_TOKEN", "YOOKASSA_SECRET_KEY"]
