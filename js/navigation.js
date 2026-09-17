@@ -1,143 +1,288 @@
-// navigation.js — simplified, text-first navigation for ALX Oracle.
-// Existing buttons remain the source of truth; secondary ones are hidden and
-// triggered from a single readable menu so their behavior does not change.
+// navigation.js — Navigation Cleanup v1.22 for ALX Oracle.
+// Keeps existing feature buttons as hidden action sources while exposing a
+// clear four-section bottom navigation with readable labels.
 
+import { getProState } from './pro.js?v=1.17.0-mixlab';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
 const VERSION = '1.22.0-navigation';
-const MENU_BUTTON_ID = 'alxNavMenuButton';
-const OVERLAY_ID = 'alxNavOverlay';
+const NAV_ID = 'alxBottomNav';
+const ACCESS_ID = 'alxAccessStrip';
+const FREE_LIMIT = 5;
+const USAGE_KEY = 'alx_oracle_free_daily_usage_v1';
 
-const SECONDARY_ACTIONS = [
-  {
-    targetId: 'historyBtnTop',
-    title: 'История миксов',
-    note: 'Все последние подборы Оракула',
-    event: 'nav_history_open',
-  },
-  {
-    targetId: 'tasteBtnTop',
-    title: 'Профиль вкуса',
-    note: 'Персонализация, Микс дня, серия и достижения',
-    event: 'nav_taste_open',
-  },
-  {
-    targetId: 'alxProTopButton',
-    title: 'ALX PRO',
-    note: 'Безлимитные подборы и закрытые коллекции',
-    event: 'nav_pro_open',
-  },
-  {
-    targetId: 'onboardingHelpBtn',
-    title: 'Как пользоваться',
-    note: 'Короткая инструкция по ALX Oracle',
-    event: 'nav_help_open',
-  },
-];
-
-function closeMenu() {
-  const overlay = document.getElementById(OVERLAY_ID);
-  overlay?.classList.remove('show');
-  overlay?.setAttribute('aria-hidden', 'true');
+function dayKey(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
-function triggerExisting(targetId, eventName) {
-  closeMenu();
-  trackAnalytics(eventName, { navigationVersion: VERSION });
-  setTimeout(() => {
-    const target = document.getElementById(targetId);
-    if (target) target.click();
-  }, 80);
+function freeState() {
+  const today = dayKey();
+  try {
+    const raw = JSON.parse(localStorage.getItem(USAGE_KEY) || 'null');
+    const used = raw?.day === today ? Math.max(0, Math.min(FREE_LIMIT, Number(raw.used) || 0)) : 0;
+    return { used, limit: FREE_LIMIT, remaining: Math.max(0, FREE_LIMIT - used) };
+  } catch (error) {
+    return { used: 0, limit: FREE_LIMIT, remaining: FREE_LIMIT };
+  }
 }
 
-function ensureOverlay() {
-  let overlay = document.getElementById(OVERLAY_ID);
-  if (overlay) return overlay;
-
-  overlay = document.createElement('div');
-  overlay.id = OVERLAY_ID;
-  overlay.className = 'alx-nav-overlay';
-  overlay.setAttribute('aria-hidden', 'true');
-  overlay.innerHTML = `
-    <section class="alx-nav-panel" role="dialog" aria-modal="true" aria-labelledby="alxNavTitle">
-      <div class="alx-nav-head">
-        <div>
-          <div class="alx-nav-kicker">ALX ORACLE</div>
-          <h2 id="alxNavTitle">Меню</h2>
-        </div>
-        <button class="alx-nav-close" id="alxNavClose" type="button">Закрыть</button>
-      </div>
-      <div class="alx-nav-list">
-        ${SECONDARY_ACTIONS.map((item) => `
-          <button class="alx-nav-row" type="button" data-target="${item.targetId}" data-event="${item.event}">
-            <b>${item.title}</b>
-            <small>${item.note}</small>
-          </button>`).join('')}
-      </div>
-      <div class="alx-nav-foot">Основное действие всегда остаётся на главном экране — коснись шара, чтобы получить микс.</div>
-    </section>`;
-  document.body.appendChild(overlay);
-
-  overlay.querySelector('#alxNavClose')?.addEventListener('click', closeMenu);
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) closeMenu();
+function setActive(tab) {
+  document.querySelectorAll(`#${NAV_ID} .alx-bottom-nav-btn`).forEach((button) => {
+    const active = button.dataset.tab === tab;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-current', active ? 'page' : 'false');
   });
-  overlay.querySelectorAll('.alx-nav-row').forEach((button) => {
-    button.addEventListener('click', () => {
-      triggerExisting(button.dataset.target || '', button.dataset.event || 'nav_secondary_open');
+}
+
+function clickExisting(id) {
+  const target = document.getElementById(id);
+  if (!target) return false;
+  target.click();
+  return true;
+}
+
+function closeKnownPanels() {
+  ['myAlxClose', 'tasteClose', 'sheetClose', 'proClose'].forEach((id) => {
+    const button = document.getElementById(id);
+    if (button) {
+      try { button.click(); } catch (error) { /* non-fatal */ }
+    }
+  });
+  document.getElementById('alxOnboarding')?.classList.remove('show');
+}
+
+function goHome() {
+  closeKnownPanels();
+  setActive('home');
+  trackAnalytics('nav_home_open', { navigationVersion: VERSION });
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (error) { window.scrollTo(0, 0); }
+}
+
+function openFavorites() {
+  setActive('favorites');
+  trackAnalytics('nav_favorites_open', { navigationVersion: VERSION });
+  clickExisting('favBtnTop');
+}
+
+function openAccount() {
+  setActive('account');
+  trackAnalytics('nav_my_alx_open', { navigationVersion: VERSION });
+  clickExisting('myAlxTopButton');
+  setTimeout(enhanceMyAlx, 80);
+}
+
+function openPro() {
+  setActive('pro');
+  trackAnalytics('nav_pro_open', { navigationVersion: VERSION });
+  clickExisting('alxProTopButton');
+}
+
+function ensureBottomNav() {
+  let nav = document.getElementById(NAV_ID);
+  if (nav) return nav;
+
+  nav = document.createElement('nav');
+  nav.id = NAV_ID;
+  nav.className = 'alx-bottom-nav';
+  nav.setAttribute('aria-label', 'Основная навигация');
+  nav.innerHTML = `
+    <button class="alx-bottom-nav-btn active" type="button" data-tab="home" aria-current="page">
+      <span class="alx-bottom-nav-label">Главная</span>
+    </button>
+    <button class="alx-bottom-nav-btn" type="button" data-tab="favorites" aria-current="false">
+      <span class="alx-bottom-nav-label">Избранное</span>
+    </button>
+    <button class="alx-bottom-nav-btn" type="button" data-tab="account" aria-current="false">
+      <span class="alx-bottom-nav-label">Мой ALX</span>
+    </button>
+    <button class="alx-bottom-nav-btn alx-bottom-nav-btn--pro" type="button" data-tab="pro" aria-current="false">
+      <span class="alx-bottom-nav-label">PRO</span>
+      <span class="alx-bottom-nav-dot" aria-hidden="true"></span>
+    </button>`;
+  document.body.appendChild(nav);
+
+  nav.querySelector('[data-tab="home"]')?.addEventListener('click', goHome);
+  nav.querySelector('[data-tab="favorites"]')?.addEventListener('click', openFavorites);
+  nav.querySelector('[data-tab="account"]')?.addEventListener('click', openAccount);
+  nav.querySelector('[data-tab="pro"]')?.addEventListener('click', openPro);
+  return nav;
+}
+
+function ensureAccessStrip() {
+  let strip = document.getElementById(ACCESS_ID);
+  if (strip) return strip;
+
+  strip = document.createElement('button');
+  strip.id = ACCESS_ID;
+  strip.className = 'alx-access-strip';
+  strip.type = 'button';
+  strip.addEventListener('click', () => {
+    if (getProState().active) openAccount();
+    else openPro();
+  });
+
+  const retention = document.getElementById('alxRetentionStrip');
+  const hint = document.getElementById('hint');
+  if (retention) retention.insertAdjacentElement('afterend', strip);
+  else if (hint) hint.insertAdjacentElement('afterend', strip);
+  else document.getElementById('stage')?.appendChild(strip);
+  return strip;
+}
+
+function renderAccess() {
+  const strip = ensureAccessStrip();
+  const state = getProState();
+  const free = freeState();
+  const proButton = document.querySelector(`#${NAV_ID} [data-tab="pro"]`);
+  proButton?.classList.toggle('is-active-plan', state.active);
+
+  if (state.active) {
+    strip.classList.add('is-pro');
+    strip.innerHTML = `
+      <span><b>ALX PRO активен</b><small>Безлимитные подборы и закрытые коллекции</small></span>
+      <strong>Мой ALX</strong>`;
+    return;
+  }
+
+  strip.classList.remove('is-pro');
+  const main = free.remaining > 0
+    ? `FREE · осталось ${free.remaining} из ${free.limit} сегодня`
+    : 'FREE · лимит на сегодня использован';
+  strip.innerHTML = `
+    <span><b>${main}</b><small>Бесплатные подборы обновятся завтра</small></span>
+    <strong>Что даёт PRO</strong>`;
+}
+
+function closeAccountThen(callback) {
+  document.getElementById('myAlxClose')?.click();
+  setTimeout(callback, 90);
+}
+
+function openTaste(selector = null) {
+  closeAccountThen(() => {
+    clickExisting('tasteBtnTop');
+    if (!selector) return;
+    setTimeout(() => {
+      const target = document.querySelector(selector);
+      try { target?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      catch (error) { target?.scrollIntoView(); }
+    }, 220);
+  });
+}
+
+function addAccountRow(section, id, title, note, handler) {
+  if (!section || document.getElementById(id)) return;
+  const button = document.createElement('button');
+  button.className = 'my-alx-row';
+  button.id = id;
+  button.type = 'button';
+  button.innerHTML = `<span>${title}</span><small>${note}</small>`;
+  button.addEventListener('click', handler);
+  section.appendChild(button);
+}
+
+function enhanceMyAlx() {
+  const content = document.getElementById('myAlxContent');
+  if (!content || !content.children.length) return;
+
+  const close = document.getElementById('myAlxClose');
+  if (close) {
+    close.textContent = 'Закрыть';
+    close.setAttribute('aria-label', 'Закрыть Мой ALX');
+  }
+
+  const tasteLabel = content.querySelector('#myAlxTaste span');
+  if (tasteLabel) tasteLabel.textContent = 'Профиль вкуса';
+  const restoreLabel = content.querySelector('#myAlxRestore span');
+  if (restoreLabel) restoreLabel.textContent = 'Восстановить PRO';
+  const proLabel = content.querySelector('#myAlxProDetails span');
+  if (proLabel) proLabel.textContent = 'Возможности ALX PRO';
+
+  const section = content.querySelector('.my-alx-section');
+  const title = section?.querySelector('.my-alx-section-title');
+  if (title) title.textContent = 'Разделы и настройки';
+
+  addAccountRow(section, 'myAlxHistory', 'История миксов', 'последние подборы Оракула', () => {
+    closeAccountThen(() => {
+      setActive('account');
+      clickExisting('historyBtnTop');
+      trackAnalytics('nav_history_open', { navigationVersion: VERSION, source: 'my_alx' });
     });
   });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && overlay.classList.contains('show')) closeMenu();
+
+  addAccountRow(section, 'myAlxNotifications', 'Уведомления', 'напоминание о Миксе дня и время отправки', () => {
+    trackAnalytics('nav_notifications_open', { navigationVersion: VERSION, source: 'my_alx' });
+    openTaste('#alxDailyReminderCard');
   });
-  return overlay;
+
+  addAccountRow(section, 'myAlxAchievements', 'Микс дня и достижения', 'серия посещений, награды и персональный выбор', () => {
+    trackAnalytics('nav_achievements_open', { navigationVersion: VERSION, source: 'my_alx' });
+    openTaste('.taste-daily-card');
+  });
+
+  addAccountRow(section, 'myAlxHelp', 'Как пользоваться ALX Oracle', 'короткая инструкция для всех основных функций', () => {
+    closeAccountThen(() => {
+      setActive('home');
+      clickExisting('onboardingHelpBtn');
+      trackAnalytics('nav_help_open', { navigationVersion: VERSION, source: 'my_alx' });
+    });
+  });
 }
 
-function openMenu() {
-  const overlay = ensureOverlay();
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-  trackAnalytics('nav_menu_open', { navigationVersion: VERSION });
+function observeAccount() {
+  const bodyObserver = new MutationObserver(() => {
+    const content = document.getElementById('myAlxContent');
+    if (!content || content.dataset.navObserved === '1') return;
+    content.dataset.navObserved = '1';
+    new MutationObserver(enhanceMyAlx).observe(content, { childList: true, subtree: true });
+    enhanceMyAlx();
+  });
+  bodyObserver.observe(document.body, { childList: true, subtree: true });
+  enhanceMyAlx();
 }
 
-function simplifyToolbar() {
-  const toolbar = document.getElementById('topToolbar');
-  if (!toolbar) return;
+function simplifyDailyStrip() {
+  const streak = document.querySelector('.retention-pill--streak');
+  if (streak) streak.setAttribute('aria-hidden', 'true');
+  const dailySmall = document.querySelector('.retention-pill--daily small');
+  if (dailySmall) dailySmall.textContent = 'Открыть сегодняшний персональный выбор';
+}
 
-  const favorite = document.getElementById('favBtnTop');
-  if (favorite) {
-    favorite.textContent = 'Избранное';
-    favorite.classList.add('alx-nav-main');
-    favorite.setAttribute('aria-label', 'Открыть избранные миксы');
-  }
+function wireState() {
+  window.addEventListener('alx-free-usage-change', renderAccess);
+  window.addEventListener('alx-pro-change', renderAccess);
 
-  const myAlx = document.getElementById('myAlxTopButton');
-  if (myAlx) {
-    myAlx.textContent = 'Мой ALX';
-    myAlx.classList.add('alx-nav-main');
-    myAlx.setAttribute('aria-label', 'Открыть Мой ALX');
-  }
+  document.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target.closest('button') : null;
+    if (!target) return;
+    if (target.id === 'sheetClose' || target.id === 'tasteClose' || target.id === 'myAlxClose' || target.id === 'proClose') {
+      setTimeout(() => setActive('home'), 60);
+    }
+  }, true);
 
-  if (!document.getElementById(MENU_BUTTON_ID)) {
-    const menu = document.createElement('button');
-    menu.id = MENU_BUTTON_ID;
-    menu.className = 'icon-btn alx-nav-main';
-    menu.type = 'button';
-    menu.textContent = 'Меню';
-    menu.setAttribute('aria-label', 'Открыть меню');
-    menu.addEventListener('click', openMenu);
-    toolbar.appendChild(menu);
+  const counter = document.getElementById('counter');
+  if (counter) {
+    new MutationObserver(renderAccess).observe(counter, { childList: true, characterData: true, subtree: true });
   }
 }
 
 function init() {
-  simplifyToolbar();
-  ensureOverlay();
+  ensureBottomNav();
+  ensureAccessStrip();
+  renderAccess();
+  observeAccount();
+  wireState();
+  simplifyDailyStrip();
 
-  // Other modules create their toolbar buttons synchronously during startup,
-  // but keep this observer as a safety net for slow WebViews.
-  const observer = new MutationObserver(() => simplifyToolbar());
-  observer.observe(document.getElementById('topToolbar') || document.body, { childList: true, subtree: false });
+  const bodyObserver = new MutationObserver(() => {
+    ensureBottomNav();
+    ensureAccessStrip();
+    simplifyDailyStrip();
+  });
+  bodyObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 init();
