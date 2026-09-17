@@ -2,6 +2,7 @@ import base from './worker.js';
 
 const TELEGRAM_ISSUER = 'https://oauth.telegram.org';
 const TELEGRAM_JWKS = 'https://oauth.telegram.org/.well-known/jwks.json';
+const TEST_YOOKASSA_SHOP_ID = '1464130';
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 let jwksCache = null;
@@ -109,20 +110,37 @@ function paymentMode(env) {
   return String(env.ALX_PAYMENT_MODE || 'test').trim().toLowerCase() === 'live' ? 'live' : 'test';
 }
 
+function liveConfig(env) {
+  const shopId = String(env.YOOKASSA_LIVE_SHOP_ID || '').trim();
+  const secret = String(env.YOOKASSA_LIVE_SECRET_KEY || '').trim();
+  const price = Number(env.ALX_LIVE_PRICE_RUB || 0);
+  const safePrice = Number.isFinite(price) && price >= 100;
+  const safeShop = Boolean(shopId && shopId !== TEST_YOOKASSA_SHOP_ID);
+  return {
+    shopId,
+    secret,
+    price: safePrice ? Math.round(price) : null,
+    safe: Boolean(safeShop && secret && safePrice),
+  };
+}
+
 function effectivePaymentEnv(env) {
   const mode = paymentMode(env);
   if (mode !== 'live') return env;
 
+  const live = liveConfig(env);
   const effective = Object.create(env);
-  effective.YOOKASSA_SHOP_ID = String(env.YOOKASSA_LIVE_SHOP_ID || '').trim();
-  effective.YOOKASSA_SECRET_KEY = String(env.YOOKASSA_LIVE_SECRET_KEY || '').trim();
-  effective.ALX_EXTERNAL_PRICE_RUB = String(env.ALX_LIVE_PRICE_RUB || '').trim();
+  // Fail closed: unsafe live settings intentionally become "not configured".
+  effective.YOOKASSA_SHOP_ID = live.safe ? live.shopId : '';
+  effective.YOOKASSA_SECRET_KEY = live.safe ? live.secret : '';
+  effective.ALX_EXTERNAL_PRICE_RUB = live.safe ? String(live.price) : '';
   return effective;
 }
 
-function withPaymentMode(response, mode) {
+function withPaymentMode(response, mode, env) {
   const headers = new Headers(response.headers);
   headers.set('X-ALX-Payment-Mode', mode);
+  if (mode === 'live') headers.set('X-ALX-Live-Ready', liveConfig(env).safe ? 'yes' : 'no');
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -137,11 +155,11 @@ export default {
     const effectiveEnv = effectivePaymentEnv(env);
 
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') {
-      return withPaymentMode(await sdkLogin(request, effectiveEnv), mode);
+      return withPaymentMode(await sdkLogin(request, effectiveEnv), mode, env);
     }
 
     let response = await base.fetch(request, effectiveEnv, ctx);
     if (url.pathname === '/auth/telegram/callback') response = splitOAuthCookies(response);
-    return withPaymentMode(response, mode);
+    return withPaymentMode(response, mode, env);
   },
 };
