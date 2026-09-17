@@ -1,6 +1,7 @@
 import base from './worker.js';
 import { handleAnalyticsRoute, applyAnalyticsReturn } from './analytics.js';
 import { handleRetentionRoute, runRetentionSchedule } from './retention.js';
+import { handleOriginalsRoute } from './originals.js';
 
 const TELEGRAM_ISSUER = 'https://oauth.telegram.org';
 const TELEGRAM_JWKS = 'https://oauth.telegram.org/.well-known/jwks.json';
@@ -155,6 +156,9 @@ export default {
     const url = new URL(request.url);
     const mode = paymentMode(env);
     const effectiveEnv = effectivePaymentEnv(env);
+
+    const originalsResponse = await handleOriginalsRoute(request, env);
+    if (originalsResponse) return withPaymentMode(originalsResponse, mode, env);
 
     const analyticsResponse = await handleAnalyticsRoute(request, env, ctx);
     if (analyticsResponse) return withPaymentMode(analyticsResponse, mode, env);
