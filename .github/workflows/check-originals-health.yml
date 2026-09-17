@@ -1,0 +1,34 @@
+name: Check ALX Originals Health
+
+on:
+  push:
+    paths:
+      - '.github/workflows/check-originals-health.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check live D1 health
+        run: |
+          set -e
+          URL='https://alx-pay.alxoracle.workers.dev/api/originals/health'
+          for i in $(seq 1 18); do
+            echo "Attempt $i"
+            BODY=$(curl -sS -m 15 -w '\nHTTP_STATUS:%{http_code}' "$URL" || true)
+            echo "$BODY"
+            STATUS=$(printf '%s' "$BODY" | sed -n 's/^HTTP_STATUS://p' | tail -1)
+            JSON=$(printf '%s' "$BODY" | sed '/^HTTP_STATUS:/d')
+            if [ "$STATUS" = '200' ] && echo "$JSON" | grep -q '"storage":"d1"' && echo "$JSON" | grep -q '"total":5' && echo "$JSON" | grep -q '"active":5'; then
+              echo 'PASS: D1 has 5 active ALX Originals.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Health endpoint is not live with 5 rows yet.'
+          exit 1
