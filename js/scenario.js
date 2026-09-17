@@ -1,9 +1,10 @@
 // scenario.js — ситуационный режим Оракула и виртуальные коллекции.
-// Работает поверх существующей персонализации и не меняет данные mixes.json.
+// Работает поверх существующей персонализации и поддерживает явные
+// collections[] у новых кураторских миксов.
 
 import { getItem, setItem } from './storage.js';
 import { buildDerivedProfile, calculateMixScore } from './personalization.js';
-import { isPremiumCollection, isProActive } from './pro.js?v=1.13.0';
+import { isPremiumCollection, isProActive } from './pro.js?v=1.17.0-mixlab';
 
 const KEY = 'alx_oracle_scenario';
 
@@ -47,6 +48,8 @@ export const COLLECTION_OPTIONS = [
   { id: 'sour', label: 'С кислинкой' },
   { id: 'strong', label: 'Крепкие' },
   { id: 'signature', label: 'ALX Signature', pro: true },
+  { id: 'parfum', label: 'Parfum Lab', pro: true },
+  { id: 'limited', label: 'LIMITED 2026', pro: true },
   { id: 'date-night', label: 'Для двоих', pro: true },
   { id: 'after-dark', label: 'После полуночи', pro: true },
   { id: 'experimental', label: 'Эксперимент', pro: true },
@@ -65,7 +68,7 @@ const TROPICAL_WORDS = [
 const DESSERT_WORDS = [
   'шоколад', 'бисквит', 'печенье', 'чизкейк', 'меренга', 'пломбир',
   'мороженое', 'йогурт', 'карамель', 'ваниль', 'крем', 'вафля', 'тирамису',
-  'фисташка', 'лесной орех', 'орех',
+  'фисташка', 'лесной орех', 'орех', 'пудинг', 'сливки',
 ];
 
 function normalize(value) {
@@ -79,6 +82,11 @@ function recipeNames(mix) {
     .filter(Boolean);
 }
 
+function explicitCollections(mix) {
+  if (!Array.isArray(mix?.collections)) return [];
+  return mix.collections.map(normalize).filter(Boolean);
+}
+
 function includesAny(names, words) {
   return names.some((name) => words.some((word) => name.includes(normalize(word))));
 }
@@ -87,6 +95,15 @@ export function collectionMatches(mix, collectionId) {
   if (!mix || collectionId === 'any') return true;
   const names = recipeNames(mix);
   const mood = normalize(mix.mood);
+  const explicit = explicitCollections(mix);
+  const normalizedCollection = normalize(collectionId);
+
+  // Новые кураторские дропы могут быть привязаны к коллекциям явно.
+  if (explicit.includes(normalizedCollection)) return true;
+
+  // Parfum Lab и LIMITED — строго кураторские: туда не попадают старые
+  // миксы только из-за совпадения отдельных числовых характеристик.
+  if (collectionId === 'parfum' || collectionId === 'limited') return false;
 
   switch (collectionId) {
     case 'fresh':
@@ -270,6 +287,8 @@ function scenarioBonus(mix, scenario) {
   if (scenario.collection === 'date-night' && ['уют', 'вечер'].includes(mood)) bonus += 3;
   if (scenario.collection === 'after-dark' && Number(mix.strength) >= 3) bonus += 3;
   if (scenario.collection === 'experimental' && Number(mix.sourness) >= 2 && Number(mix.freshness) >= 2) bonus += 2.5;
+  if (scenario.collection === 'parfum' && normalize(mix.theme) === 'perfume') bonus += 4;
+  if (scenario.collection === 'limited' && explicitCollections(mix).includes('limited')) bonus += 4;
 
   return bonus;
 }
@@ -311,8 +330,6 @@ export function selectScenarioMix(mixes, lastMixId) {
 
   if (!scored.length) return null;
 
-  // Небольшая доля исследования сохраняет ощущение живого Оракула,
-  // но выбор всё равно остаётся внутри активной коллекции, если она задана.
   if (Math.random() < 0.12) {
     const exploration = scored
       .slice()
