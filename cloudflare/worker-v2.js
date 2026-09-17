@@ -1,5 +1,6 @@
 import base from './worker.js';
 import { handleAnalyticsRoute, applyAnalyticsReturn } from './analytics.js';
+import { handleRetentionRoute, runRetentionSchedule } from './retention.js';
 
 const TELEGRAM_ISSUER = 'https://oauth.telegram.org';
 const TELEGRAM_JWKS = 'https://oauth.telegram.org/.well-known/jwks.json';
@@ -158,6 +159,9 @@ export default {
     const analyticsResponse = await handleAnalyticsRoute(request, env, ctx);
     if (analyticsResponse) return withPaymentMode(analyticsResponse, mode, env);
 
+    const retentionResponse = await handleRetentionRoute(request, env);
+    if (retentionResponse) return withPaymentMode(retentionResponse, mode, env);
+
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') {
       return withPaymentMode(await sdkLogin(request, effectiveEnv), mode, env);
     }
@@ -168,5 +172,9 @@ export default {
       response = applyAnalyticsReturn(request, response);
     }
     return withPaymentMode(response, mode, env);
+  },
+
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(runRetentionSchedule(env));
   },
 };
