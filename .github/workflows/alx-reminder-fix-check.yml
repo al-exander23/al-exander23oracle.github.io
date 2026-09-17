@@ -1,0 +1,51 @@
+name: ALX reminder fix live check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-reminder-fix-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for reminder fix deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          HEALTH='https://alx-pay.alxoracle.workers.dev/api/retention/health'
+          APP='https://al-exander23.github.io/al-exander23oracle.github.io/'
+          for i in $(seq 1 36); do
+            body=$(curl -fsS "$HEALTH" 2>/dev/null || true)
+            if echo "$body" | grep -q '1.20.1-reminder-fix'; then
+              echo "Worker ready: $body"
+              break
+            fi
+            sleep 10
+          done
+          body=$(curl -fsS "$HEALTH")
+          echo "$body" | grep -q '1.20.1-reminder-fix'
+
+          for i in $(seq 1 30); do
+            html=$(curl -fsS "$APP" 2>/dev/null || true)
+            if echo "$html" | grep -q 'reminder-fix.js?v=1.20.1-reminder-fix'; then
+              echo 'Pages reminder UI ready.'
+              break
+            fi
+            sleep 10
+          done
+          html=$(curl -fsS "$APP")
+          echo "$html" | grep -q 'reminder-fix.js?v=1.20.1-reminder-fix'
+
+      - name: Verify test endpoint requires Telegram session
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://alx-pay.alxoracle.workers.dev/api/retention/reminder/test'
+          code=$(curl -sS -o /tmp/result -w '%{http_code}' -X POST "$URL" \
+            -H 'Origin: https://al-exander23.github.io' \
+            -H 'Content-Type: application/json' \
+            --data '{}')
+          test "$code" = '401'
+          grep -q 'Telegram' /tmp/result
+          echo 'PASS: reminder fix is live.'
