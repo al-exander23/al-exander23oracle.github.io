@@ -9,7 +9,7 @@ import {
   syncProEntitlement,
   createStarsInvoice,
   waitForProActivation,
-} from './pro.js?v=1.14.0-stars';
+} from './pro.js?v=1.17.0-mixlab';
 
 const CARD_ID = 'alxProCard';
 const OVERLAY_ID = 'alxProOverlay';
@@ -48,8 +48,8 @@ function buildProCard() {
       <div class="pro-card-copy">
         <div class="pro-card-title">${state.active ? 'PRO открыт' : 'Открой глубже Оракула'}</div>
         <div class="pro-card-text">${state.active
-          ? 'Авторские коллекции доступны в ситуационном режиме.'
-          : `Закрытые подборки ALX · ${offer.priceStars} ⭐ за ${offer.periodDays} дней.`}</div>
+          ? 'Parfum Lab, LIMITED 2026 и авторские коллекции уже доступны.'
+          : `Parfum Lab · LIMITED 2026 · закрытые подборки · ${offer.priceStars} ⭐ / ${offer.periodDays} дней.`}</div>
       </div>
       ${state.active
         ? '<div class="pro-card-badge">PRO</div>'
@@ -80,6 +80,8 @@ function ensurePaywall() {
         ${PRO_BENEFITS.map((item) => `<div class="pro-benefit"><span>◆</span><p>${item}</p></div>`).join('')}
       </div>
       <div class="pro-premium-preview">
+        <div><b>Parfum Lab</b><span>цветы, чай, специи и фруктовые ноты как парфюмная композиция</span></div>
+        <div><b>LIMITED 2026</b><span>необычные сезонные дропы и новые вкусовые идеи</span></div>
         <div><b>ALX Signature</b><span>отбор самых сильных сочетаний</span></div>
         <div><b>Для двоих</b><span>мягкие вечерние сценарии</span></div>
         <div><b>После полуночи</b><span>более насыщенные подборки</span></div>
@@ -122,7 +124,7 @@ function resetCheckoutUi(overlay) {
   if (state.active) {
     updateCheckoutUi(overlay, {
       text: `PRO активен${state.expiresAt ? ` до ${formatExpiry(state.expiresAt)}` : ''}`,
-      note: 'Подписка подтверждена Telegram Stars.',
+      note: 'Доступ ALX PRO подтверждён и закрытые коллекции открыты.',
       disabled: true,
     });
     return;
@@ -156,7 +158,7 @@ async function confirmActivation(overlay) {
     if (!state.active) throw new Error('Подписка ещё не появилась в Stars ledger.');
     updateCheckoutUi(overlay, {
       text: 'ALX PRO активирован ✓',
-      note: 'Закрытые коллекции уже разблокированы.',
+      note: 'Parfum Lab, LIMITED 2026 и другие закрытые коллекции разблокированы.',
       disabled: true,
     });
     renderCard();
@@ -249,7 +251,7 @@ export function openProPaywall(feature = 'ALX PRO') {
 
   featureText.textContent = feature && feature !== 'ALX PRO'
     ? `«${feature}» входит в ALX PRO.`
-    : 'Больше контроля над тем, что покажет Оракул.';
+    : 'Больше контроля, больше коллекций и больше необычных вкусов.';
 
   resetCheckoutUi(overlay);
   overlay.classList.add('show');
