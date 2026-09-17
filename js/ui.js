@@ -4,7 +4,7 @@
 
 import { typeText } from './effects.js';
 import { isFavorite, toggleFavorite, getFavorites, getHistory, isDisliked, toggleDislike, resetTaste } from './profile.js';
-import { getMixById } from './mixes.js';
+import { getMixById } from './mixes.js?v=1.23.0-originals';
 
 const STAT_FIELDS = [
   { key: 'strength', label: 'Крепость' },
@@ -57,6 +57,13 @@ function buildChips(mix) {
 
 function buildRatingLine(mix) {
   const el = document.createElement('div');
+
+  if (mix?.original === true) {
+    el.className = 'mix-card-rating mix-card-rating--new';
+    el.textContent = 'ALX ORIGINAL · авторский рецепт';
+    return el;
+  }
+
   if (mix.rating != null) {
     el.className = 'mix-card-rating';
     el.textContent = `★ ${mix.rating.toFixed(1)}`;
@@ -68,6 +75,10 @@ function buildRatingLine(mix) {
     el.textContent = `🔥 ${pct}% · оценок пока нет`;
   }
   return el;
+}
+
+function hasProfileStats(mix) {
+  return STAT_FIELDS.some((field) => Number.isFinite(mix?.[field.key]));
 }
 
 // Карточка строится через createElement с прямыми ссылками на узлы —
@@ -129,16 +140,20 @@ export function renderCard(cardEl, mix) {
   foot.appendChild(authorSpan);
   foot.appendChild(shareBtn);
 
-  cardEl.replaceChildren(
+  const cardParts = [
     head,
     buildRatingLine(mix),
     desc,
     compositionLabel,
     buildChips(mix),
-    profileLabel,
-    buildStatGrid(mix),
-    foot,
-  );
+  ];
+
+  if (hasProfileStats(mix)) {
+    cardParts.push(profileLabel, buildStatGrid(mix));
+  }
+
+  cardParts.push(foot);
+  cardEl.replaceChildren(...cardParts);
   cardEl.classList.add('show');
 
   favBtn.addEventListener('click', () => {
