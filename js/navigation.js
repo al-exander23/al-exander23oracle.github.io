@@ -1,11 +1,12 @@
-// navigation.js — Navigation Cleanup v1.22 for ALX Oracle.
+// navigation.js — Navigation Cleanup v1.22.1 for ALX Oracle.
 // Keeps existing feature buttons as hidden action sources while exposing a
 // clear four-section bottom navigation with readable labels.
+// v1.22.1 fixes a MutationObserver feedback loop that could starve the UI thread.
 
 import { getProState } from './pro.js?v=1.17.0-mixlab';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.22.0-navigation';
+const VERSION = '1.22.1-navigation-fix';
 const NAV_ID = 'alxBottomNav';
 const ACCESS_ID = 'alxAccessStrip';
 const FREE_LIMIT = 5;
@@ -27,6 +28,14 @@ function freeState() {
   } catch (error) {
     return { used: 0, limit: FREE_LIMIT, remaining: FREE_LIMIT };
   }
+}
+
+function setTextIfChanged(node, value) {
+  if (node && node.textContent !== value) node.textContent = value;
+}
+
+function setHtmlIfChanged(node, value) {
+  if (node && node.innerHTML !== value) node.innerHTML = value;
 }
 
 function setActive(tab) {
@@ -141,9 +150,9 @@ function renderAccess() {
 
   if (state.active) {
     strip.classList.add('is-pro');
-    strip.innerHTML = `
+    setHtmlIfChanged(strip, `
       <span><b>ALX PRO активен</b><small>Безлимитные подборы и закрытые коллекции</small></span>
-      <strong>Мой ALX</strong>`;
+      <strong>Мой ALX</strong>`);
     return;
   }
 
@@ -151,9 +160,9 @@ function renderAccess() {
   const main = free.remaining > 0
     ? `FREE · осталось ${free.remaining} из ${free.limit} сегодня`
     : 'FREE · лимит на сегодня использован';
-  strip.innerHTML = `
+  setHtmlIfChanged(strip, `
     <span><b>${main}</b><small>Бесплатные подборы обновятся завтра</small></span>
-    <strong>Что даёт PRO</strong>`;
+    <strong>Что даёт PRO</strong>`);
 }
 
 function closeAccountThen(callback) {
@@ -190,20 +199,16 @@ function enhanceMyAlx() {
 
   const close = document.getElementById('myAlxClose');
   if (close) {
-    close.textContent = 'Закрыть';
-    close.setAttribute('aria-label', 'Закрыть Мой ALX');
+    setTextIfChanged(close, 'Закрыть');
+    if (close.getAttribute('aria-label') !== 'Закрыть Мой ALX') close.setAttribute('aria-label', 'Закрыть Мой ALX');
   }
 
-  const tasteLabel = content.querySelector('#myAlxTaste span');
-  if (tasteLabel) tasteLabel.textContent = 'Профиль вкуса';
-  const restoreLabel = content.querySelector('#myAlxRestore span');
-  if (restoreLabel) restoreLabel.textContent = 'Восстановить PRO';
-  const proLabel = content.querySelector('#myAlxProDetails span');
-  if (proLabel) proLabel.textContent = 'Возможности ALX PRO';
+  setTextIfChanged(content.querySelector('#myAlxTaste span'), 'Профиль вкуса');
+  setTextIfChanged(content.querySelector('#myAlxRestore span'), 'Восстановить PRO');
+  setTextIfChanged(content.querySelector('#myAlxProDetails span'), 'Возможности ALX PRO');
 
   const section = content.querySelector('.my-alx-section');
-  const title = section?.querySelector('.my-alx-section-title');
-  if (title) title.textContent = 'Разделы и настройки';
+  setTextIfChanged(section?.querySelector('.my-alx-section-title'), 'Разделы и настройки');
 
   addAccountRow(section, 'myAlxHistory', 'История миксов', 'последние подборы Оракула', () => {
     closeAccountThen(() => {
@@ -233,27 +238,35 @@ function enhanceMyAlx() {
 }
 
 function observeAccount() {
-  const bodyObserver = new MutationObserver(() => {
+  const attach = () => {
     const content = document.getElementById('myAlxContent');
-    if (!content || content.dataset.navObserved === '1') return;
+    if (!content || content.dataset.navObserved === '1') return false;
     content.dataset.navObserved = '1';
-    new MutationObserver(enhanceMyAlx).observe(content, { childList: true, subtree: true });
+    new MutationObserver(() => enhanceMyAlx()).observe(content, { childList: true, subtree: true });
     enhanceMyAlx();
+    return true;
+  };
+
+  if (attach()) return;
+  const bodyObserver = new MutationObserver(() => {
+    if (attach()) bodyObserver.disconnect();
   });
   bodyObserver.observe(document.body, { childList: true, subtree: true });
-  enhanceMyAlx();
 }
 
 function simplifyDailyStrip() {
   const streak = document.querySelector('.retention-pill--streak');
-  if (streak) streak.setAttribute('aria-hidden', 'true');
+  if (streak && streak.getAttribute('aria-hidden') !== 'true') streak.setAttribute('aria-hidden', 'true');
   const dailySmall = document.querySelector('.retention-pill--daily small');
-  if (dailySmall) dailySmall.textContent = 'Открыть сегодняшний персональный выбор';
+  setTextIfChanged(dailySmall, 'Открыть сегодняшний персональный выбор');
 }
 
 function wireState() {
   window.addEventListener('alx-free-usage-change', renderAccess);
-  window.addEventListener('alx-pro-change', renderAccess);
+  window.addEventListener('alx-pro-change', () => {
+    renderAccess();
+    setTimeout(enhanceMyAlx, 0);
+  });
 
   document.addEventListener('click', (event) => {
     const target = event.target instanceof Element ? event.target.closest('button') : null;
@@ -265,7 +278,7 @@ function wireState() {
 
   const counter = document.getElementById('counter');
   if (counter) {
-    new MutationObserver(renderAccess).observe(counter, { childList: true, characterData: true, subtree: true });
+    new MutationObserver(() => renderAccess()).observe(counter, { childList: true, characterData: true, subtree: true });
   }
 }
 
@@ -276,13 +289,6 @@ function init() {
   observeAccount();
   wireState();
   simplifyDailyStrip();
-
-  const bodyObserver = new MutationObserver(() => {
-    ensureBottomNav();
-    ensureAccessStrip();
-    simplifyDailyStrip();
-  });
-  bodyObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 init();
