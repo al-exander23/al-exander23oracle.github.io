@@ -1,4 +1,6 @@
-// pro-ui.js — ALX PRO + native Telegram Stars subscription flow.
+// pro-ui.js — ALX PRO purchase/restore UI.
+// Inside Telegram digital PRO is sold only via Telegram Stars.
+// Outside Telegram the same paywall may route to the official external ALX Pay page.
 
 import {
   PRO_BENEFITS,
@@ -13,8 +15,16 @@ import {
 
 const CARD_ID = 'alxProCard';
 const OVERLAY_ID = 'alxProOverlay';
+const EXTERNAL_PAY_URL = 'https://alx-pay.alxoracle.workers.dev/';
+const EXTERNAL_PRICE_RUB = 299;
 let renderQueued = false;
 let checkoutBusy = false;
+
+function isInsideTelegramApp() {
+  if (isTelegramPaymentContext()) return true;
+  const platform = String(window.Telegram?.WebApp?.platform || '').trim().toLowerCase();
+  return Boolean(platform && platform !== 'unknown');
+}
 
 function formatExpiry(timestamp) {
   if (!Number.isFinite(timestamp)) return '';
@@ -30,6 +40,7 @@ function formatExpiry(timestamp) {
 function buildProCard() {
   const state = getProState();
   const offer = getProOffer();
+  const telegram = isInsideTelegramApp();
   const card = document.createElement('div');
   card.id = CARD_ID;
   card.className = `taste-section pro-card-section${state.active ? ' pro-card-section--active' : ''}`;
@@ -37,6 +48,10 @@ function buildProCard() {
   const expiry = state.active && state.expiresAt
     ? ` · до ${formatExpiry(state.expiresAt)}`
     : '';
+
+  const priceCopy = telegram
+    ? `${offer.priceStars} ⭐ / ${offer.periodDays} дней`
+    : `${EXTERNAL_PRICE_RUB} ₽ / ${offer.periodDays} дней · карта / СБП`;
 
   card.innerHTML = `
     <div class="taste-section-title taste-section-title--row">
@@ -49,7 +64,7 @@ function buildProCard() {
         <div class="pro-card-title">${state.active ? 'PRO открыт' : 'Открой глубже Оракула'}</div>
         <div class="pro-card-text">${state.active
           ? 'Parfum Lab, LIMITED 2026 и авторские коллекции уже доступны.'
-          : `Parfum Lab · LIMITED 2026 · закрытые подборки · ${offer.priceStars} ⭐ / ${offer.periodDays} дней.`}</div>
+          : `Parfum Lab · LIMITED 2026 · закрытые подборки · ${priceCopy}.`}</div>
       </div>
       ${state.active
         ? '<div class="pro-card-badge">PRO</div>'
@@ -89,6 +104,15 @@ function ensurePaywall() {
       </div>
       <button class="pro-checkout" id="proCheckout" type="button"></button>
       <div class="pro-checkout-note" id="proCheckoutNote"></div>
+      <div class="pro-secondary-actions" id="proSecondaryActions">
+        <button class="pro-secondary-btn" id="proStarsHelp" type="button">Не получается оплатить?</button>
+        <button class="pro-secondary-btn" id="proRestore" type="button">Восстановить PRO</button>
+      </div>
+      <div class="pro-inline-help" id="proInlineHelp" hidden>
+        <b>Как оплатить Stars</b>
+        <span>Пополни баланс Telegram Stars в Telegram, затем вернись сюда и нажми «Подключить PRO».</span>
+      </div>
+      <div class="pro-restore-status" id="proRestoreStatus" aria-live="polite"></div>
     </section>`;
   document.body.appendChild(overlay);
 
@@ -101,8 +125,49 @@ function ensurePaywall() {
     if (event.key === 'Escape' && overlay.classList.contains('show')) close();
   });
 
-  overlay.querySelector('#proCheckout')?.addEventListener('click', () => beginStarsCheckout(overlay));
+  overlay.querySelector('#proCheckout')?.addEventListener('click', () => {
+    if (isInsideTelegramApp()) beginStarsCheckout(overlay);
+    else openExternalCheckout();
+  });
+
+  overlay.querySelector('#proStarsHelp')?.addEventListener('click', () => {
+    const help = overlay.querySelector('#proInlineHelp');
+    if (!help) return;
+    help.hidden = !help.hidden;
+  });
+
+  overlay.querySelector('#proRestore')?.addEventListener('click', () => restoreProAccess(overlay));
   return overlay;
+}
+
+function setRestoreStatus(overlay, text = '', tone = '') {
+  const status = overlay.querySelector('#proRestoreStatus');
+  if (!status) return;
+  status.textContent = text;
+  status.classList.toggle('success', tone === 'success');
+  status.classList.toggle('error', tone === 'error');
+}
+
+function renderSecondaryUi(overlay) {
+  const state = getProState();
+  const telegram = isInsideTelegramApp();
+  const actions = overlay.querySelector('#proSecondaryActions');
+  const help = overlay.querySelector('#proInlineHelp');
+  const helpBtn = overlay.querySelector('#proStarsHelp');
+  const restoreBtn = overlay.querySelector('#proRestore');
+
+  if (!actions || !help || !helpBtn || !restoreBtn) return;
+
+  if (!telegram || state.active) {
+    actions.hidden = true;
+    help.hidden = true;
+    setRestoreStatus(overlay, '');
+    return;
+  }
+
+  actions.hidden = false;
+  helpBtn.hidden = false;
+  restoreBtn.hidden = false;
 }
 
 function updateCheckoutUi(overlay, { busy = false, text, note, disabled } = {}) {
@@ -120,6 +185,10 @@ function updateCheckoutUi(overlay, { busy = false, text, note, disabled } = {}) 
 function resetCheckoutUi(overlay) {
   const state = getProState();
   const offer = getProOffer();
+  const telegram = isInsideTelegramApp();
+
+  setRestoreStatus(overlay, '');
+  renderSecondaryUi(overlay);
 
   if (state.active) {
     updateCheckoutUi(overlay, {
@@ -130,10 +199,10 @@ function resetCheckoutUi(overlay) {
     return;
   }
 
-  if (!isTelegramPaymentContext()) {
+  if (!telegram) {
     updateCheckoutUi(overlay, {
-      text: `Подключить PRO · ${offer.priceStars} ⭐`,
-      note: 'Оплата Stars доступна, когда ALX Oracle открыт внутри Telegram.',
+      text: `Оплатить картой / СБП · ${EXTERNAL_PRICE_RUB} ₽`,
+      note: 'Откроется официальный ALX Pay. После оплаты вернись в ALX Oracle в Telegram — PRO восстановится автоматически.',
       disabled: false,
     });
     return;
@@ -141,9 +210,47 @@ function resetCheckoutUi(overlay) {
 
   updateCheckoutUi(overlay, {
     text: `Подключить PRO · ${offer.priceStars} ⭐`,
-    note: `Автопродление каждые ${offer.periodDays} дней через Telegram Stars. Отменить можно в Telegram.`,
+    note: `Оплата внутри Telegram проходит через Stars · ${offer.periodDays} дней.`,
     disabled: false,
   });
+}
+
+function openExternalCheckout() {
+  if (isInsideTelegramApp()) return;
+  window.location.assign(EXTERNAL_PAY_URL);
+}
+
+async function restoreProAccess(overlay) {
+  if (!isTelegramPaymentContext()) {
+    setRestoreStatus(overlay, 'Открой ALX Oracle из Telegram, чтобы проверить доступ.', 'error');
+    return;
+  }
+
+  const button = overlay.querySelector('#proRestore');
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Проверяю…';
+  }
+  setRestoreStatus(overlay, 'Проверяю активную подписку…');
+
+  try {
+    const state = await syncProEntitlement({ attempts: 2, delayMs: 700 });
+    if (state.active) {
+      setRestoreStatus(overlay, 'ALX PRO найден и восстановлен ✓', 'success');
+      renderCard();
+      window.dispatchEvent(new CustomEvent('alx-pro-change', { detail: state }));
+      resetCheckoutUi(overlay);
+      return;
+    }
+    setRestoreStatus(overlay, 'Активный ALX PRO пока не найден.', 'error');
+  } catch (error) {
+    setRestoreStatus(overlay, 'Не удалось проверить доступ. Попробуй ещё раз.', 'error');
+  } finally {
+    if (button && !getProState().active) {
+      button.disabled = false;
+      button.textContent = 'Восстановить PRO';
+    }
+  }
 }
 
 async function confirmActivation(overlay) {
@@ -161,13 +268,14 @@ async function confirmActivation(overlay) {
       note: 'Parfum Lab, LIMITED 2026 и другие закрытые коллекции разблокированы.',
       disabled: true,
     });
+    renderSecondaryUi(overlay);
     renderCard();
     window.dispatchEvent(new CustomEvent('alx-pro-change', { detail: state }));
     setTimeout(() => closeProPaywall(), 900);
   } catch (error) {
     updateCheckoutUi(overlay, {
       text: `Проверить PRO · ${getProOffer().priceStars} ⭐`,
-      note: 'Платёж мог уже пройти. Закрой и снова открой ALX Oracle — доступ восстановится автоматически.',
+      note: 'Платёж мог уже пройти. Нажми «Восстановить PRO» или снова открой ALX Oracle.',
       disabled: false,
     });
   } finally {
@@ -182,7 +290,7 @@ async function beginStarsCheckout(overlay) {
   if (!isTelegramPaymentContext()) {
     updateCheckoutUi(overlay, {
       text: `Подключить PRO · ${getProOffer().priceStars} ⭐`,
-      note: 'Открой приложение из Telegram и повтори оплату.',
+      note: 'Открой ALX Oracle из Telegram и повтори оплату.',
       disabled: false,
     });
     return;
