@@ -27,8 +27,7 @@ ALX_EXTERNAL_PRICE_RUB = "1"
 
 # Production ALX PRO configuration.
 YOOKASSA_LIVE_SHOP_ID = "1462630"
-# Temporary live verification price. Restore to 299 after the real payment test.
-ALX_LIVE_PRICE_RUB = "29"
+ALX_LIVE_PRICE_RUB = "299"
 
 # Live Secret Key is intentionally not stored in GitHub:
 # YOOKASSA_LIVE_SECRET_KEY -> Cloudflare secret.
