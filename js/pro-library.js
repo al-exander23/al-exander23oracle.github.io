@@ -1,17 +1,23 @@
-// pro-library.js — unified premium library for ALX Oracle.
-// Presentation only: existing Oracle, scenario and payment flows stay intact.
+// pro-library.js — unified premium direction library for ALX Oracle.
+// Every PRO collection follows the same interaction: choose a direction,
+// then let the Oracle reveal a concrete mix through the orb.
 
-import { getProState, requestProPaywall } from './pro.js?v=1.25.0-pro-library';
-import { initMixes, initOriginals, getAllMixes } from './mixes.js?v=1.24.0-originals-catalog';
-import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.24.0-originals-catalog';
-import { openCatalog as openOriginalsCatalog } from './originals-catalog.js?v=1.24.0-originals-catalog';
+import { getProState, requestProPaywall } from './pro.js?v=1.26.0-oracle-first';
+import { initMixes, initOriginals, getAllMixes } from './mixes.js?v=1.26.0-oracle-first';
+import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.26.0-oracle-first';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.25.0-pro-library';
+const VERSION = '1.26.0-oracle-first';
 const OVERLAY_ID = 'alxProLibrary';
 const CONTENT_ID = 'alxProLibraryContent';
 
 const COLLECTIONS = Object.freeze([
+  {
+    id: 'originals',
+    title: 'ALX Originals',
+    eyebrow: 'АВТОРСКАЯ КОЛЛЕКЦИЯ',
+    description: 'Закрытые авторские миксы ALX. Ты выбираешь направление, а конкретный рецепт и пропорции раскрывает только Оракул.',
+  },
   {
     id: 'parfum',
     title: 'Parfum Lab',
@@ -82,9 +88,9 @@ function ensureOverlay() {
       <header class="pro-library-head">
         <div>
           <div class="pro-library-kicker">ALX ORACLE</div>
-          <h2 id="proLibraryTitle">PRO Библиотека</h2>
+          <h2 id="proLibraryTitle">PRO Направления</h2>
         </div>
-        <button class="pro-library-close" id="proLibraryClose" type="button" aria-label="Закрыть PRO библиотеку">Закрыть</button>
+        <button class="pro-library-close" id="proLibraryClose" type="button" aria-label="Закрыть PRO направления">Закрыть</button>
       </header>
       <div id="${CONTENT_ID}" class="pro-library-content"></div>
     </section>`;
@@ -100,44 +106,24 @@ function ensureOverlay() {
   return overlay;
 }
 
-function activateCollection(collection) {
-  const state = getProState();
-  if (!state.active) {
+async function activateCollection(collection) {
+  if (!getProState().active) {
     closeProLibrary();
     requestProPaywall(collection.title);
     trackAnalytics('pro_library_unlock_click', { version: VERSION, collection: collection.id });
     return;
   }
 
+  // Originals stay protected by the verified PRO endpoint. Loading them here
+  // prepares the orb without exposing a browseable catalog.
+  if (collection.id === 'originals') {
+    await initOriginals();
+  }
+
   setScenario({ collection: collection.id });
   trackAnalytics('pro_library_collection_select', { version: VERSION, collection: collection.id });
   closeProLibrary({ returnHome: false });
   document.querySelector('#alxBottomNav [data-tab="home"]')?.click();
-}
-
-function activateOriginalsOracle() {
-  if (!getProState().active) {
-    closeProLibrary();
-    requestProPaywall('ALX Originals');
-    trackAnalytics('pro_library_unlock_click', { version: VERSION, collection: 'originals' });
-    return;
-  }
-
-  setScenario({ collection: 'originals' });
-  trackAnalytics('pro_library_collection_select', { version: VERSION, collection: 'originals' });
-  closeProLibrary({ returnHome: false });
-  document.querySelector('#alxBottomNav [data-tab="home"]')?.click();
-}
-
-function openOriginals() {
-  const active = getProState().active;
-  trackAnalytics('pro_library_originals_open', { version: VERSION, pro: active });
-  if (!active) {
-    closeProLibrary();
-    requestProPaywall('ALX Originals');
-    return;
-  }
-  openOriginalsCatalog().catch((error) => console.warn('[ALX PRO Library] Originals:', error));
 }
 
 function resetToAll() {
@@ -147,13 +133,19 @@ function resetToAll() {
   document.querySelector('#alxBottomNav [data-tab="home"]')?.click();
 }
 
+function countLabel(count) {
+  if (count === 1) return '1 микс';
+  if (count >= 2 && count <= 4) return `${count} микса`;
+  return `${count} миксов`;
+}
+
 function collectionCard(collection, counts, current, activePlan) {
   const selected = current.collection === collection.id;
   const count = Number(counts?.[collection.id]) || 0;
-  const meta = activePlan
-    ? `${count} ${count === 1 ? 'микс' : count >= 2 && count <= 4 ? 'микса' : 'миксов'}`
-    : 'ALX PRO';
-  const action = activePlan ? (selected ? 'Выбрано для Оракула' : 'Выбирать из коллекции') : 'Открыть с PRO';
+  const meta = activePlan ? countLabel(count) : 'ALX PRO';
+  const action = activePlan
+    ? (selected ? 'Выбрано для Оракула' : 'Выбрать направление')
+    : 'Открыть с PRO';
 
   return `
     <article class="pro-library-card${selected ? ' is-selected' : ''}" data-pro-card="${collection.id}">
@@ -179,12 +171,11 @@ async function render() {
   const current = getScenario();
   let counts = {};
 
-  content.innerHTML = '<div class="pro-library-loading">Собираю PRO библиотеку…</div>';
+  content.innerHTML = '<div class="pro-library-loading">Собираю PRO направления…</div>';
 
   if (activePlan) {
     try {
       await initMixes();
-      await initOriginals();
       counts = getCollectionCounts(getAllMixes());
     } catch (error) {
       console.warn('[ALX PRO Library] counts unavailable:', error);
@@ -192,39 +183,22 @@ async function render() {
   }
 
   const expiry = activePlan ? formatExpiry(state.expiresAt) : '';
-  const originalsSelected = current.collection === 'originals';
-  const originalsCount = Number(counts.originals) || 5;
 
   content.innerHTML = `
     <section class="pro-library-status${activePlan ? ' is-active' : ''}">
       <div>
         <span>${activePlan ? 'ALX PRO АКТИВЕН' : 'ALX FREE'}</span>
-        <b>${activePlan ? 'Премиальная библиотека открыта' : 'Премиальные коллекции закрыты'}</b>
+        <b>${activePlan ? 'Выбери направление для Оракула' : 'PRO-направления закрыты'}</b>
         <small>${activePlan
-          ? `${expiry ? `Доступ до ${expiry}. ` : ''}Выбирай коллекцию вручную или доверь решение Оракулу.`
-          : 'Можно посмотреть структуру PRO, но закрытые подборки и авторские рецепты открываются после активации.'}</small>
+          ? `${expiry ? `Доступ до ${expiry}. ` : ''}Направление задаёт настроение, а конкретный микс откроет шар.`
+          : 'Можно увидеть направления PRO, но конкретные миксы и рецепты раскрываются только после активации.'}</small>
       </div>
       ${activePlan ? '<strong>PRO</strong>' : '<button id="proLibraryUnlock" type="button">Открыть PRO</button>'}
     </section>
 
-    <section class="pro-library-originals${originalsSelected ? ' is-selected' : ''}">
-      <div class="pro-library-originals-label">ГЛАВНАЯ АВТОРСКАЯ КОЛЛЕКЦИЯ</div>
-      <div class="pro-library-originals-row">
-        <div>
-          <h3>ALX Originals</h3>
-          <p>Авторские рецепты ALX с точными пропорциями. Отдельный каталог, не смешанный с общей базой.</p>
-        </div>
-        <span>${activePlan ? `${originalsCount} рецептов` : 'PRO'}</span>
-      </div>
-      <div class="pro-library-originals-actions">
-        <button class="pro-library-primary" id="proLibraryOriginalsBrowse" type="button">${activePlan ? 'Открыть каталог' : 'Открыть с PRO'}</button>
-        <button class="pro-library-secondary" id="proLibraryOriginalsOracle" type="button">${activePlan ? (originalsSelected ? 'Выбрано для Оракула' : 'Выбирать шаром') : 'Открыть с PRO'}</button>
-      </div>
-    </section>
-
     <div class="pro-library-section-title">
-      <span>Коллекции Оракула</span>
-      <small>${activePlan ? 'Выбор меняет источник следующего подбора' : 'Доступны после активации ALX PRO'}</small>
+      <span>Направления Оракула</span>
+      <small>${activePlan ? 'Выбери одно — затем возвращайся к шару' : 'Доступны после активации ALX PRO'}</small>
     </div>
 
     <div class="pro-library-grid">
@@ -234,7 +208,7 @@ async function render() {
     ${activePlan ? `
       <button class="pro-library-all${current.collection === 'any' ? ' is-current' : ''}" id="proLibraryAll" type="button"${current.collection === 'any' ? ' disabled' : ''}>
         <span>Все миксы</span>
-        <small>${current.collection === 'any' ? 'Обычный режим уже включён' : 'Вернуть Оракула к общей базе без изменения других настроек'}</small>
+        <small>${current.collection === 'any' ? 'Обычный режим уже включён' : 'Убрать фильтр направления и вернуть общую базу'}</small>
       </button>` : ''}
   `;
 
@@ -244,13 +218,20 @@ async function render() {
     trackAnalytics('pro_library_unlock_click', { version: VERSION, collection: 'all' });
   });
 
-  content.querySelector('#proLibraryOriginalsBrowse')?.addEventListener('click', openOriginals);
-  content.querySelector('#proLibraryOriginalsOracle')?.addEventListener('click', activateOriginalsOracle);
-
   content.querySelectorAll('[data-pro-select]').forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
       const collection = COLLECTIONS.find((item) => item.id === button.dataset.proSelect);
-      if (collection) activateCollection(collection);
+      if (!collection) return;
+      button.disabled = true;
+      const originalText = button.textContent;
+      if (getProState().active) button.textContent = 'Готовлю Оракула…';
+      try {
+        await activateCollection(collection);
+      } catch (error) {
+        console.warn('[ALX PRO Library] collection activation failed:', error);
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     });
   });
 
