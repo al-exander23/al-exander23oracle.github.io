@@ -14,15 +14,15 @@ jobs:
         run: |
           set -e
           for i in $(seq 1 30); do
-            HTML=$(curl -fsSL 'https://al-exander23.github.io/al-exander23oracle.github.io/?pro-library-smoke=1' || true)
-            if echo "$HTML" | grep -q 'pro-library.css?v=1.25.0-pro-library' && echo "$HTML" | grep -q 'originals-nav-hook.js?v=1.25.0-pro-library'; then
-              echo 'PRO library assets are live'
+            HTML=$(curl -fsSL 'https://al-exander23.github.io/al-exander23oracle.github.io/?pro-library-smoke=final' || true)
+            if echo "$HTML" | grep -q 'pro-library.css?v=1.25.0-pro-library' && echo "$HTML" | grep -q 'originals-nav-hook.js?v=1.25.1-pro-library-fix'; then
+              echo 'Final PRO library assets are live'
               exit 0
             fi
             echo "waiting for Pages deploy: $i"
             sleep 5
           done
-          echo 'PRO library assets did not appear in time'
+          echo 'Final PRO library assets did not appear in time'
           exit 1
 
       - name: Prepare Playwright
@@ -32,12 +32,12 @@ jobs:
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium >/dev/null 2>&1
 
-      - name: Verify FREE and PRO library flows
+      - name: Verify final FREE and PRO library flows
         working-directory: /tmp/alx-pro-library-smoke
         run: |
           cat > smoke.mjs <<'JS'
           import { chromium } from 'playwright';
-          const APP = 'https://al-exander23.github.io/al-exander23oracle.github.io/?pro-library-smoke=v125';
+          const APP = 'https://al-exander23.github.io/al-exander23oracle.github.io/?pro-library-smoke=v1251';
           const browser = await chromium.launch({ headless: true });
 
           async function baseRoutes(page) {
@@ -48,7 +48,7 @@ jobs:
             });
           }
 
-          // FREE: PRO tab shows the library itself first, not the legacy paywall.
+          // FREE: library first; neither ordinary collection nor Originals can sit above the paywall.
           {
             const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
             await context.addInitScript(() => {
@@ -68,13 +68,22 @@ jobs:
               if (!libraryText?.includes(label)) throw new Error('Missing FREE library collection: '+label);
             }
             if (await page.locator('#alxProOverlay.show').count()) throw new Error('Legacy paywall opened before library');
+
+            await page.click('#proLibraryOriginalsBrowse');
+            await page.waitForFunction(() => document.querySelector('#alxProOverlay')?.classList.contains('show'), null, { timeout:10000 });
+            if (await page.locator('#alxProLibrary.show').count()) throw new Error('FREE PRO library still covers paywall after Originals CTA');
+            await page.click('#proClose');
+
+            await page.click('#alxBottomNav [data-tab="pro"]');
+            await page.waitForFunction(() => document.querySelector('#alxProLibrary')?.classList.contains('show'), null, { timeout:10000 });
             await page.click('[data-pro-select="parfum"]');
             await page.waitForFunction(() => document.querySelector('#alxProOverlay')?.classList.contains('show'), null, { timeout:10000 });
+            if (await page.locator('#alxProLibrary.show').count()) throw new Error('FREE PRO library still covers paywall after collection CTA');
             if (errors.length) throw new Error('FREE page errors: '+errors.join(' | '));
             await context.close();
           }
 
-          // PRO: full library, Originals catalog handoff, and collection selection.
+          // PRO: full library, Originals catalog handoff, collection selection and normal orb operation.
           {
             const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
             await context.addInitScript(() => {
@@ -126,7 +135,7 @@ jobs:
             await context.close();
           }
 
-          console.log('PASS: unified PRO library FREE + PRO + Originals + collection selection + orb.');
+          console.log('PASS: final unified PRO library FREE + PRO + Originals + paywall layering + collection selection + orb.');
           await browser.close();
           JS
           node smoke.mjs
