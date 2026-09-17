@@ -4,7 +4,7 @@
 
 import { getItem, setItem } from './storage.js';
 import { buildDerivedProfile, calculateMixScore } from './personalization.js';
-import { isPremiumCollection, isProActive } from './pro.js?v=1.17.0-mixlab';
+import { isPremiumCollection, isProActive } from './pro.js?v=1.23.0-originals';
 
 const KEY = 'alx_oracle_scenario';
 
@@ -47,6 +47,7 @@ export const COLLECTION_OPTIONS = [
   { id: 'tropical', label: 'Тропические' },
   { id: 'sour', label: 'С кислинкой' },
   { id: 'strong', label: 'Крепкие' },
+  { id: 'originals', label: 'ALX Originals', pro: true, hiddenUntilPro: true },
   { id: 'signature', label: 'ALX Signature', pro: true },
   { id: 'parfum', label: 'Parfum Lab', pro: true },
   { id: 'limited', label: 'LIMITED 2026', pro: true },
@@ -92,20 +93,31 @@ function includesAny(names, words) {
 }
 
 export function collectionMatches(mix, collectionId) {
-  if (!mix || collectionId === 'any') return true;
+  if (!mix) return false;
+
+  const normalizedCollection = normalize(collectionId || 'any');
+  const exclusive = normalize(mix.exclusiveCollection);
+
+  // Эксклюзивные авторские коллекции не участвуют ни в «Все миксы»,
+  // ни в производных фильтрах. Они открываются только своим разделом.
+  if (exclusive) {
+    return normalizedCollection !== 'any' && exclusive === normalizedCollection;
+  }
+
+  if (normalizedCollection === 'any') return true;
+
   const names = recipeNames(mix);
   const mood = normalize(mix.mood);
   const explicit = explicitCollections(mix);
-  const normalizedCollection = normalize(collectionId);
 
   // Новые кураторские дропы могут быть привязаны к коллекциям явно.
   if (explicit.includes(normalizedCollection)) return true;
 
-  // Parfum Lab и LIMITED — строго кураторские: туда не попадают старые
-  // миксы только из-за совпадения отдельных числовых характеристик.
-  if (collectionId === 'parfum' || collectionId === 'limited') return false;
+  // Строго кураторские коллекции: туда не попадают старые миксы только
+  // из-за совпадения отдельных вкусовых или числовых характеристик.
+  if (['parfum', 'limited', 'originals'].includes(normalizedCollection)) return false;
 
-  switch (collectionId) {
+  switch (normalizedCollection) {
     case 'fresh':
       return Number(mix.freshness) >= 2 || includesAny(names, ['мята', 'эвкалипт', 'лед', 'айс', 'ментол']);
     case 'dessert':
@@ -217,9 +229,7 @@ export function describeScenario(scenario = getScenario()) {
 export function getCollectionCounts(mixes = []) {
   const counts = {};
   COLLECTION_OPTIONS.forEach((collection) => {
-    counts[collection.id] = collection.id === 'any'
-      ? mixes.filter(Boolean).length
-      : mixes.filter((mix) => collectionMatches(mix, collection.id)).length;
+    counts[collection.id] = mixes.filter((mix) => collectionMatches(mix, collection.id)).length;
   });
   return counts;
 }
@@ -289,6 +299,7 @@ function scenarioBonus(mix, scenario) {
   if (scenario.collection === 'experimental' && Number(mix.sourness) >= 2 && Number(mix.freshness) >= 2) bonus += 2.5;
   if (scenario.collection === 'parfum' && normalize(mix.theme) === 'perfume') bonus += 4;
   if (scenario.collection === 'limited' && explicitCollections(mix).includes('limited')) bonus += 4;
+  if (scenario.collection === 'originals' && normalize(mix.exclusiveCollection) === 'originals') bonus += 5;
 
   return bonus;
 }
