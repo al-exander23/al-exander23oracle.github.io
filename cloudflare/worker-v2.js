@@ -114,7 +114,8 @@ function liveConfig(env) {
   const shopId = String(env.YOOKASSA_LIVE_SHOP_ID || '').trim();
   const secret = String(env.YOOKASSA_LIVE_SECRET_KEY || '').trim();
   const price = Number(env.ALX_LIVE_PRICE_RUB || 0);
-  const safePrice = Number.isFinite(price) && price >= 100;
+  // Keep live verification flexible while still preventing accidental use of the 1 RUB sandbox offer.
+  const safePrice = Number.isFinite(price) && price >= 10;
   const safeShop = Boolean(shopId && shopId !== TEST_YOOKASSA_SHOP_ID);
   return {
     shopId,
