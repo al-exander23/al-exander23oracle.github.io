@@ -1,7 +1,7 @@
 // scenario-ui.js — UI ситуационного режима внутри уже существующего Taste Profile.
 // Главный экран и визуал шара не меняет.
 
-import { initMixes, getMixes } from './mixes.js';
+import { initMixes, getMixes, getAllMixes } from './mixes.js?v=1.23.0-originals';
 import {
   SCENARIO_OPTIONS,
   COLLECTION_OPTIONS,
@@ -11,12 +11,12 @@ import {
   describeScenario,
   getCollectionCounts,
   hasActiveScenario,
-} from './scenario.js?v=1.17.0-mixlab';
+} from './scenario.js?v=1.23.0-originals';
 import {
   isProActive,
   isPremiumCollection,
   requestProPaywall,
-} from './pro.js?v=1.17.0-mixlab';
+} from './pro.js?v=1.23.0-originals';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
@@ -34,8 +34,9 @@ function optionButtons(group, options, selected) {
 
 function collectionButtons(selected, counts) {
   const proActive = isProActive();
+  const visibleCollections = COLLECTION_OPTIONS.filter((collection) => !collection.hiddenUntilPro || proActive);
 
-  return COLLECTION_OPTIONS.map((collection) => {
+  return visibleCollections.map((collection) => {
     const premium = isPremiumCollection(collection.id);
     const locked = premium && !proActive;
     const countLabel = locked && !counts[collection.id] ? 'PRO' : (counts[collection.id] || 0);
@@ -134,7 +135,7 @@ async function renderScenarioSection() {
   if (!content) return;
 
   await initMixes();
-  const mixes = getMixes();
+  const mixes = isProActive() ? getAllMixes() : getMixes();
   const fresh = buildSection(mixes);
   const existing = document.getElementById(SECTION_ID);
 
