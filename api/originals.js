@@ -1,5 +1,5 @@
 // POST /api/originals
-// Returns Alexander's private ALX Originals collection only after a verified
+// Returns the private ALX Originals collection only after a verified
 // Telegram Mini App session and an active ALX PRO entitlement.
 
 const { handleOptions, json, readJson } = require('../server/http.js');
@@ -11,7 +11,7 @@ const ORIGINALS = Object.freeze([
   {
     id: 'alx-original-001',
     name: 'Bazar Night',
-    description: 'Авторский микс Alexander из закрытой коллекции ALX Originals.',
+    description: 'Авторский микс из закрытой коллекции ALX Originals.',
     recipe: [
       { flavor: 'Пан-расс', percent: 10 },
       { flavor: 'Блэк Афгано', percent: 30 },
@@ -20,7 +20,7 @@ const ORIGINALS = Object.freeze([
     ],
     rating: null,
     favorites: 0,
-    author: 'Alexander · ALX Originals',
+    author: 'ALX Originals',
     proOnly: true,
     hiddenUntilPro: true,
     exclusiveCollection: 'originals',
@@ -30,14 +30,14 @@ const ORIGINALS = Object.freeze([
   {
     id: 'alx-original-002',
     name: 'Дорогая вишня',
-    description: 'Авторский микс Alexander из закрытой коллекции ALX Originals.',
+    description: 'Авторский микс из закрытой коллекции ALX Originals.',
     recipe: [
       { flavor: 'Бакара Руж', percent: 80 },
       { flavor: 'Вишня', percent: 20 },
     ],
     rating: null,
     favorites: 0,
-    author: 'Alexander · ALX Originals',
+    author: 'ALX Originals',
     proOnly: true,
     hiddenUntilPro: true,
     exclusiveCollection: 'originals',
@@ -47,7 +47,7 @@ const ORIGINALS = Object.freeze([
   {
     id: 'alx-original-003',
     name: 'Мускус тайм',
-    description: 'Авторский микс Alexander из закрытой коллекции ALX Originals.',
+    description: 'Авторский микс из закрытой коллекции ALX Originals.',
     recipe: [
       { flavor: 'Мускусная вишня', percent: 60 },
       { flavor: 'Пан-расс', percent: 20 },
@@ -55,7 +55,7 @@ const ORIGINALS = Object.freeze([
     ],
     rating: null,
     favorites: 0,
-    author: 'Alexander · ALX Originals',
+    author: 'ALX Originals',
     proOnly: true,
     hiddenUntilPro: true,
     exclusiveCollection: 'originals',
@@ -65,14 +65,14 @@ const ORIGINALS = Object.freeze([
   {
     id: 'alx-original-004',
     name: 'Сапожник',
-    description: 'Авторский микс Alexander из закрытой коллекции ALX Originals.',
+    description: 'Авторский микс из закрытой коллекции ALX Originals.',
     recipe: [
       { flavor: 'Замша', percent: 30 },
       { flavor: 'Лесные ягоды', percent: 70 },
     ],
     rating: null,
     favorites: 0,
-    author: 'Alexander · ALX Originals',
+    author: 'ALX Originals',
     proOnly: true,
     hiddenUntilPro: true,
     exclusiveCollection: 'originals',
@@ -82,7 +82,7 @@ const ORIGINALS = Object.freeze([
   {
     id: 'alx-original-005',
     name: 'Luxury Viski-Cola',
-    description: 'Авторский микс Alexander из закрытой коллекции ALX Originals.',
+    description: 'Авторский микс из закрытой коллекции ALX Originals.',
     recipe: [
       { flavor: 'Мармеладная кола', percent: 40 },
       { flavor: 'Виски', percent: 30 },
@@ -90,7 +90,7 @@ const ORIGINALS = Object.freeze([
     ],
     rating: null,
     favorites: 0,
-    author: 'Alexander · ALX Originals',
+    author: 'ALX Originals',
     proOnly: true,
     hiddenUntilPro: true,
     exclusiveCollection: 'originals',
@@ -144,7 +144,7 @@ module.exports = async function handler(req, res) {
     json(req, res, 200, {
       ok: true,
       collection: 'originals',
-      author: 'Alexander',
+      author: 'ALX Originals',
       mixes: ORIGINALS,
     });
   } catch (error) {
