@@ -14,10 +14,10 @@
 // ui.js и effects.js сами ничего не решают, они только делают то, что им
 // сказал SceneController, и отчитываются Promise'ом.
 
-import { initMixes, hasMixes } from './mixes.js';
-import { oracleChooseMix } from './oracle.js?v=1.12.0';
+import { initMixes, hasMixes } from './mixes.js?v=1.23.0-originals';
+import { oracleChooseMix } from './oracle.js?v=1.23.0-originals';
 import { createGlobeRotator, spawnSmoke } from './effects.js';
-import { prepareOrbText, typeOrbText, prepareOraclePhrase, typeOraclePhrase, renderCard, showToast } from './ui.js';
+import { prepareOrbText, typeOrbText, prepareOraclePhrase, typeOraclePhrase, renderCard, showToast } from './ui.js?v=1.23.0-originals';
 import { addToHistory } from './profile.js';
 
 export const SCENES = Object.freeze({
