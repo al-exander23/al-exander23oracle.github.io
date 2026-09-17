@@ -12,6 +12,7 @@ const DEFAULT_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.
 const DEFAULT_API_URL = 'https://al-exander23oracle-github-io.vercel.app';
 const ALX_PAY_URL = 'https://alx-pay.alxoracle.workers.dev/';
 const ALX_PAY_SUPPORT_URL = 'https://alx-pay.alxoracle.workers.dev/support/';
+const DEFAULT_EXTERNAL_PRICE_RUB = 299;
 
 function miniAppUrl() {
   const configured = String(process.env.ALX_MINI_APP_URL || '').trim();
@@ -21,6 +22,11 @@ function miniAppUrl() {
 function apiOrigin() {
   const configured = String(process.env.ALX_PUBLIC_API_URL || '').trim().replace(/\/$/, '');
   return /^https:\/\//i.test(configured) ? configured : DEFAULT_API_URL;
+}
+
+function externalPriceRub() {
+  const configured = Number(process.env.ALX_EXTERNAL_PRICE_RUB || DEFAULT_EXTERNAL_PRICE_RUB);
+  return Number.isFinite(configured) && configured > 0 ? Math.round(configured) : DEFAULT_EXTERNAL_PRICE_RUB;
 }
 
 function botVisualUrl() {
@@ -81,6 +87,7 @@ function welcomeCaption(user = {}) {
   const name = escapeHtml(user.first_name || user.username || '');
   const greeting = name ? `, ${name}` : '';
   const price = getPriceStars();
+  const rubPrice = externalPriceRub();
   return [
     `<b>ALX ORACLE</b>${greeting}`,
     '<i>Твой персональный Оракул вкуса.</i>',
@@ -93,8 +100,9 @@ function welcomeCaption(user = {}) {
     '✦ сценарии и достижения',
     '✦ закрытые коллекции ALX PRO',
     '',
-    `<b>ALX PRO · ${price} ⭐ / 30 дней</b>`,
-    'Внутри Telegram цифровой PRO оформляется через Telegram Stars.',
+    '<b>ALX PRO · 30 дней</b>',
+    `<b>Внутри Telegram: ${price} ⭐</b> — оплата через Telegram Stars.`,
+    `<b>Внешний ALX Pay: ${rubPrice} ₽</b> — официальный внешний канал оплаты.`,
     '',
     '<i>18+ · ALX Oracle не продаёт табачную продукцию.</i>',
   ].join('\n');
@@ -117,6 +125,7 @@ async function sendWelcome(chatId, user = {}) {
 
 async function sendProInfo(chatId) {
   const price = getPriceStars();
+  const rubPrice = externalPriceRub();
   const text = [
     '<b>✦ ALX PRO</b>',
     '<i>Глубже Оракула — больше контроля над подбором.</i>',
@@ -127,8 +136,11 @@ async function sendProInfo(chatId) {
     '◆ <b>Эксперимент</b> — смелые и нестандартные сочетания',
     '◆ новые PRO-функции по мере развития проекта',
     '',
-    `<b>${price} ⭐ / 30 дней</b>`,
-    'Цифровой доступ внутри Telegram оплачивается через Telegram Stars.',
+    '<b>Стоимость ALX PRO / 30 дней</b>',
+    `<b>${price} ⭐</b> — внутри Telegram через Telegram Stars.`,
+    `<b>${rubPrice} ₽</b> — через официальный внешний ALX Pay.`,
+    '',
+    'ALX PRO — цифровой доступ к дополнительным функциям сервиса на 30 дней.',
   ].join('\n');
 
   const replyMarkup = {
@@ -170,6 +182,7 @@ async function sendHelp(chatId) {
 }
 
 async function sendPaySupport(chatId) {
+  const rubPrice = externalPriceRub();
   await telegramApi('sendMessage', {
     chat_id: chatId,
     parse_mode: 'HTML',
@@ -181,7 +194,8 @@ async function sendPaySupport(chatId) {
       'Если Stars списались, а PRO не открылся — полностью закрой ALX Oracle и открой Mini App заново. Доступ восстанавливается по подтверждённой Telegram-транзакции.',
       '',
       '<b>ALX Pay</b>',
-      'ALX Pay — официальный внешний ресурс проекта. На нём можно ознакомиться с доступными внешними способами оплаты, войти через Telegram и проверить уже оформленный внешний доступ ALX PRO.',
+      `Стоимость ALX PRO на внешнем официальном ALX Pay: <b>${rubPrice} ₽ / 30 дней</b>.`,
+      'ALX Pay — отдельный официальный внешний ресурс проекта. На нём можно ознакомиться с доступными внешними способами оплаты, войти через Telegram и проверить уже оформленный внешний доступ ALX PRO.',
       '',
       'Для информации об ALX Pay и перехода на ресурс используй кнопку «Открыть ALX Pay». Для диагностики уже совершённой покупки — Support Center.',
       '',
