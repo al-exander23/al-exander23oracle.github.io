@@ -2,13 +2,14 @@
 // Базовая библиотека, 2026 Mix Lab, PRO drops и пользовательские ALX Originals
 // объединяются здесь. Всё остальное приложение работает через getMixes().
 
-import { isProActive } from './pro.js?v=1.17.0-mixlab';
+import { isProActive } from './pro.js?v=1.23.0-originals';
 
 let cache = null;
 let loadPromise = null;
 
-const DATA_VERSION = '1.18.0-pro-drops';
+const DATA_VERSION = '1.23.0-originals';
 const FETCH_TIMEOUT = 6000;
+const ORIGINALS_COLLECTION = 'originals';
 
 async function fetchJson(path, { required = false } = {}) {
   const abortCtrl = new AbortController();
@@ -51,12 +52,22 @@ async function loadMixes() {
     fetchJson('data/mixes.json', { required: true }),
     fetchJson('data/mixes-2026.json'),
     fetchJson('data/pro-drops-2026.json'),
-    fetchJson('data/alx-originals.json'),
+    fetchJson('data/alx-originals-pro-v1.json'),
   ]);
 
   const merged = mergeUnique(base, trend2026, proDrops2026, originals);
   if (!merged.length) throw new Error('База миксов пуста');
   return merged;
+}
+
+function entitledMixes() {
+  const all = cache || [];
+  if (isProActive()) return all;
+  return all.filter((mix) => mix?.proOnly !== true);
+}
+
+function isExclusive(mix) {
+  return typeof mix?.exclusiveCollection === 'string' && mix.exclusiveCollection.trim().length > 0;
 }
 
 export function initMixes() {
@@ -72,20 +83,34 @@ export function initMixes() {
   return loadPromise;
 }
 
+// Обычный пул Оракула. Эксклюзивные коллекции сюда намеренно не входят,
+// чтобы ALX Originals не выпадали случайно вне выбранного раздела.
 export function getMixes() {
-  const all = cache || [];
-  if (isProActive()) return all;
-  return all.filter((mix) => mix?.proOnly !== true);
+  return entitledMixes().filter((mix) => !isExclusive(mix));
 }
 
+// Полный набор данных, доступный текущему пользователю. Для FREE скрываем
+// коллекции с hiddenUntilPro, чтобы авторские Originals не попадали даже
+// в тизеры или вспомогательные экраны до покупки.
 export function getAllMixes() {
-  return cache || [];
+  const all = cache || [];
+  if (isProActive()) return all;
+  return all.filter((mix) => mix?.hiddenUntilPro !== true);
+}
+
+export function getCollectionMixes(collectionId) {
+  const normalized = String(collectionId || '').trim().toLowerCase();
+  if (!normalized || normalized === 'any') return getMixes();
+  return getAllMixes().filter((mix) => {
+    const exclusive = String(mix?.exclusiveCollection || '').trim().toLowerCase();
+    return exclusive === normalized;
+  });
 }
 
 export function hasMixes() {
-  return getMixes().length > 0;
+  return getMixes().length > 0 || (isProActive() && getCollectionMixes(ORIGINALS_COLLECTION).length > 0);
 }
 
 export function getMixById(id) {
-  return getMixes().find((m) => m.id === id) || null;
+  return getAllMixes().find((m) => m.id === id) || null;
 }
