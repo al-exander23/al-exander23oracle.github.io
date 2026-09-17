@@ -13,13 +13,16 @@ export const PREMIUM_COLLECTION_IDS = Object.freeze([
   'date-night',
   'after-dark',
   'experimental',
+  'parfum',
+  'limited',
 ]);
 
 export const PRO_BENEFITS = Object.freeze([
   'Закрытые авторские коллекции ALX',
+  'Parfum Lab — миксы, собранные по логике парфюмных композиций',
+  'LIMITED 2026 — сезонные и экспериментальные дропы',
   'Сценарии «Для двоих» и «После полуночи»',
-  'Экспериментальные подборки с более смелыми сочетаниями',
-  'Новые PRO-функции по мере развития Оракула',
+  'Новые PRO-функции и коллекции по мере развития Оракула',
 ]);
 
 function cleanEntitlement(raw) {
