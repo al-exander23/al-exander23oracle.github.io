@@ -1,0 +1,160 @@
+[
+  {
+    "id": "drop26-peach-oolong",
+    "name": "Peach Oolong",
+    "description": "Сочный персик открывает чашу, улун даёт сухую чайную структуру, мёд смягчает финал.",
+    "recipe": [{"flavor":"Персик","percent":45},{"flavor":"Улун","percent":35},{"flavor":"Мёд","percent":20}],
+    "strength": 2, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 2, "popularity": 88,
+    "brands": [], "season": "всесезонный", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · 2026 Drop"
+  },
+  {
+    "id": "drop26-lychee-green-tea",
+    "name": "Lychee Green Tea",
+    "description": "Личи остаётся сочным и ароматным, зелёный чай делает профиль чище, лайм добавляет яркий сухой штрих.",
+    "recipe": [{"flavor":"Личи","percent":45},{"flavor":"Зелёный чай","percent":35},{"flavor":"Лайм","percent":20}],
+    "strength": 2, "freshness": 2, "sweetness": 1, "sourness": 2, "difficulty": 2, "popularity": 87,
+    "brands": [], "season": "весна", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Oracle · 2026 Drop"
+  },
+  {
+    "id": "drop26-mango-coconut-ice",
+    "name": "Mango Coconut Ice",
+    "description": "Манго и кокос дают плотную тропическую базу, холод делает вкус современным и собранным.",
+    "recipe": [{"flavor":"Манго","percent":45},{"flavor":"Кокос","percent":35},{"flavor":"Лёд","percent":20}],
+    "strength": 2, "freshness": 4, "sweetness": 2, "sourness": 1, "difficulty": 2, "popularity": 91,
+    "brands": [], "season": "лето", "mood": "бодрит", "rating": null, "favorites": 0, "author": "ALX Oracle · 2026 Drop"
+  },
+  {
+    "id": "drop26-blueberry-tonic",
+    "name": "Blueberry Tonic",
+    "description": "Черника даёт мягкую ягоду, тоник добавляет сухую газированность, мята оставляет чистое послевкусие.",
+    "recipe": [{"flavor":"Черника","percent":45},{"flavor":"Тоник","percent":30},{"flavor":"Мята","percent":25}],
+    "strength": 2, "freshness": 3, "sweetness": 1, "sourness": 2, "difficulty": 2, "popularity": 89,
+    "brands": [], "season": "лето", "mood": "бодрит", "rating": null, "favorites": 0, "author": "ALX Oracle · 2026 Drop"
+  },
+  {
+    "id": "drop26-raspberry-basil",
+    "name": "Raspberry Basil",
+    "description": "Малина даёт яркий ягодный старт, базилик — зелёную пряность, лимон собирает композицию в сухой финал.",
+    "recipe": [{"flavor":"Малина","percent":50},{"flavor":"Базилик","percent":25},{"flavor":"Лимон","percent":25}],
+    "strength": 2, "freshness": 2, "sweetness": 1, "sourness": 3, "difficulty": 3, "popularity": 82,
+    "brands": [], "season": "весна", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Oracle · 2026 Drop"
+  },
+  {
+    "id": "drop26-mango-sticky-rice",
+    "name": "Mango Sticky Rice",
+    "description": "Спелое манго, сливочный рисовый десерт и кокос складываются в мягкий азиатский гурманский профиль.",
+    "recipe": [{"flavor":"Манго","percent":45},{"flavor":"Рисовый пудинг","percent":35},{"flavor":"Кокос","percent":20}],
+    "strength": 3, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 3, "popularity": 86,
+    "brands": [], "season": "всесезонный", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · 2026 Drop"
+  },
+
+  {
+    "id": "parfum26-bergamot-suede",
+    "name": "Bergamot Suede",
+    "description": "Парфюмная композиция: бергамот даёт яркий верх, чёрный чай формирует сухое тело, ваниль оставляет мягкий тёплый шлейф.",
+    "recipe": [{"flavor":"Бергамот","percent":35},{"flavor":"Чёрный чай","percent":40},{"flavor":"Ваниль","percent":25}],
+    "strength": 3, "freshness": 1, "sweetness": 1, "sourness": 2, "difficulty": 4, "popularity": 93,
+    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
+    "proOnly": true, "collections": ["parfum","signature","after-dark"], "theme": "perfume"
+  },
+  {
+    "id": "parfum26-neroli-lychee",
+    "name": "Neroli Lychee",
+    "description": "Личи открывает вкус сочным фруктовым акцентом, нероли даёт цветочно-цитрусовое сердце, груша смягчает шлейф.",
+    "recipe": [{"flavor":"Личи","percent":40},{"flavor":"Нероли","percent":30},{"flavor":"Груша","percent":30}],
+    "strength": 2, "freshness": 2, "sweetness": 2, "sourness": 1, "difficulty": 4, "popularity": 92,
+    "brands": [], "season": "весна", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
+    "proOnly": true, "collections": ["parfum","date-night"], "theme": "perfume"
+  },
+  {
+    "id": "parfum26-iris-pistachio",
+    "name": "Iris Pistachio",
+    "description": "Фисташка даёт кремовую основу, ирис — сухую пудровую середину, ваниль завершает композицию мягко и дорого.",
+    "recipe": [{"flavor":"Фисташка","percent":40},{"flavor":"Ирис","percent":30},{"flavor":"Ваниль","percent":30}],
+    "strength": 3, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 4, "popularity": 94,
+    "brands": [], "season": "зима", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
+    "proOnly": true, "collections": ["parfum","signature","date-night"], "theme": "perfume"
+  },
+  {
+    "id": "parfum26-osmanthus-tea",
+    "name": "Osmanthus Tea",
+    "description": "Османтус даёт абрикосово-цветочную ноту, улун — чайную сухость, персик делает аромат более округлым.",
+    "recipe": [{"flavor":"Османтус","percent":30},{"flavor":"Улун","percent":40},{"flavor":"Персик","percent":30}],
+    "strength": 2, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 4, "popularity": 90,
+    "brands": [], "season": "весна", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
+    "proOnly": true, "collections": ["parfum","date-night"], "theme": "perfume"
+  },
+  {
+    "id": "parfum26-incense-plum",
+    "name": "Incense Plum",
+    "description": "Тёмная слива идёт плотной базой, ладан создаёт дымный ароматический центр, гранат добавляет терпкую кислотность.",
+    "recipe": [{"flavor":"Слива","percent":45},{"flavor":"Ладан","percent":25},{"flavor":"Гранат","percent":30}],
+    "strength": 4, "freshness": 1, "sweetness": 1, "sourness": 2, "difficulty": 5, "popularity": 91,
+    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
+    "proOnly": true, "collections": ["parfum","after-dark","experimental"], "theme": "perfume"
+  },
+  {
+    "id": "parfum26-rosewood-pear",
+    "name": "Rosewood Pear",
+    "description": "Груша даёт чистый сочный верх, роза формирует цветочное сердце, чёрный чай уводит вкус в сухой древесный шлейф.",
+    "recipe": [{"flavor":"Груша","percent":40},{"flavor":"Роза","percent":30},{"flavor":"Чёрный чай","percent":30}],
+    "strength": 3, "freshness": 1, "sweetness": 1, "sourness": 1, "difficulty": 4, "popularity": 92,
+    "brands": [], "season": "всесезонный", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
+    "proOnly": true, "collections": ["parfum","signature","date-night"], "theme": "perfume"
+  },
+
+  {
+    "id": "limited26-witching-hour",
+    "name": "Witching Hour",
+    "description": "Лимитированный ночной дроп: ежевика, шалфей и гранат дают тёмный травяно-ягодный профиль с мистическим характером.",
+    "recipe": [{"flavor":"Ежевика","percent":45},{"flavor":"Шалфей","percent":25},{"flavor":"Гранат","percent":30}],
+    "strength": 4, "freshness": 2, "sweetness": 1, "sourness": 3, "difficulty": 4, "popularity": 94,
+    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Oracle · LIMITED 2026",
+    "proOnly": true, "collections": ["limited","after-dark","experimental"]
+  },
+  {
+    "id": "limited26-verde-grove",
+    "name": "Verde Grove",
+    "description": "Фисташка, зелёный чай и карамель — неожиданная смесь зелёного, орехового и гурманского профиля.",
+    "recipe": [{"flavor":"Фисташка","percent":35},{"flavor":"Зелёный чай","percent":35},{"flavor":"Карамель","percent":30}],
+    "strength": 3, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 4, "popularity": 90,
+    "brands": [], "season": "осень", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · LIMITED 2026",
+    "proOnly": true, "collections": ["limited","signature","experimental"]
+  },
+  {
+    "id": "limited26-sakura-tonic",
+    "name": "Sakura Tonic",
+    "description": "Цветочный весенний дроп: сакура, личи и тоник дают лёгкий прозрачный аромат без тяжёлой сладости.",
+    "recipe": [{"flavor":"Сакура","percent":30},{"flavor":"Личи","percent":40},{"flavor":"Тоник","percent":30}],
+    "strength": 2, "freshness": 3, "sweetness": 1, "sourness": 1, "difficulty": 4, "popularity": 89,
+    "brands": [], "season": "весна", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Oracle · LIMITED 2026",
+    "proOnly": true, "collections": ["limited","date-night"]
+  },
+  {
+    "id": "limited26-dark-citrus",
+    "name": "Dark Citrus",
+    "description": "Красный апельсин, бергамот и чёрный чай дают плотный цитрусовый профиль с сухим взрослым характером.",
+    "recipe": [{"flavor":"Красный апельсин","percent":40},{"flavor":"Бергамот","percent":25},{"flavor":"Чёрный чай","percent":35}],
+    "strength": 4, "freshness": 2, "sweetness": 1, "sourness": 3, "difficulty": 3, "popularity": 93,
+    "brands": [], "season": "зима", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Oracle · LIMITED 2026",
+    "proOnly": true, "collections": ["limited","after-dark","signature"]
+  },
+  {
+    "id": "limited26-pear-cardamom",
+    "name": "Pear Cardamom",
+    "description": "Груша остаётся сочной базой, кардамон добавляет сухую пряность, мёд связывает профиль в мягкий вечерний микс.",
+    "recipe": [{"flavor":"Груша","percent":45},{"flavor":"Кардамон","percent":25},{"flavor":"Мёд","percent":30}],
+    "strength": 3, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 3, "popularity": 88,
+    "brands": [], "season": "осень", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · LIMITED 2026",
+    "proOnly": true, "collections": ["limited","date-night"]
+  },
+  {
+    "id": "limited26-yuzu-juniper",
+    "name": "Yuzu Juniper",
+    "description": "Юдзу даёт кислотность и эфирный цитрус, можжевельник — сухую хвойность, огурец делает финал холодным и прозрачным.",
+    "recipe": [{"flavor":"Юдзу","percent":40},{"flavor":"Можжевельник","percent":30},{"flavor":"Огурец","percent":30}],
+    "strength": 3, "freshness": 4, "sweetness": 1, "sourness": 3, "difficulty": 4, "popularity": 91,
+    "brands": [], "season": "лето", "mood": "бодрит", "rating": null, "favorites": 0, "author": "ALX Oracle · LIMITED 2026",
+    "proOnly": true, "collections": ["limited","experimental"]
+  }
+]
