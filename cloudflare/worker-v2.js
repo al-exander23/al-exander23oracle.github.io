@@ -149,11 +149,48 @@ function withPaymentMode(response, mode, env) {
   });
 }
 
+async function temporaryLivePaymentProbe(env) {
+  const payment = await env.DB.prepare(`
+    SELECT provider, method, amount_rub, status, created_at, updated_at
+    FROM payments
+    ORDER BY created_at DESC
+    LIMIT 1
+  `).first();
+  const entitlement = await env.DB.prepare(`
+    SELECT source, status, expires_at, updated_at
+    FROM entitlements
+    ORDER BY updated_at DESC
+    LIMIT 1
+  `).first();
+  const now = Date.now();
+  return json({
+    ok: true,
+    payment: payment ? {
+      provider: payment.provider,
+      method: payment.method,
+      amountRub: Number(payment.amount_rub),
+      status: payment.status,
+      ageSeconds: Math.max(0, Math.round((now - Number(payment.updated_at || payment.created_at || now)) / 1000)),
+    } : null,
+    entitlement: entitlement ? {
+      source: entitlement.source,
+      status: entitlement.status,
+      active: entitlement.status === 'active' && Number(entitlement.expires_at || 0) > now,
+      expiresAt: Number(entitlement.expires_at || 0) || null,
+      ageSeconds: Math.max(0, Math.round((now - Number(entitlement.updated_at || now)) / 1000)),
+    } : null,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const mode = paymentMode(env);
     const effectiveEnv = effectivePaymentEnv(env);
+
+    if (url.pathname === '/api/_alx_live_payment_probe' && request.method === 'GET') {
+      return withPaymentMode(await temporaryLivePaymentProbe(effectiveEnv), mode, env);
+    }
 
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') {
       return withPaymentMode(await sdkLogin(request, effectiveEnv), mode, env);
