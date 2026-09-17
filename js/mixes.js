@@ -1,35 +1,33 @@
-// mixes.js — единственное место в приложении, которое знает про
-// data/mixes.json. Всё остальное работает через getMixes()/getMixById()
-// и не заботится о том, как и откуда данные на самом деле загружены.
+// mixes.js — единая точка загрузки базы миксов.
+// Базовая библиотека, 2026 Mix Lab и пользовательские ALX Originals
+// объединяются здесь. Всё остальное приложение работает через getMixes().
+
+import { isProActive } from './pro.js?v=1.17.0-mixlab';
 
 let cache = null;
 let loadPromise = null;
 
-// Версия дописывается в query — на GitHub Pages иначе можно словить
-// закэшированную версию data/mixes.json после обновления файла.
-// Бампать при каждом релизе, где меняются данные миксов.
-const DATA_VERSION = '1.2.1';
-
-// Собственный, независимый от сцен таймаут на саму загрузку: это общий
-// кэшируемый ресурс приложения (initMixes() переиспользуется всеми
-// будущими попытками, а не создаётся заново на каждую сцену), поэтому
-// его нельзя обрывать через AbortSignal одной конкретной сцены — иначе
-// одна нетерпеливая попытка сломает загрузку данных для всех остальных.
-// Вместо этого — собственный жёсткий предел на саму сетевую операцию.
+const DATA_VERSION = '1.17.0-mixlab';
 const FETCH_TIMEOUT = 6000;
 
-async function loadMixes() {
+async function fetchJson(path, { required = false } = {}) {
   const abortCtrl = new AbortController();
   const timer = setTimeout(() => abortCtrl.abort(), FETCH_TIMEOUT);
   try {
-    const res = await fetch(`data/mixes.json?v=${DATA_VERSION}`, {
+    const res = await fetch(`${path}?v=${DATA_VERSION}`, {
       cache: 'no-cache',
       signal: abortCtrl.signal,
     });
-    if (!res.ok) throw new Error('Не удалось загрузить data/mixes.json: ' + res.status);
+    if (!res.ok) {
+      if (required) throw new Error(`Не удалось загрузить ${path}: ${res.status}`);
+      console.warn('[mixes.js] optional mix layer unavailable:', path, res.status);
+      return [];
+    }
     const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('data/mixes.json пуст или повреждён');
+    if (!Array.isArray(data)) {
+      if (required) throw new Error(`${path} повреждён`);
+      console.warn('[mixes.js] optional mix layer is not an array:', path);
+      return [];
     }
     return data;
   } finally {
@@ -37,10 +35,33 @@ async function loadMixes() {
   }
 }
 
+function mergeUnique(...layers) {
+  const seen = new Set();
+  const merged = [];
+  layers.flat().forEach((mix) => {
+    if (!mix || typeof mix.id !== 'string' || !mix.id || seen.has(mix.id)) return;
+    seen.add(mix.id);
+    merged.push(mix);
+  });
+  return merged;
+}
+
+async function loadMixes() {
+  const [base, trend2026, originals] = await Promise.all([
+    fetchJson('data/mixes.json', { required: true }),
+    fetchJson('data/mixes-2026.json'),
+    fetchJson('data/alx-originals.json'),
+  ]);
+
+  const merged = mergeUnique(base, trend2026, originals);
+  if (!merged.length) throw new Error('База миксов пуста');
+  return merged;
+}
+
 export function initMixes() {
   if (!loadPromise) {
     loadPromise = loadMixes()
-      .then((data) => { cache = data; return cache; })
+      .then((data) => { cache = data; return getMixes(); })
       .catch((err) => {
         console.error('[mixes.js]', err);
         cache = [];
@@ -51,6 +72,12 @@ export function initMixes() {
 }
 
 export function getMixes() {
+  const all = cache || [];
+  if (isProActive()) return all;
+  return all.filter((mix) => mix?.proOnly !== true);
+}
+
+export function getAllMixes() {
   return cache || [];
 }
 
