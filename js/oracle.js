@@ -1,9 +1,9 @@
 // oracle.js — «мозг» приложения.
 // Интегрирована персонализация с безопасным откатом к случайному выбору.
 
-import { getMixes } from './mixes.js';
+import { getMixes, getAllMixes } from './mixes.js?v=1.23.0-originals';
 import { selectWeightedMix } from './personalization.js';
-import { selectScenarioMix } from './scenario.js?v=1.12.0';
+import { selectScenarioMix, getScenario } from './scenario.js?v=1.23.0-originals';
 
 export const oracleMessages = {
   mysterious: [
@@ -180,7 +180,11 @@ function pickMix(mixes) {
 }
 
 export function oracleChooseMix(context = {}) {
-  const mixes = getMixes();
+  const scenario = getScenario();
+  const mixes = scenario.collection === 'originals'
+    ? getAllMixes().filter((mix) => String(mix?.exclusiveCollection || '').toLowerCase() === 'originals')
+    : getMixes();
+
   if (!mixes.length) {
     return { mix: null, phrase: 'Оракул пока молчит...', phraseCategory: 'mysterious' };
   }
