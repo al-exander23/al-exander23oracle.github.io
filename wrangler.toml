@@ -17,15 +17,17 @@ ALX_ALLOWED_ORIGIN = "https://al-exander23.github.io"
 ALX_PAY_ORIGIN = "https://alx-pay.alxoracle.workers.dev"
 TELEGRAM_CLIENT_ID = "8910147832"
 
-# Payment mode stays on the tested sandbox until live credentials are added
-# in Cloudflare and ALX_PAYMENT_MODE is explicitly switched to "live".
+# Payment mode stays on the tested sandbox until the live YooKassa credentials
+# are added and ALX_PAYMENT_MODE is explicitly switched to "live".
 ALX_PAYMENT_MODE = "test"
 YOOKASSA_SHOP_ID = "1464130"
 ALX_EXTERNAL_PRICE_RUB = "1"
 
-# LIVE values are intentionally not stored in GitHub:
-# YOOKASSA_LIVE_SHOP_ID      -> Cloudflare variable
-# ALX_LIVE_PRICE_RUB         -> Cloudflare variable
+# Production ALX PRO price is public configuration, not a secret.
+ALX_LIVE_PRICE_RUB = "299"
+
+# LIVE credentials are intentionally not stored in GitHub:
+# YOOKASSA_LIVE_SHOP_ID      -> Cloudflare variable (or set here once known)
 # YOOKASSA_LIVE_SECRET_KEY   -> Cloudflare secret
 
 [secrets]
