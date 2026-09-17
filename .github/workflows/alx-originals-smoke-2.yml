@@ -1,0 +1,96 @@
+name: ALX Originals smoke check 2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-originals-smoke-2.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Prepare Playwright
+        run: |
+          mkdir -p /tmp/alx-smoke2 && cd /tmp/alx-smoke2
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify FREE and PRO client flows
+        working-directory: /tmp/alx-smoke2
+        run: |
+          cat > smoke.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const APP = 'https://al-exander23.github.io/al-exander23oracle.github.io/?smoke=originals-v123b';
+          const browser = await chromium.launch({ headless: true });
+
+          async function baseRoutes(page) {
+            await page.route('**/*', async route => {
+              const url = route.request().url();
+              if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com') || url.includes('telegram.org/js/telegram-web-app.js')) return route.abort();
+              return route.continue();
+            });
+          }
+          async function dismiss(page) {
+            if (await page.locator('#alxOnboarding.show').count()) await page.click('#alxTourSkip');
+          }
+
+          // FREE
+          {
+            const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+            await baseRoutes(page);
+            await page.goto(APP, { waitUntil:'domcontentloaded', timeout:30000 });
+            await page.waitForSelector('#orbWrap', { state:'visible', timeout:15000 });
+            await dismiss(page);
+            await page.click('#orbWrap');
+            await page.waitForFunction(() => /^№\s*\d+/.test(document.querySelector('#counter')?.textContent || ''), null, { timeout:25000 });
+            await page.evaluate(() => document.getElementById('tasteBtnTop')?.click());
+            await page.waitForSelector('#scenarioOracleSection', { timeout:10000 });
+            if (await page.locator('[data-scenario-collection="originals"]').count()) throw new Error('FREE sees Originals');
+            if (errors.length) throw new Error(errors.join(' | '));
+            await page.close();
+          }
+
+          // PRO with protected endpoint mocked after generic routes so it wins.
+          {
+            const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+            await context.addInitScript(() => {
+              localStorage.setItem('alx_oracle_pro_entitlement', JSON.stringify({ plan:'pro', status:'active', expiresAt:Date.now()+86400000, source:'smoke' }));
+              window.Telegram = { WebApp: { initData:'mock-init', platform:'android' } };
+            });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e)));
+            await baseRoutes(page);
+            await page.route('**/api/originals', route => route.fulfill({ status:200, contentType:'application/json', body:JSON.stringify({ ok:true, mixes:[
+              {id:'alx-original-001',name:'Bazar Night',description:'Original',recipe:[{flavor:'Пан-расс',percent:10},{flavor:'Блэк Афгано',percent:30},{flavor:'Индийский перец',percent:10},{flavor:'Чернослив',percent:50}],author:'Alexander · ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-002',name:'Дорогая вишня',description:'Original',recipe:[{flavor:'Бакара Руж',percent:80},{flavor:'Вишня',percent:20}],author:'Alexander · ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-003',name:'Мускус тайм',description:'Original',recipe:[{flavor:'Мускусная вишня',percent:60},{flavor:'Пан-расс',percent:20},{flavor:'Черешня',percent:20}],author:'Alexander · ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-004',name:'Сапожник',description:'Original',recipe:[{flavor:'Замша',percent:30},{flavor:'Лесные ягоды',percent:70}],author:'Alexander · ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true},
+              {id:'alx-original-005',name:'Luxury Viski-Cola',description:'Original',recipe:[{flavor:'Мармеладная кола',percent:40},{flavor:'Виски',percent:30},{flavor:'Ганимед',percent:30}],author:'Alexander · ALX Originals',proOnly:true,hiddenUntilPro:true,exclusiveCollection:'originals',collections:['originals'],original:true}
+            ]}) }));
+            await page.goto(APP+'&pro=1', { waitUntil:'domcontentloaded', timeout:30000 });
+            await page.waitForSelector('#orbWrap', { state:'visible', timeout:15000 });
+            await dismiss(page);
+            await page.evaluate(() => document.getElementById('tasteBtnTop')?.click());
+            const originals = page.locator('[data-scenario-collection="originals"]');
+            await originals.waitFor({ state:'visible', timeout:10000 });
+            const txt = await originals.textContent();
+            if (!txt?.includes('5')) throw new Error('Originals count is not 5: '+txt);
+            await originals.click();
+            await page.click('#tasteClose');
+            await page.click('#orbWrap');
+            await page.waitForFunction(() => ['Bazar Night','Дорогая вишня','Мускус тайм','Сапожник','Luxury Viski-Cola'].includes(document.querySelector('.mix-card-title')?.textContent || ''), null, { timeout:25000 });
+            const author = await page.locator('.mix-card-foot span').first().textContent();
+            if (!author?.includes('Alexander · ALX Originals')) throw new Error('Wrong author: '+author);
+            if (errors.length) throw new Error(errors.join(' | '));
+            await context.close();
+          }
+
+          console.log('PASS: FREE hidden + PRO Originals 5/5 + author + orb selection.');
+          await browser.close();
+          JS
+          node smoke.mjs
