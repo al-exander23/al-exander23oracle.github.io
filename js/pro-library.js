@@ -3,7 +3,7 @@
 
 import { getProState, requestProPaywall } from './pro.js?v=1.25.0-pro-library';
 import { initMixes, initOriginals, getAllMixes } from './mixes.js?v=1.24.0-originals-catalog';
-import { getScenario, setScenario, resetScenario, getCollectionCounts } from './scenario.js?v=1.24.0-originals-catalog';
+import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.24.0-originals-catalog';
 import { openCatalog as openOriginalsCatalog } from './originals-catalog.js?v=1.24.0-originals-catalog';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
@@ -103,7 +103,7 @@ function ensureOverlay() {
 function activateCollection(collection) {
   const state = getProState();
   if (!state.active) {
-    closeProLibrary({ returnHome: false });
+    closeProLibrary();
     requestProPaywall(collection.title);
     trackAnalytics('pro_library_unlock_click', { version: VERSION, collection: collection.id });
     return;
@@ -117,7 +117,7 @@ function activateCollection(collection) {
 
 function activateOriginalsOracle() {
   if (!getProState().active) {
-    closeProLibrary({ returnHome: false });
+    closeProLibrary();
     requestProPaywall('ALX Originals');
     trackAnalytics('pro_library_unlock_click', { version: VERSION, collection: 'originals' });
     return;
@@ -130,12 +130,18 @@ function activateOriginalsOracle() {
 }
 
 function openOriginals() {
-  trackAnalytics('pro_library_originals_open', { version: VERSION, pro: getProState().active });
+  const active = getProState().active;
+  trackAnalytics('pro_library_originals_open', { version: VERSION, pro: active });
+  if (!active) {
+    closeProLibrary();
+    requestProPaywall('ALX Originals');
+    return;
+  }
   openOriginalsCatalog().catch((error) => console.warn('[ALX PRO Library] Originals:', error));
 }
 
 function resetToAll() {
-  resetScenario();
+  setScenario({ collection: 'any' });
   trackAnalytics('pro_library_all_mixes', { version: VERSION });
   closeProLibrary({ returnHome: false });
   document.querySelector('#alxBottomNav [data-tab="home"]')?.click();
@@ -211,7 +217,7 @@ async function render() {
         <span>${activePlan ? `${originalsCount} рецептов` : 'PRO'}</span>
       </div>
       <div class="pro-library-originals-actions">
-        <button class="pro-library-primary" id="proLibraryOriginalsBrowse" type="button">${activePlan ? 'Открыть каталог' : 'Посмотреть коллекцию'}</button>
+        <button class="pro-library-primary" id="proLibraryOriginalsBrowse" type="button">${activePlan ? 'Открыть каталог' : 'Открыть с PRO'}</button>
         <button class="pro-library-secondary" id="proLibraryOriginalsOracle" type="button">${activePlan ? (originalsSelected ? 'Выбрано для Оракула' : 'Выбирать шаром') : 'Открыть с PRO'}</button>
       </div>
     </section>
@@ -228,12 +234,12 @@ async function render() {
     ${activePlan ? `
       <button class="pro-library-all${current.collection === 'any' ? ' is-current' : ''}" id="proLibraryAll" type="button"${current.collection === 'any' ? ' disabled' : ''}>
         <span>Все миксы</span>
-        <small>${current.collection === 'any' ? 'Обычный режим уже включён' : 'Вернуть Оракула к общей базе без фильтра коллекции'}</small>
+        <small>${current.collection === 'any' ? 'Обычный режим уже включён' : 'Вернуть Оракула к общей базе без изменения других настроек'}</small>
       </button>` : ''}
   `;
 
   content.querySelector('#proLibraryUnlock')?.addEventListener('click', () => {
-    closeProLibrary({ returnHome: false });
+    closeProLibrary();
     requestProPaywall('ALX PRO');
     trackAnalytics('pro_library_unlock_click', { version: VERSION, collection: 'all' });
   });
