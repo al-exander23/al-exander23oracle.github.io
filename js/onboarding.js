@@ -16,41 +16,40 @@ const STEPS = [
     chips: ['тап по шару', 'встряхивание'],
   },
   {
-    target: '#topToolbar',
+    target: '#alxBottomNav',
     kicker: '02 · НАВИГАЦИЯ',
-    icon: '⌁',
-    title: 'Всё важное — сверху',
-    text: 'Панель всегда под рукой. Здесь можно быстро вернуться к сохранённым миксам и персональным функциям.',
+    icon: 'ALX',
+    title: 'Четыре понятных раздела',
+    text: 'Внизу всегда доступны Главная, Избранное, Мой ALX и PRO. Остальные настройки собраны внутри «Мой ALX».',
     legend: [
-      ['♡', 'избранное'],
-      ['🕐', 'история'],
-      ['✦', 'профиль вкуса'],
-      ['PRO', 'подписка'],
-      ['?', 'эта инструкция'],
+      ['Главная', 'подбор микса'],
+      ['Избранное', 'сохранённые миксы'],
+      ['Мой ALX', 'профиль и настройки'],
+      ['PRO', 'закрытые возможности'],
     ],
   },
   {
-    target: '#topToolbar',
+    target: '#alxBottomNav',
     kicker: '03 · ПЕРСОНАЛИЗАЦИЯ',
-    icon: '✦',
-    title: 'Оракул учится твоему вкусу',
-    text: 'Нажми ✦ в верхней панели. Там живут профиль вкуса, Микс дня, достижения и режимы. Отмечай ❤️ и 👎 — следующие подборы станут точнее.',
-    chips: ['❤️ нравится', '👎 не моё', 'Микс дня'],
+    icon: 'ALX',
+    title: 'Твой профиль — в «Мой ALX»',
+    text: 'Там находятся профиль вкуса, Микс дня, серия, достижения, уведомления и история. Отмечай понравившиеся и неподходящие миксы — следующие подборы станут точнее.',
+    chips: ['профиль вкуса', 'Микс дня', 'достижения'],
   },
   {
-    target: '#alxProMainBanner',
+    target: '#alxAccessStrip',
     kicker: '04 · FREE И PRO',
-    icon: '◆',
+    icon: 'PRO',
     title: 'Начни бесплатно',
     text: 'FREE даёт 5 подборов в день. ALX PRO снимает дневной лимит и открывает закрытые авторские коллекции.',
-    chips: ['FREE · 5/день', 'PRO · без лимита'],
+    chips: ['FREE · 5 в день', 'PRO · без лимита'],
   },
   {
     target: '#orbWrap',
     kicker: '05 · ГОТОВО',
     icon: '✦',
     title: 'Теперь просто попробуй',
-    text: 'Никаких сложных настроек. Коснись шара, оцени результат — и Оракул постепенно подстроится под тебя.',
+    text: 'Коснись шара, оцени результат и возвращайся за Миксом дня. Всё остальное всегда можно найти в «Мой ALX».',
     chips: ['1 тап', '1 микс', 'дальше — точнее'],
   },
 ];
@@ -172,8 +171,8 @@ function placeCard() {
 
 function revealTarget(target) {
   const rect = target.getBoundingClientRect();
-  const isFixedTop = target.id === 'topToolbar';
-  if (isFixedTop) return;
+  const fixedTarget = target.id === 'topToolbar' || target.id === 'alxBottomNav';
+  if (fixedTarget) return;
 
   if (rect.bottom > window.innerHeight - 170 || rect.top < 60) {
     try {
@@ -214,7 +213,7 @@ function renderStep() {
 
   renderProgress(overlay.querySelector('#alxTourProgress'));
   const next = overlay.querySelector('#alxTourNext');
-  next.textContent = stepIndex === STEPS.length - 1 ? 'Попробовать ✦' : 'Далее';
+  next.textContent = stepIndex === STEPS.length - 1 ? 'Попробовать' : 'Далее';
 
   revealTarget(currentTarget);
   requestAnimationFrame(placeCard);
@@ -247,8 +246,6 @@ function init() {
   ensureHelpButton();
   ensureOverlay();
 
-  // Automatic guide is for genuinely new users. Existing users still get the
-  // persistent ? button and can launch the guide whenever they want.
   if (!isDone() && !hasMeaningfulHistory()) {
     setTimeout(() => openOnboarding(false), 850);
   }
