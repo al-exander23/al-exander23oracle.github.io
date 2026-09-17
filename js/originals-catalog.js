@@ -1,9 +1,9 @@
 // originals-catalog.js — browseable ALX Originals catalog inside the PRO section.
 // Recipes are fetched only through the protected /api/originals endpoint.
 
-import { getProState, requestProPaywall } from './pro.js?v=1.24.0-originals-catalog';
-import { initOriginals, getCollectionMixes } from './mixes.js?v=1.24.0-originals-catalog';
-import { setScenario } from './scenario.js?v=1.24.0-originals-catalog';
+import { getProState, requestProPaywall } from './pro.js?v=1.23.0-originals';
+import { initOriginals, getCollectionMixes } from './mixes.js?v=1.23.0-originals';
+import { setScenario } from './scenario.js?v=1.23.0-originals';
 import { isFavorite, toggleFavorite } from './profile.js';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
@@ -18,12 +18,6 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
-}
-
-function recipeText(mix) {
-  return (mix?.recipe || [])
-    .map((item) => `${item.flavor}${item.percent ? ` ${item.percent}%` : ''}`)
-    .join(' · ');
 }
 
 function showToast(text) {
