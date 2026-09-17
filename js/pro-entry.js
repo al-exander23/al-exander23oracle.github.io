@@ -5,13 +5,21 @@ import {
   getProState,
   getProOffer,
   requestProPaywall,
-} from './pro.js?v=1.14.0-stars';
+  isTelegramPaymentContext,
+} from './pro.js?v=1.17.0-mixlab';
 
 const FREE_DAILY_LIMIT = 5;
+const EXTERNAL_PRICE_RUB = 299;
 const USAGE_KEY = 'alx_oracle_free_daily_usage_v1';
 const TOP_BUTTON_ID = 'alxProTopButton';
 const BANNER_ID = 'alxProMainBanner';
 let lastLimitPromptAt = 0;
+
+function isInsideTelegramApp() {
+  if (isTelegramPaymentContext()) return true;
+  const platform = String(window.Telegram?.WebApp?.platform || '').trim().toLowerCase();
+  return Boolean(platform && platform !== 'unknown');
+}
 
 function dayKey(date = new Date()) {
   const y = date.getFullYear();
@@ -110,6 +118,7 @@ function renderMainEntry() {
   const state = getProState();
   const offer = getProOffer();
   const free = freeState();
+  const telegram = isInsideTelegramApp();
   const top = document.getElementById(TOP_BUTTON_ID);
   const banner = document.getElementById(BANNER_ID);
 
@@ -139,12 +148,17 @@ function renderMainEntry() {
     ? `Осталось ${free.remaining} из ${free.limit} подборов сегодня`
     : 'Бесплатные подборы на сегодня закончились';
 
+  const paymentHint = telegram
+    ? 'PRO — без лимита + закрытые коллекции · Telegram Stars'
+    : 'PRO — без лимита + закрытые коллекции · карта / СБП';
+  const price = telegram ? `${offer.priceStars} ⭐` : `${EXTERNAL_PRICE_RUB} ₽`;
+
   banner.innerHTML = `
     <span class="pro-main-copy">
       <b>FREE · ${usageText}</b>
-      <small>PRO — без лимита + закрытые коллекции</small>
+      <small>${paymentHint}</small>
     </span>
-    <span class="pro-main-action">${offer.priceStars} ⭐</span>`;
+    <span class="pro-main-action">${price}</span>`;
 }
 
 function enhancePaywall() {
