@@ -1,0 +1,59 @@
+name: ALX analytics live check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-analytics-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for analytics deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          HEALTH='https://alx-pay.alxoracle.workers.dev/api/analytics/health'
+          APP='https://al-exander23.github.io/al-exander23oracle.github.io/'
+          for i in $(seq 1 30); do
+            body=$(curl -fsS "$HEALTH" 2>/dev/null || true)
+            if echo "$body" | grep -q '1.19.0-analytics'; then
+              echo "Worker analytics ready: $body"
+              break
+            fi
+            echo "Waiting for Worker deployment ($i/30)..."
+            sleep 10
+          done
+          body=$(curl -fsS "$HEALTH")
+          echo "$body" | grep -q '"ok":true'
+          echo "$body" | grep -q '1.19.0-analytics'
+
+          for i in $(seq 1 24); do
+            html=$(curl -fsS "$APP" 2>/dev/null || true)
+            if echo "$html" | grep -q 'analytics.js?v=1.19.0-analytics'; then
+              echo 'GitHub Pages analytics client ready.'
+              break
+            fi
+            echo "Waiting for Pages deployment ($i/24)..."
+            sleep 10
+          done
+          html=$(curl -fsS "$APP")
+          echo "$html" | grep -q 'analytics.js?v=1.19.0-analytics'
+
+      - name: Verify analytics API guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://alx-pay.alxoracle.workers.dev/api/analytics/event'
+          code=$(curl -sS -o /tmp/options -w '%{http_code}' -X OPTIONS "$URL" \
+            -H 'Origin: https://al-exander23.github.io' \
+            -H 'Access-Control-Request-Method: POST')
+          test "$code" = '204'
+
+          code=$(curl -sS -o /tmp/bad -w '%{http_code}' -X POST "$URL" \
+            -H 'Origin: https://al-exander23.github.io' \
+            -H 'Content-Type: application/json' \
+            --data '{"installId":"test_install_123456","sessionId":"test_session_123456","event":"not_a_real_event","context":"browser","appVersion":"test","props":{}}')
+          test "$code" = '400'
+          grep -q 'Unsupported analytics event' /tmp/bad
+          echo 'PASS: analytics storage, client and API guards are live.'
