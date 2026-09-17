@@ -11,12 +11,12 @@ import {
   describeScenario,
   getCollectionCounts,
   hasActiveScenario,
-} from './scenario.js?v=1.13.0';
+} from './scenario.js?v=1.17.0-mixlab';
 import {
   isProActive,
   isPremiumCollection,
   requestProPaywall,
-} from './pro.js?v=1.13.0';
+} from './pro.js?v=1.17.0-mixlab';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
@@ -38,6 +38,7 @@ function collectionButtons(selected, counts) {
   return COLLECTION_OPTIONS.map((collection) => {
     const premium = isPremiumCollection(collection.id);
     const locked = premium && !proActive;
+    const countLabel = locked && !counts[collection.id] ? 'PRO' : (counts[collection.id] || 0);
 
     return `
       <button
@@ -49,7 +50,7 @@ function collectionButtons(selected, counts) {
         aria-label="${collection.label}${locked ? ', ALX PRO' : ''}"
       >
         <span>${collection.label}${locked ? ' <span class="pro-lock">PRO</span>' : ''}</span>
-        <small>${counts[collection.id] || 0}</small>
+        <small>${countLabel}</small>
       </button>`;
   }).join('');
 }
