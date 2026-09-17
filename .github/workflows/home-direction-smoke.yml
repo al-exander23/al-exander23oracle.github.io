@@ -39,11 +39,11 @@ jobs:
         run: |
           cat > smoke.mjs <<'JS'
           import { chromium } from 'playwright';
-          const APP='https://al-exander23.github.io/al-exander23oracle.github.io/?home-direction-smoke=v129';
+          const APP='https://al-exander23.github.io/al-exander23oracle.github.io/?home-direction-smoke=v129b';
           const browser=await chromium.launch({headless:true});
           const context=await browser.newContext({viewport:{width:390,height:844}});
           await context.addInitScript(()=>{
-            localStorage.setItem('alx_oracle_onboarding_v1', JSON.stringify('done'));
+            localStorage.setItem('alx_oracle_onboarding_v1', 'done');
             localStorage.setItem('alx_oracle_pro_entitlement', JSON.stringify({
               plan:'pro', status:'active', expiresAt:Date.now()+86400000, source:'smoke'
             }));
