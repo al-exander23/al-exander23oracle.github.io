@@ -26,10 +26,18 @@ jobs:
           const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
           const errors = [];
           page.on('pageerror', e => errors.push(String(e)));
-          await page.goto('https://al-exander23.github.io/al-exander23oracle.github.io/?smoke=1221', { waitUntil: 'networkidle', timeout: 60000 });
 
-          await page.waitForSelector('#orbWrap', { state: 'visible' });
-          await page.waitForSelector('#alxBottomNav', { state: 'visible' });
+          await page.route('**/*', async route => {
+            const url = route.request().url();
+            if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com') || url.includes('telegram.org/js/telegram-web-app.js')) {
+              return route.abort();
+            }
+            return route.continue();
+          });
+
+          await page.goto('https://al-exander23.github.io/al-exander23oracle.github.io/?smoke=1221b', { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page.waitForSelector('#orbWrap', { state: 'visible', timeout: 15000 });
+          await page.waitForSelector('#alxBottomNav', { state: 'visible', timeout: 15000 });
 
           await page.click('#orbWrap');
           await page.waitForFunction(() => /^№\s*\d+/.test(document.querySelector('#counter')?.textContent || ''), null, { timeout: 25000 });
