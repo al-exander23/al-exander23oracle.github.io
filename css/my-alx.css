@@ -1,0 +1,331 @@
+/* v1.21 — My ALX dashboard + smart PRO teaser */
+
+.my-alx-top-btn{
+  font:600 10px/1 'Sora',sans-serif;
+  letter-spacing:.02em;
+}
+
+.my-alx-overlay{
+  position:fixed;
+  inset:0;
+  z-index:180;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:18px;
+  padding-bottom:calc(18px + env(safe-area-inset-bottom));
+  background:rgba(7,5,10,.72);
+  backdrop-filter:blur(12px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease;
+}
+.my-alx-overlay.show{ opacity:1; pointer-events:auto; }
+.my-alx-panel{
+  width:min(560px,100%);
+  max-height:min(82vh,760px);
+  overflow:auto;
+  border-radius:24px;
+  border:1px solid rgba(217,184,120,.17);
+  background:
+    radial-gradient(circle at 90% -8%,rgba(165,139,255,.12),transparent 36%),
+    linear-gradient(180deg,#15101c 0%,#0d0912 100%);
+  box-shadow:0 28px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.025);
+  transform:translateY(18px);
+  transition:transform .22s ease;
+}
+.my-alx-overlay.show .my-alx-panel{ transform:translateY(0); }
+.my-alx-head{
+  position:sticky;
+  top:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px 18px 12px;
+  background:linear-gradient(180deg,rgba(21,16,28,.98),rgba(21,16,28,.90));
+  backdrop-filter:blur(12px);
+}
+.my-alx-kicker{
+  color:#b89f73;
+  font:600 8px/1.2 'Inter',sans-serif;
+  letter-spacing:.18em;
+}
+.my-alx-head h2{
+  margin:4px 0 0;
+  color:#f5e9d2;
+  font:600 22px/1.1 'Sora',sans-serif;
+}
+.my-alx-close{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.025);
+  color:#b9afbe;
+}
+#myAlxContent{ padding:6px 16px 18px; }
+
+.my-alx-status{
+  padding:16px;
+  border-radius:18px;
+  border:1px solid rgba(217,184,120,.14);
+  background:linear-gradient(145deg,rgba(217,184,120,.055),rgba(165,139,255,.025));
+}
+.my-alx-status--pro{
+  background:
+    radial-gradient(circle at 86% -20%,rgba(230,199,130,.14),transparent 44%),
+    linear-gradient(145deg,rgba(217,184,120,.09),rgba(165,139,255,.035));
+  border-color:rgba(230,199,130,.24);
+}
+.my-alx-status-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.my-alx-plan{
+  color:#e8ca87;
+  font:700 10px/1 'Sora',sans-serif;
+  letter-spacing:.12em;
+}
+.my-alx-live,.my-alx-free-left{
+  padding:5px 8px;
+  border-radius:999px;
+  border:1px solid rgba(217,184,120,.16);
+  color:#bcae91;
+  font:600 8px/1 'Inter',sans-serif;
+}
+.my-alx-status--pro .my-alx-live{
+  color:#e6c782;
+  background:rgba(230,199,130,.06);
+}
+.my-alx-status>b{
+  display:block;
+  color:#f4e5c9;
+  font:600 14px/1.35 'Sora',sans-serif;
+}
+.my-alx-status p{
+  margin:7px 0 0;
+  color:#9d92a4;
+  font:400 9px/1.55 'Inter',sans-serif;
+}
+.my-alx-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:12px;
+}
+.my-alx-meta span{
+  padding:6px 8px;
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+  color:#b7acba;
+  font:500 8px/1 'Inter',sans-serif;
+}
+.my-alx-primary{
+  width:100%;
+  margin-top:13px;
+  padding:11px 12px;
+  border:1px solid rgba(230,199,130,.34);
+  border-radius:13px;
+  background:linear-gradient(135deg,rgba(230,199,130,.18),rgba(165,139,255,.08));
+  color:#f6e5bd;
+  font:600 10px/1.2 'Sora',sans-serif;
+}
+
+.my-alx-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.my-alx-grid>div{
+  padding:12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.055);
+  background:rgba(255,255,255,.018);
+}
+.my-alx-grid b{
+  display:block;
+  color:#f0dfbf;
+  font:600 18px/1 'Sora',sans-serif;
+}
+.my-alx-grid span{
+  display:block;
+  margin-top:5px;
+  color:#8f8597;
+  font:400 8px/1.3 'Inter',sans-serif;
+}
+
+.my-alx-section{ margin-top:14px; }
+.my-alx-section-title{
+  margin:0 2px 7px;
+  color:#8e8496;
+  font:600 8px/1 'Inter',sans-serif;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.my-alx-row{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 10px;
+  border:0;
+  border-top:1px solid rgba(255,255,255,.045);
+  background:transparent;
+  text-align:left;
+}
+.my-alx-row:last-child{ border-bottom:1px solid rgba(255,255,255,.045); }
+.my-alx-row span{
+  color:#ded2df;
+  font:500 10px/1.3 'Inter',sans-serif;
+}
+.my-alx-row small{
+  max-width:48%;
+  color:#817789;
+  font:400 8px/1.3 'Inter',sans-serif;
+  text-align:right;
+}
+.my-alx-row:disabled{ opacity:.55; }
+.my-alx-foot{
+  padding:13px 3px 2px;
+  color:#746b7c;
+  font:400 7.6px/1.5 'Inter',sans-serif;
+}
+
+.alx-pro-teaser{
+  position:fixed;
+  inset:0;
+  z-index:220;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.alx-pro-teaser-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(5,3,8,.78);
+  backdrop-filter:blur(13px);
+}
+.alx-pro-teaser-card{
+  position:relative;
+  width:min(410px,100%);
+  padding:22px 18px 18px;
+  border-radius:24px;
+  border:1px solid rgba(230,199,130,.22);
+  background:
+    radial-gradient(circle at 50% -10%,rgba(230,199,130,.12),transparent 34%),
+    radial-gradient(circle at 100% 0%,rgba(165,139,255,.12),transparent 42%),
+    linear-gradient(180deg,#17111e,#0d0912);
+  box-shadow:0 32px 90px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.03);
+  text-align:center;
+}
+.alx-pro-teaser-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.02);
+  color:#8f8597;
+}
+.alx-pro-teaser-kicker{
+  padding-right:25px;
+  color:#bda574;
+  font:600 7.5px/1.3 'Inter',sans-serif;
+  letter-spacing:.14em;
+}
+.alx-pro-teaser-lock{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  margin:18px auto 12px;
+  border-radius:50%;
+  border:1px solid rgba(230,199,130,.22);
+  background:rgba(230,199,130,.055);
+  color:#e6c782;
+  font-size:17px;
+}
+.alx-pro-teaser-card h3{
+  margin:0;
+  color:#f2e2c8;
+  font:600 14px/1.35 'Sora',sans-serif;
+}
+.alx-pro-teaser-name{
+  margin-top:5px;
+  color:#fff3da;
+  font:700 22px/1.18 'Sora',sans-serif;
+}
+.alx-pro-teaser-notes{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:6px;
+  margin-top:12px;
+}
+.alx-pro-teaser-notes span{
+  padding:6px 8px;
+  border-radius:999px;
+  border:1px solid rgba(217,184,120,.13);
+  background:rgba(217,184,120,.035);
+  color:#bdaf97;
+  font:500 8px/1 'Inter',sans-serif;
+}
+.alx-pro-teaser-card p{
+  margin:13px auto 0;
+  max-width:330px;
+  color:#968c9e;
+  font:400 9px/1.55 'Inter',sans-serif;
+}
+.alx-pro-teaser-mask{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:14px;
+  padding:11px 12px;
+  border-radius:13px;
+  border:1px dashed rgba(230,199,130,.18);
+  background:rgba(255,255,255,.018);
+  color:#8d8395;
+  font:500 8.5px/1.3 'Inter',sans-serif;
+}
+.alx-pro-teaser-mask b{ color:#e6c782; }
+.alx-pro-teaser-cta{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  border-radius:13px;
+  border:1px solid rgba(230,199,130,.34);
+  background:linear-gradient(135deg,rgba(230,199,130,.20),rgba(165,139,255,.09));
+  color:#f7e7bf;
+  font:600 10px/1.2 'Sora',sans-serif;
+}
+.alx-pro-teaser-later{
+  margin-top:9px;
+  padding:7px 12px;
+  border:0;
+  background:transparent;
+  color:#786f80;
+  font:500 8.5px/1 'Inter',sans-serif;
+}
+
+@media(max-width:360px){
+  .my-alx-overlay{ padding:10px; padding-bottom:calc(10px + env(safe-area-inset-bottom)); }
+  .my-alx-panel{ border-radius:20px; }
+  .alx-pro-teaser{ padding:12px; }
+  .alx-pro-teaser-card{ padding:20px 14px 16px; }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .my-alx-overlay,.my-alx-panel{ transition:none; }
+}
