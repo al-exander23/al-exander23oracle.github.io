@@ -1,12 +1,11 @@
-// navigation.js — Navigation Cleanup v1.22.1 for ALX Oracle.
+// navigation.js — Navigation Cleanup for ALX Oracle.
 // Keeps existing feature buttons as hidden action sources while exposing a
 // clear four-section bottom navigation with readable labels.
-// v1.22.1 fixes a MutationObserver feedback loop that could starve the UI thread.
 
 import { getProState } from './pro.js?v=1.17.0-mixlab';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.22.1-navigation-fix';
+const VERSION = '1.27.0-current-guide';
 const NAV_ID = 'alxBottomNav';
 const ACCESS_ID = 'alxAccessStrip';
 const FREE_LIMIT = 5;
@@ -151,7 +150,7 @@ function renderAccess() {
   if (state.active) {
     strip.classList.add('is-pro');
     setHtmlIfChanged(strip, `
-      <span><b>ALX PRO активен</b><small>Безлимитные подборы и закрытые коллекции</small></span>
+      <span><b>ALX PRO активен</b><small>Безлимитные подборы и PRO-направления</small></span>
       <strong>Мой ALX</strong>`);
     return;
   }
@@ -206,6 +205,16 @@ function enhanceMyAlx() {
   setTextIfChanged(content.querySelector('#myAlxTaste span'), 'Профиль вкуса');
   setTextIfChanged(content.querySelector('#myAlxRestore span'), 'Восстановить PRO');
   setTextIfChanged(content.querySelector('#myAlxProDetails span'), 'Возможности ALX PRO');
+  setTextIfChanged(content.querySelector('#myAlxProDetails small'), '7 PRO-направлений и безлимитные подборы');
+
+  const state = getProState();
+  const statusText = content.querySelector('.my-alx-status p');
+  setTextIfChanged(
+    statusText,
+    state.active
+      ? 'Безлимитные подборы и 7 PRO-направлений. Выбирай направление — конкретный микс раскроет шар.'
+      : 'PRO снимает дневной лимит и открывает 7 закрытых направлений Оракула.'
+  );
 
   const section = content.querySelector('.my-alx-section');
   setTextIfChanged(section?.querySelector('.my-alx-section-title'), 'Разделы и настройки');
@@ -228,7 +237,7 @@ function enhanceMyAlx() {
     openTaste('.taste-daily-card');
   });
 
-  addAccountRow(section, 'myAlxHelp', 'Как пользоваться ALX Oracle', 'короткая инструкция для всех основных функций', () => {
+  addAccountRow(section, 'myAlxHelp', 'Как пользоваться ALX Oracle', 'что такое Оракул, FREE/PRO и как выбирать направления', () => {
     closeAccountThen(() => {
       setActive('home');
       clickExisting('onboardingHelpBtn');
