@@ -1,4 +1,5 @@
 import base from './worker.js';
+import { handleAnalyticsRoute, applyAnalyticsReturn } from './analytics.js';
 
 const TELEGRAM_ISSUER = 'https://oauth.telegram.org';
 const TELEGRAM_JWKS = 'https://oauth.telegram.org/.well-known/jwks.json';
@@ -154,12 +155,18 @@ export default {
     const mode = paymentMode(env);
     const effectiveEnv = effectivePaymentEnv(env);
 
+    const analyticsResponse = await handleAnalyticsRoute(request, env, ctx);
+    if (analyticsResponse) return withPaymentMode(analyticsResponse, mode, env);
+
     if (url.pathname === '/api/auth/telegram-sdk' && request.method === 'POST') {
       return withPaymentMode(await sdkLogin(request, effectiveEnv), mode, env);
     }
 
     let response = await base.fetch(request, effectiveEnv, ctx);
-    if (url.pathname === '/auth/telegram/callback') response = splitOAuthCookies(response);
+    if (url.pathname === '/auth/telegram/callback') {
+      response = splitOAuthCookies(response);
+      response = applyAnalyticsReturn(request, response);
+    }
     return withPaymentMode(response, mode, env);
   },
 };
