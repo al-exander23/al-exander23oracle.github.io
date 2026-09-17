@@ -1,0 +1,163 @@
+/* v1.22 — simplified primary navigation for ALX Oracle */
+
+/* Secondary actions stay functional, but no longer compete for attention. */
+#historyBtnTop,
+#tasteBtnTop,
+#alxProTopButton,
+#onboardingHelpBtn{
+  display:none !important;
+}
+
+.top-toolbar{
+  top:14px;
+  left:50%;
+  right:auto;
+  transform:translateX(-50%);
+  gap:4px;
+  padding:5px;
+  max-width:calc(100vw - 24px);
+  border-color:rgba(217,184,120,.28);
+  background:linear-gradient(180deg,rgba(217,184,120,.065),rgba(13,10,20,.72));
+  box-shadow:0 8px 28px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.top-toolbar .icon-btn.alx-nav-main{
+  width:auto;
+  height:34px;
+  min-width:0;
+  padding:0 12px;
+  border-radius:999px;
+  background:transparent;
+  color:#d8c7a6;
+  font:600 11px/1 'Inter',sans-serif;
+  letter-spacing:.01em;
+  white-space:nowrap;
+}
+
+.top-toolbar .icon-btn.alx-nav-main:active{
+  transform:scale(.97);
+  background:rgba(217,184,120,.10);
+}
+
+#myAlxTopButton.alx-nav-main{
+  color:#f1ddb3;
+  background:rgba(217,184,120,.07);
+}
+
+#alxNavMenuButton.alx-nav-main{
+  color:#bcb1c5;
+}
+
+/* The result counter moves under navigation, so it never collides with labels. */
+.counter{
+  top:59px;
+  right:16px;
+}
+
+.alx-nav-overlay{
+  position:fixed;
+  inset:0;
+  z-index:220;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:16px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  background:rgba(7,5,10,.72);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+}
+.alx-nav-overlay.show{ opacity:1; pointer-events:auto; }
+
+.alx-nav-panel{
+  width:min(520px,100%);
+  border:1px solid rgba(217,184,120,.17);
+  border-radius:24px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 88% -16%,rgba(217,184,120,.10),transparent 38%),
+    linear-gradient(180deg,#15101c 0%,#0d0912 100%);
+  box-shadow:0 28px 80px rgba(0,0,0,.55);
+  transform:translateY(16px);
+  transition:transform .2s ease;
+}
+.alx-nav-overlay.show .alx-nav-panel{ transform:translateY(0); }
+
+.alx-nav-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:19px 18px 13px;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.alx-nav-kicker{
+  color:#b89f73;
+  font:600 8px/1.2 'Inter',sans-serif;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.alx-nav-head h2{
+  margin:5px 0 0;
+  color:#f5e9d2;
+  font:600 21px/1.15 'Sora',sans-serif;
+}
+.alx-nav-close{
+  border:0;
+  border-radius:999px;
+  padding:9px 12px;
+  background:rgba(255,255,255,.04);
+  color:#bdb3c1;
+  font:500 11px/1 'Inter',sans-serif;
+}
+
+.alx-nav-list{
+  display:grid;
+  gap:1px;
+  padding:8px;
+}
+.alx-nav-row{
+  width:100%;
+  border:0;
+  border-radius:15px;
+  padding:14px 13px;
+  background:transparent;
+  color:#eee2cc;
+  text-align:left;
+  cursor:pointer;
+}
+.alx-nav-row:active{ background:rgba(217,184,120,.07); }
+.alx-nav-row b{
+  display:block;
+  font:600 13px/1.25 'Inter',sans-serif;
+}
+.alx-nav-row small{
+  display:block;
+  margin-top:5px;
+  color:#8f8598;
+  font:400 10px/1.4 'Inter',sans-serif;
+}
+.alx-nav-foot{
+  padding:10px 18px 17px;
+  color:#6f6678;
+  font:400 9px/1.45 'Inter',sans-serif;
+  text-align:center;
+}
+
+@media (max-width:360px){
+  .top-toolbar{
+    left:50%;
+    gap:2px;
+    padding:4px;
+    max-width:calc(100vw - 16px);
+  }
+  .top-toolbar .icon-btn.alx-nav-main{
+    height:33px;
+    padding:0 9px;
+    font-size:10px;
+  }
+  .counter{ top:56px; right:12px; }
+}
