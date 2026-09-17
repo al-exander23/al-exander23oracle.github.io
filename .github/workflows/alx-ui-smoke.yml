@@ -35,12 +35,18 @@ jobs:
             return route.continue();
           });
 
-          await page.goto('https://al-exander23.github.io/al-exander23oracle.github.io/?smoke=1221b', { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await page.goto('https://al-exander23.github.io/al-exander23oracle.github.io/?smoke=1221c', { waitUntil: 'domcontentloaded', timeout: 30000 });
           await page.waitForSelector('#orbWrap', { state: 'visible', timeout: 15000 });
           await page.waitForSelector('#alxBottomNav', { state: 'visible', timeout: 15000 });
 
           await page.click('#orbWrap');
           await page.waitForFunction(() => /^№\s*\d+/.test(document.querySelector('#counter')?.textContent || ''), null, { timeout: 25000 });
+
+          const onboarding = page.locator('#alxOnboarding.show');
+          if (await onboarding.count()) {
+            await page.click('#alxTourSkip');
+            await page.waitForFunction(() => !document.querySelector('#alxOnboarding')?.classList.contains('show'), null, { timeout: 5000 });
+          }
 
           await page.click('#alxBottomNav [data-tab="favorites"]');
           await page.waitForFunction(() => document.querySelector('#sheetOverlay')?.classList.contains('show'), null, { timeout: 5000 });
