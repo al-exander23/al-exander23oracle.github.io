@@ -1,5 +1,5 @@
 // mixes.js — единая точка загрузки базы миксов.
-// Базовая библиотека, 2026 Mix Lab и пользовательские ALX Originals
+// Базовая библиотека, 2026 Mix Lab, PRO drops и пользовательские ALX Originals
 // объединяются здесь. Всё остальное приложение работает через getMixes().
 
 import { isProActive } from './pro.js?v=1.17.0-mixlab';
@@ -7,7 +7,7 @@ import { isProActive } from './pro.js?v=1.17.0-mixlab';
 let cache = null;
 let loadPromise = null;
 
-const DATA_VERSION = '1.17.0-mixlab';
+const DATA_VERSION = '1.18.0-pro-drops';
 const FETCH_TIMEOUT = 6000;
 
 async function fetchJson(path, { required = false } = {}) {
@@ -47,13 +47,14 @@ function mergeUnique(...layers) {
 }
 
 async function loadMixes() {
-  const [base, trend2026, originals] = await Promise.all([
+  const [base, trend2026, proDrops2026, originals] = await Promise.all([
     fetchJson('data/mixes.json', { required: true }),
     fetchJson('data/mixes-2026.json'),
+    fetchJson('data/pro-drops-2026.json'),
     fetchJson('data/alx-originals.json'),
   ]);
 
-  const merged = mergeUnique(base, trend2026, originals);
+  const merged = mergeUnique(base, trend2026, proDrops2026, originals);
   if (!merged.length) throw new Error('База миксов пуста');
   return merged;
 }
