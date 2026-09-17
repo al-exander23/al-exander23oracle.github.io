@@ -15,9 +15,11 @@ export const PREMIUM_COLLECTION_IDS = Object.freeze([
   'experimental',
   'parfum',
   'limited',
+  'originals',
 ]);
 
 export const PRO_BENEFITS = Object.freeze([
+  'ALX Originals — авторские миксы Alexander, доступные только после активации PRO',
   'Закрытые авторские коллекции ALX',
   'Parfum Lab — миксы, собранные по логике парфюмных композиций',
   'LIMITED 2026 — сезонные и экспериментальные дропы',
