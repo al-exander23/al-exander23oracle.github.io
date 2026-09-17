@@ -1,0 +1,192 @@
+/* v1.20 — daily habit, streak, reminder and sharing layer. */
+
+.retention-strip{
+  width:min(520px,calc(100% - 32px));
+  margin:10px auto 0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.retention-pill{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px 11px;
+  border-radius:14px;
+  border:1px solid rgba(217,184,120,.14);
+  background:linear-gradient(145deg,rgba(217,184,120,.055),rgba(165,139,255,.025));
+  color:#e8decf;
+  text-align:left;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+}
+.retention-pill:active{ transform:translateY(1px); }
+.retention-pill-icon{
+  width:27px;
+  height:27px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:rgba(217,184,120,.07);
+  border:1px solid rgba(217,184,120,.16);
+  font-size:12px;
+}
+.retention-pill b{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#f5e8cb;
+  font:600 10.5px/1.25 'Sora',sans-serif;
+}
+.retention-pill small{
+  display:block;
+  margin-top:2px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--text-dim,#9b91a3);
+  font:400 8px/1.25 'Inter',sans-serif;
+}
+.retention-pill--streak .retention-pill-icon{
+  background:rgba(195,112,54,.07);
+  border-color:rgba(218,154,93,.16);
+}
+
+.retention-reminder-card{
+  margin:10px 0 14px;
+  padding:13px;
+  border-radius:16px;
+  border:1px solid rgba(217,184,120,.14);
+  background:
+    radial-gradient(circle at 92% -10%,rgba(165,139,255,.08),transparent 40%),
+    linear-gradient(145deg,rgba(217,184,120,.045),rgba(255,255,255,.012));
+}
+.retention-reminder-copy{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+.retention-reminder-icon{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border-radius:50%;
+  border:1px solid rgba(217,184,120,.18);
+  background:rgba(217,184,120,.055);
+  font-size:13px;
+}
+.retention-reminder-copy b{
+  display:block;
+  color:#f1dfbd;
+  font:600 11px/1.35 'Sora',sans-serif;
+}
+.retention-reminder-copy span{
+  display:block;
+  margin-top:3px;
+  color:var(--text-dim,#9b91a3);
+  font-size:8.5px;
+  line-height:1.45;
+}
+.retention-reminder-controls{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.retention-reminder-controls select{
+  min-width:88px;
+  padding:7px 10px;
+  border-radius:10px;
+  border:1px solid rgba(217,184,120,.17);
+  background:#100c16;
+  color:#e9d7b4;
+  font:500 10px 'Inter',sans-serif;
+}
+.retention-reminder-controls select:disabled{ opacity:.4; }
+.retention-reminder-note{
+  margin-top:9px;
+  color:#8e8496;
+  font-size:8.2px;
+  line-height:1.4;
+}
+.retention-switch{
+  position:relative;
+  width:42px;
+  height:24px;
+  flex:0 0 auto;
+}
+.retention-switch input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.retention-switch span{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background:#211a28;
+  transition:.2s ease;
+}
+.retention-switch span::after{
+  content:'';
+  position:absolute;
+  width:18px;
+  height:18px;
+  left:2px;
+  top:2px;
+  border-radius:50%;
+  background:#887f90;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  transition:.2s ease;
+}
+.retention-switch input:checked + span{
+  background:rgba(217,184,120,.18);
+  border-color:rgba(217,184,120,.34);
+}
+.retention-switch input:checked + span::after{
+  transform:translateX(18px);
+  background:#e6c782;
+}
+.retention-switch input:disabled + span{ opacity:.5; }
+
+.retention-daily-share{
+  border-color:rgba(217,184,120,.17)!important;
+  color:#e9d7b4!important;
+}
+
+.retention-toast{
+  position:fixed;
+  left:50%;
+  bottom:calc(22px + env(safe-area-inset-bottom));
+  z-index:140;
+  max-width:calc(100vw - 36px);
+  padding:9px 13px;
+  border-radius:999px;
+  border:1px solid rgba(217,184,120,.22);
+  background:rgba(18,13,24,.95);
+  color:#f0dfbf;
+  font:500 10px 'Inter',sans-serif;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  opacity:0;
+  transform:translate(-50%,8px);
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+}
+.retention-toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+@media(max-width:360px){
+  .retention-strip{ grid-template-columns:1fr; }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .retention-switch span,.retention-switch span::after,.retention-toast{ transition:none; }
+}
