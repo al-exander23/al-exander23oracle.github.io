@@ -1,0 +1,45 @@
+name: ALX live payment probe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/alx-live-payment-probe.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe latest live payment
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://alx-pay.alxoracle.workers.dev/api/_alx_live_payment_probe'
+          ok=0
+          for i in {1..24}; do
+            body=$(mktemp)
+            headers=$(mktemp)
+            code=$(curl -sS -D "$headers" -o "$body" -w '%{http_code}' "$URL" || true)
+            cat "$body" || true; echo
+            if [ "$code" = '200' ]; then
+              python3 - "$body" <<'PY'
+import json,sys
+with open(sys.argv[1], encoding='utf-8') as f:
+    d=json.load(f)
+p=d.get('payment') or {}
+e=d.get('entitlement') or {}
+assert d.get('ok') is True
+assert p.get('amountRub') == 29
+assert p.get('provider') == 'yookassa'
+assert p.get('status') == 'succeeded'
+assert e.get('source') == 'yookassa'
+assert e.get('status') == 'active'
+assert e.get('active') is True
+PY
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ok" = '1'
+          echo 'PASS: latest 29 RUB payment succeeded and PRO is active'
