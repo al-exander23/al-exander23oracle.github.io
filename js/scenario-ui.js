@@ -1,7 +1,7 @@
 // scenario-ui.js — UI ситуационного режима внутри уже существующего Taste Profile.
 // Главный экран и визуал шара не меняет.
 
-import { initMixes, getMixes, getAllMixes } from './mixes.js?v=1.23.0-originals';
+import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.23.0-originals';
 import {
   SCENARIO_OPTIONS,
   COLLECTION_OPTIONS,
@@ -135,6 +135,7 @@ async function renderScenarioSection() {
   if (!content) return;
 
   await initMixes();
+  if (isProActive()) await initOriginals();
   const mixes = isProActive() ? getAllMixes() : getMixes();
   const fresh = buildSection(mixes);
   const existing = document.getElementById(SECTION_ID);
