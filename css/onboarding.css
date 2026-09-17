@@ -1,0 +1,223 @@
+/* v1.16 — compact first-run onboarding for ALX Oracle. */
+
+.onboarding-help-btn{
+  font-family:'Sora',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  color:#e6cf9f;
+}
+
+.alx-onboarding{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease;
+}
+.alx-onboarding.show{
+  opacity:1;
+  pointer-events:auto;
+}
+.alx-tour-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(4,3,9,.76);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+
+.alx-tour-focus{
+  position:relative!important;
+  z-index:122!important;
+  pointer-events:none!important;
+  isolation:isolate;
+  outline:1px solid rgba(243,227,191,.72);
+  outline-offset:7px;
+  filter:drop-shadow(0 0 18px rgba(217,184,120,.24));
+}
+#topToolbar.alx-tour-focus{ border-radius:999px; }
+#orbWrap.alx-tour-focus{ border-radius:42px; }
+#alxProMainBanner.alx-tour-focus{ border-radius:18px; }
+
+.alx-tour-card{
+  position:fixed;
+  z-index:124;
+  left:50%;
+  width:min(410px,calc(100% - 28px));
+  transform:translateX(-50%);
+  padding:16px;
+  border:1px solid rgba(217,184,120,.30);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 92% 0%,rgba(165,139,255,.14),transparent 34%),
+    radial-gradient(circle at 0% 100%,rgba(217,184,120,.09),transparent 32%),
+    linear-gradient(160deg,rgba(27,20,40,.98),rgba(10,7,17,.99));
+  box-shadow:0 24px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.035);
+  transition:top .22s ease,bottom .22s ease,transform .22s ease;
+}
+.alx-tour-card.is-bottom{
+  bottom:max(16px,calc(12px + env(safe-area-inset-bottom)));
+  top:auto;
+}
+.alx-tour-card.is-top{
+  top:max(76px,calc(60px + env(safe-area-inset-top)));
+  bottom:auto;
+}
+
+.alx-tour-topline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:13px;
+}
+.alx-tour-kicker{
+  color:#b79d6e;
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  letter-spacing:.18em;
+}
+.alx-tour-skip{
+  border:0;
+  background:transparent;
+  color:#81778f;
+  font-family:'Inter',sans-serif;
+  font-size:9px;
+  padding:4px 0;
+}
+
+.alx-tour-hero{
+  display:grid;
+  grid-template-columns:44px 1fr;
+  gap:12px;
+  align-items:start;
+}
+.alx-tour-icon{
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  border:1px solid rgba(217,184,120,.34);
+  background:
+    radial-gradient(circle at 35% 28%,rgba(255,246,224,.19),transparent 28%),
+    rgba(217,184,120,.065);
+  color:#f7e7c5;
+  font-size:18px;
+  text-shadow:0 0 12px rgba(243,227,191,.28);
+  box-shadow:inset 0 0 18px rgba(165,139,255,.06),0 0 22px rgba(217,184,120,.05);
+}
+.alx-tour-card h2{
+  margin:1px 0 5px;
+  color:#fff4df;
+  font-family:'Lora',serif;
+  font-size:20px;
+  font-weight:600;
+  line-height:1.2;
+}
+.alx-tour-card p{
+  margin:0;
+  color:#b8adc4;
+  font-size:10.5px;
+  line-height:1.55;
+}
+
+.alx-tour-legend{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+  margin-top:14px;
+}
+.alx-tour-legend[hidden],
+.alx-tour-chips[hidden]{ display:none; }
+.alx-tour-legend-item{
+  min-width:0;
+  padding:8px 4px 7px;
+  text-align:center;
+  border-radius:11px;
+  border:1px solid rgba(255,255,255,.045);
+  background:rgba(255,255,255,.018);
+}
+.alx-tour-legend-item b{
+  display:block;
+  color:#ead2a2;
+  font-family:'Sora',sans-serif;
+  font-size:10px;
+  line-height:1.2;
+}
+.alx-tour-legend-item span{
+  display:block;
+  margin-top:4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#81788d;
+  font-size:7px;
+  white-space:nowrap;
+}
+
+.alx-tour-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:13px;
+}
+.alx-tour-chips span{
+  padding:6px 8px;
+  border-radius:999px;
+  border:1px solid rgba(217,184,120,.13);
+  background:rgba(217,184,120,.045);
+  color:#cbb991;
+  font-size:8px;
+}
+
+.alx-tour-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:15px;
+}
+.alx-tour-progress{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.alx-tour-dot{
+  width:5px;
+  height:5px;
+  border-radius:99px;
+  background:rgba(255,255,255,.12);
+  transition:width .18s ease,background .18s ease;
+}
+.alx-tour-dot.done{ background:rgba(217,184,120,.34); }
+.alx-tour-dot.active{
+  width:17px;
+  background:#d9b878;
+  box-shadow:0 0 9px rgba(217,184,120,.22);
+}
+.alx-tour-next{
+  min-width:96px;
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid rgba(217,184,120,.32);
+  background:linear-gradient(180deg,rgba(217,184,120,.17),rgba(217,184,120,.08));
+  color:#fff0cf;
+  font-family:'Sora',sans-serif;
+  font-size:10px;
+  font-weight:600;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.alx-tour-next:active{ transform:scale(.97); }
+
+@media (max-width:360px){
+  .alx-tour-card{ width:calc(100% - 20px); padding:14px; border-radius:19px; }
+  .alx-tour-card h2{ font-size:18px; }
+  .alx-tour-legend{ gap:4px; }
+  .alx-tour-legend-item{ padding-inline:2px; }
+  .alx-tour-legend-item span{ font-size:6.6px; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .alx-onboarding,.alx-tour-card,.alx-tour-dot{ transition:none; }
+}
