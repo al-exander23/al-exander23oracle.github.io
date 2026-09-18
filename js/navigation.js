@@ -5,7 +5,7 @@
 import { getProState } from './pro.js?v=1.17.0-mixlab';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.27.0-current-guide';
+const VERSION = '1.30.0-community-mvp';
 const NAV_ID = 'alxBottomNav';
 const ACCESS_ID = 'alxAccessStrip';
 const FREE_LIMIT = 5;
@@ -150,7 +150,7 @@ function renderAccess() {
   if (state.active) {
     strip.classList.add('is-pro');
     setHtmlIfChanged(strip, `
-      <span><b>ALX PRO активен</b><small>Безлимитные подборы и PRO-направления</small></span>
+      <span><b>ALX PRO активен</b><small>Безлимит, PRO-направления и Community</small></span>
       <strong>Мой ALX</strong>`);
     return;
   }
@@ -205,15 +205,15 @@ function enhanceMyAlx() {
   setTextIfChanged(content.querySelector('#myAlxTaste span'), 'Профиль вкуса');
   setTextIfChanged(content.querySelector('#myAlxRestore span'), 'Восстановить PRO');
   setTextIfChanged(content.querySelector('#myAlxProDetails span'), 'Возможности ALX PRO');
-  setTextIfChanged(content.querySelector('#myAlxProDetails small'), '7 PRO-направлений и безлимитные подборы');
+  setTextIfChanged(content.querySelector('#myAlxProDetails small'), '7 PRO-направлений, Community и безлимит');
 
   const state = getProState();
   const statusText = content.querySelector('.my-alx-status p');
   setTextIfChanged(
     statusText,
     state.active
-      ? 'Безлимитные подборы и 7 PRO-направлений. Выбирай направление — конкретный микс раскроет шар.'
-      : 'PRO снимает дневной лимит и открывает 7 закрытых направлений Оракула.'
+      ? 'Безлимит, 7 PRO-направлений и Community Mixes: публикуй свои рецепты, получай оценки и рейтинг.'
+      : 'PRO снимает дневной лимит, открывает 7 направлений Оракула и Community Mixes.'
   );
 
   const section = content.querySelector('.my-alx-section');
