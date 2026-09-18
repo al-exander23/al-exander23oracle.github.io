@@ -1,0 +1,40 @@
+name: ALX Community Backend Health
+
+on:
+  push:
+    paths:
+      - '.github/workflows/community-backend-health.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Wait for Community API
+        run: |
+          set -e
+          URL='https://alx-pay.alxoracle.workers.dev/api/community/health'
+          for i in $(seq 1 48); do
+            BODY=$(curl -sS -m 15 -w '\nHTTP_STATUS:%{http_code}' "$URL" || true)
+            echo "$BODY"
+            STATUS=$(printf '%s' "$BODY" | sed -n 's/^HTTP_STATUS://p' | tail -1)
+            JSON=$(printf '%s' "$BODY" | sed '/^HTTP_STATUS:/d')
+            if [ "$STATUS" = '200' ] && echo "$JSON" | grep -q '"version":"1.30.0-community-mvp"' && echo "$JSON" | grep -q '"storage":"d1"'; then
+              echo 'PASS: Community D1 API is live.'
+              break
+            fi
+            if [ "$i" = '48' ]; then exit 1; fi
+            sleep 5
+          done
+
+          BODY=$(mktemp)
+          CODE=$(curl -sS -o "$BODY" -w '%{http_code}' -X POST \
+            -H 'Content-Type: application/json' -d '{}' \
+            'https://alx-pay.alxoracle.workers.dev/api/community/list')
+          echo "Unauthenticated list: $CODE"
+          cat "$BODY"
+          test "$CODE" = '401'
+          ! grep -q '"mixes"' "$BODY"
