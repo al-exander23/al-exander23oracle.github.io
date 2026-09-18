@@ -342,6 +342,30 @@ function toMix(row, recipe, userId) {
   };
 }
 
+async function rankPositions(env, ids) {
+  if (!ids.length) return new Map();
+  const placeholders = ids.map(() => '?').join(',');
+  const result = await env.DB.prepare(`
+    WITH ranked AS (
+      SELECT
+        id,
+        ROW_NUMBER() OVER (
+          ORDER BY
+            (((rating_sum * 1.0 / rating_count) * rating_count + 20.0) / (rating_count + 5.0)) DESC,
+            rating_count DESC,
+            save_count DESC,
+            created_at DESC
+        ) AS rank_position
+      FROM community_mixes
+      WHERE status = 'published' AND rating_count > 0
+    )
+    SELECT id, rank_position
+    FROM ranked
+    WHERE id IN (${placeholders})
+  `).bind(...ids).all();
+  return new Map((result?.results || []).map((row) => [String(row.id), Number(row.rank_position)]));
+}
+
 function baseSelect() {
   return `
     SELECT
@@ -382,8 +406,15 @@ async function listMixes(env, userId, mode) {
   `).bind(...bindings).all();
 
   const rows = result?.results || [];
-  const components = await loadComponents(env, rows.map((row) => String(row.id)));
-  return rows.map((row) => toMix(row, components.get(String(row.id)), userId));
+  const ids = rows.map((row) => String(row.id));
+  const [components, positions] = await Promise.all([
+    loadComponents(env, ids),
+    rankPositions(env, ids),
+  ]);
+  return rows.map((row) => ({
+    ...toMix(row, components.get(String(row.id)), userId),
+    rankPosition: positions.get(String(row.id)) || null,
+  }));
 }
 
 async function getMix(env, userId, mixId) {
@@ -393,8 +424,15 @@ async function getMix(env, userId, mixId) {
     LIMIT 1
   `).bind(String(userId), String(userId), String(mixId)).first();
   if (!row) return null;
-  const components = await loadComponents(env, [String(row.id)]);
-  return toMix(row, components.get(String(row.id)), userId);
+  const id = String(row.id);
+  const [components, positions] = await Promise.all([
+    loadComponents(env, [id]),
+    rankPositions(env, [id]),
+  ]);
+  return {
+    ...toMix(row, components.get(id), userId),
+    rankPosition: positions.get(id) || null,
+  };
 }
 
 async function health(request, env) {
