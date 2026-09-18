@@ -2,7 +2,7 @@
 // User recipes are isolated from the official Oracle/ALX Originals pool.
 
 const DEFAULT_PRO_STATUS_API = 'https://al-exander23oracle-github-io.vercel.app/api/stars-status';
-const VERSION = '1.30.0-community-mvp';
+const VERSION = '1.30.1-community-rank';
 const UPSTREAM_TIMEOUT_MS = 8000;
 const MAX_CREATE_PER_24H = 5;
 const enc = new TextEncoder();
