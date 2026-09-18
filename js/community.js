@@ -198,6 +198,7 @@ function mixCard(mix) {
           <h3>${esc(mix.title)}</h3>
         </div>
         <div class="community-rating">
+          ${mix.rankPosition ? `<em>#${mix.rankPosition}</em>` : ''}
           <b>${mix.ratingCount ? Number(mix.rating).toFixed(1) : '—'}</b>
           <span>${stars(mix.rating)}</span>
           <small>${esc(ratingText(mix))}</small>
@@ -230,6 +231,7 @@ function mixCard(mix) {
         </div>
         ${mix.isMine ? `
           <div class="community-author-stats">
+            <span>Место <b>${mix.rankPosition ? `#${mix.rankPosition}` : '—'}</b></span>
             <span>Рейтинг <b>${mix.ratingCount ? Number(mix.rating).toFixed(1) : '—'}</b></span>
             <span>Оценок <b>${mix.ratingCount || 0}</b></span>
             <span>Открытий <b>${mix.views || 0}</b></span>
