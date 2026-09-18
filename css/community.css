@@ -60,6 +60,7 @@
 }
 .community-card h3{margin:5px 0 0;font:600 17px/1.18 "Sora",sans-serif;color:#f2f2ee}
 .community-rating{text-align:right;min-width:88px}
+.community-rating em{display:inline-block;margin-bottom:4px;padding:3px 6px;border-radius:7px;background:rgba(255,255,255,.08);font:700 9px/1 "JetBrains Mono",monospace;color:rgba(255,255,255,.7);font-style:normal}
 .community-rating b{display:block;font:700 18px/1 "Sora",sans-serif;color:#fff}
 .community-rating span{display:block;margin-top:3px;font-size:12px;letter-spacing:.03em;color:rgba(255,255,255,.68)}
 .community-rating small{display:block;margin-top:3px;font:400 9px/1.2 "Inter",sans-serif;color:rgba(255,255,255,.36)}
@@ -98,7 +99,7 @@
 .community-actions button.muted{color:rgba(255,255,255,.45)}
 .community-actions button.danger{color:rgba(255,220,220,.75)}
 .community-author-stats{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:5px;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05)
 }
 .community-author-stats span{text-align:center;font:400 9px/1.25 "Inter",sans-serif;color:rgba(255,255,255,.42)}
 .community-author-stats b{display:block;margin-top:3px;font:700 12px/1 "Sora",sans-serif;color:#fff}
