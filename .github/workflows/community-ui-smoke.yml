@@ -146,7 +146,7 @@ jobs:
           await page.route('**/*',async route=>{
             const url=route.request().url();
             if(url.includes('fonts.googleapis.com')||url.includes('fonts.gstatic.com')||url.includes('telegram.org/js/telegram-web-app.js')) return route.abort();
-            return route.continue();
+            return route.fallback();
           });
 
           await page.goto(APP,{waitUntil:'domcontentloaded',timeout:30000});
