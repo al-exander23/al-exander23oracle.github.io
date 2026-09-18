@@ -1,0 +1,204 @@
+name: ALX Community UI Smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/community-ui-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Wait for Community frontend
+        run: |
+          set -e
+          for i in $(seq 1 48); do
+            HTML=$(curl -fsSL 'https://al-exander23.github.io/al-exander23oracle.github.io/?community-smoke=1' || true)
+            if echo "$HTML" | grep -q 'community.js?v=1.30.0-community-mvp' && echo "$HTML" | grep -q 'community.css?v=1.30.0-community-mvp' && echo "$HTML" | grep -q 'originals-nav-hook.js?v=1.30.0-community-mvp'; then
+              echo 'Community frontend is live'
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Prepare Playwright
+        run: |
+          mkdir -p /tmp/alx-community && cd /tmp/alx-community
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify Community flow
+        working-directory: /tmp/alx-community
+        run: |
+          cat > smoke.mjs <<'JS'
+          import { chromium } from 'playwright';
+
+          const APP='https://al-exander23.github.io/al-exander23oracle.github.io/?community-smoke=v130';
+          const browser=await chromium.launch({headless:true});
+          const context=await browser.newContext({viewport:{width:390,height:844}});
+          await context.addInitScript(()=>{
+            localStorage.setItem('alx_oracle_onboarding_v1','done');
+            localStorage.setItem('alx_oracle_pro_entitlement',JSON.stringify({
+              plan:'pro',status:'active',expiresAt:Date.now()+86400000,source:'smoke'
+            }));
+            window.Telegram={
+              WebApp:{
+                initData:'mock-init-data',
+                initDataUnsafe:{user:{id:101,first_name:'Test',username:'testuser'}},
+                platform:'ios',
+                openTelegramLink:(url)=>{window.__shareUrl=url;},
+                showConfirm:(_message,cb)=>cb(true)
+              }
+            };
+          });
+
+          let created=false;
+          let saved=false;
+          let rating=null;
+          const sample={
+            id:'cm_sample123',
+            title:'Midnight Cherry',
+            description:'Яркий вечерний микс.',
+            author:'@mixmaster',
+            strength:3,
+            recipe:[
+              {flavor:'Вишня',percent:40},
+              {flavor:'Личи',percent:30},
+              {flavor:'Холод',percent:30}
+            ],
+            rating:4.7,
+            ratingCount:25,
+            rankScore:4.58,
+            saves:8,
+            views:12,
+            myRating:null,
+            saved:false,
+            isMine:false,
+            createdAt:Date.now()-10000
+          };
+          const mine={
+            ...sample,
+            id:'cm_mine123',
+            title:'My Citrus',
+            author:'@testuser',
+            recipe:[
+              {flavor:'Лимон',percent:40},
+              {flavor:'Грейпфрут',percent:35},
+              {flavor:'Мята',percent:25}
+            ],
+            rating:0,
+            ratingCount:0,
+            saves:0,
+            views:0,
+            isMine:true
+          };
+
+          const page=await context.newPage();
+          const errors=[];
+          page.on('pageerror',e=>errors.push(String(e)));
+
+          await page.route('**/api/stars-status',route=>route.fulfill({
+            status:200,contentType:'application/json',
+            body:JSON.stringify({ok:true,entitlement:{plan:'pro',status:'active',active:true,expiresAt:Date.now()+86400000,source:'smoke'},offer:{priceStars:149,periodDays:30,recurring:true}})
+          }));
+          await page.route('**/api/originals',route=>route.fulfill({
+            status:200,contentType:'application/json',
+            body:JSON.stringify({ok:true,collection:'originals',author:'ALX Originals',mixes:[]})
+          }));
+          await page.route('**/api/community/**',async route=>{
+            const url=new URL(route.request().url());
+            const action=url.pathname.split('/').pop();
+            let body={};
+            if(route.request().method()==='POST'){
+              try{body=route.request().postDataJSON()||{};}catch{}
+            }
+            if(action==='list'){
+              const view=body.view||'top';
+              const result=view==='mine'?(created?[mine]:[]):view==='saved'?(saved?[{...sample,saved:true,saves:9}]:[]):[{...sample,saved,myRating:rating,saves:saved?9:8,rating:rating?4.8:4.7,ratingCount:rating?26:25}];
+              return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,view,mixes:result})});
+            }
+            if(action==='create'){
+              created=true;
+              if(!Array.isArray(body.recipe)||body.recipe.reduce((s,x)=>s+Number(x.percent||0),0)!==100) {
+                return route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({ok:false,error:'Bad recipe'})});
+              }
+              return route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({ok:true,mix:mine})});
+            }
+            if(action==='view') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,views:13})});
+            if(action==='rate'){
+              rating=Number(body.rating);
+              return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,rating:4.8,ratingCount:26,rankScore:4.62,myRating:rating})});
+            }
+            if(action==='save'){
+              saved=body.saved!==false;
+              return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,saved,saves:saved?9:8})});
+            }
+            if(action==='get') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,mix:sample})});
+            if(action==='preview') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,preview:sample})});
+            return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true})});
+          });
+          await page.route('**/*',async route=>{
+            const url=route.request().url();
+            if(url.includes('fonts.googleapis.com')||url.includes('fonts.gstatic.com')||url.includes('telegram.org/js/telegram-web-app.js')) return route.abort();
+            return route.continue();
+          });
+
+          await page.goto(APP,{waitUntil:'domcontentloaded',timeout:30000});
+          await page.waitForSelector('#alxBottomNav [data-tab="pro"]',{timeout:15000});
+          await page.click('#alxBottomNav [data-tab="pro"]');
+          await page.waitForSelector('#proCommunityOpen',{timeout:10000});
+          const proText=await page.locator('#alxProLibrary').textContent();
+          if(!proText.includes('Community Mixes')) throw new Error('Community missing from PRO library');
+
+          await page.click('#proCommunityOpen');
+          await page.waitForFunction(()=>document.querySelector('#alxCommunity')?.classList.contains('show'),null,{timeout:10000});
+          await page.waitForSelector('[data-community-card="cm_sample123"]',{timeout:10000});
+
+          await page.click('[data-community-create]');
+          await page.fill('input[name="title"]','My Citrus');
+          await page.fill('textarea[name="description"]','Свежий цитрусовый микс');
+          const flavors=page.locator('[data-component-flavor]');
+          const percents=page.locator('[data-component-percent]');
+          await flavors.nth(0).fill('Лимон');
+          await percents.nth(0).fill('40');
+          await flavors.nth(1).fill('Грейпфрут');
+          await percents.nth(1).fill('35');
+          await flavors.nth(2).fill('Мята');
+          await percents.nth(2).fill('25');
+          const total=await page.locator('#communityPercentTotal').textContent();
+          if(total!=='100%') throw new Error('Percent total did not reach 100: '+total);
+          await page.click('.community-publish');
+          await page.waitForSelector('[data-community-card="cm_mine123"]',{timeout:10000});
+          if(!created) throw new Error('Create API was not called');
+
+          await page.click('[data-community-tab="top"]');
+          await page.waitForSelector('[data-community-card="cm_sample123"]',{timeout:10000});
+          await page.click('[data-community-open="cm_sample123"]');
+          await page.waitForSelector('[data-community-rate="cm_sample123"][data-rating="5"]',{timeout:5000});
+          await page.click('[data-community-rate="cm_sample123"][data-rating="5"]');
+          await page.waitForFunction(()=>document.querySelector('[data-community-card="cm_sample123"]')?.textContent?.includes('4.8'),null,{timeout:5000});
+
+          await page.click('[data-community-save="cm_sample123"]');
+          await page.waitForFunction(()=>document.querySelector('[data-community-save="cm_sample123"]')?.textContent?.includes('Сохранено'),null,{timeout:5000});
+
+          await page.click('[data-community-share="cm_sample123"]');
+          const share=await page.evaluate(()=>window.__shareUrl||'');
+          if(!share.includes('startapp%3Dcommunity_cm_sample123')) throw new Error('Share deep link missing: '+share);
+
+          await page.click('#communityClose');
+          await page.click('#alxBottomNav [data-tab="account"]');
+          await page.waitForSelector('#myAlxCommunity',{timeout:10000});
+          const accountText=await page.locator('#myAlxCommunity').textContent();
+          if(!accountText.includes('Community Mixes')) throw new Error('My ALX Community row missing');
+
+          if(errors.length) throw new Error('Page errors: '+errors.join(' | '));
+          console.log('PASS: Community PRO entry, create, rating, save, share and My ALX integration.');
+          await browser.close();
+          JS
+          node smoke.mjs
