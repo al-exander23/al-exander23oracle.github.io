@@ -7,7 +7,7 @@ import { initMixes, initOriginals, getAllMixes } from './mixes.js?v=1.26.0-oracl
 import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.26.0-oracle-first';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.26.0-oracle-first';
+const VERSION = '1.30.0-community-mvp';
 const OVERLAY_ID = 'alxProLibrary';
 const CONTENT_ID = 'alxProLibraryContent';
 
@@ -196,6 +196,18 @@ async function render() {
       ${activePlan ? '<strong>PRO</strong>' : '<button id="proLibraryUnlock" type="button">Открыть PRO</button>'}
     </section>
 
+    <section class="pro-community-entry">
+      <div class="pro-community-entry-top">
+        <div>
+          <span>PRO COMMUNITY</span>
+          <h3>Community Mixes</h3>
+        </div>
+        <span>${activePlan ? 'ДОСТУПНО' : 'ALX PRO'}</span>
+      </div>
+      <p>Создавай свои миксы, публикуй их для сообщества, получай оценки, следи за рейтингом и делись рецептами с другими пользователями.</p>
+      <button id="proCommunityOpen" type="button">${activePlan ? 'Открыть Community' : 'Открыть с PRO'}</button>
+    </section>
+
     <div class="pro-library-section-title">
       <span>Направления Оракула</span>
       <small>${activePlan ? 'Выбери одно — затем возвращайся к шару' : 'Доступны после активации ALX PRO'}</small>
@@ -216,6 +228,18 @@ async function render() {
     closeProLibrary();
     requestProPaywall('ALX PRO');
     trackAnalytics('pro_library_unlock_click', { version: VERSION, collection: 'all' });
+  });
+
+  content.querySelector('#proCommunityOpen')?.addEventListener('click', () => {
+    if (!getProState().active) {
+      closeProLibrary();
+      requestProPaywall('Community Mixes');
+      trackAnalytics('community_unlock_click', { version: VERSION, source: 'pro_library' });
+      return;
+    }
+    closeProLibrary({ returnHome: false });
+    window.dispatchEvent(new CustomEvent('alx-community-open', { detail: { view: 'top' } }));
+    trackAnalytics('community_entry_click', { version: VERSION, source: 'pro_library' });
   });
 
   content.querySelectorAll('[data-pro-select]').forEach((button) => {
