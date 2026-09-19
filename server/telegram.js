@@ -5,6 +5,7 @@ const crypto = require('crypto');
 
 const SUBSCRIPTION_PERIOD = 30 * 24 * 60 * 60; // Telegram currently requires exactly 30 days.
 const DEFAULT_PRICE_STARS = 149;
+const DEFAULT_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
 
 function getBotToken() {
   const token = String(process.env.TELEGRAM_BOT_TOKEN || '').trim();
@@ -135,6 +136,49 @@ function parseProPayload(payload) {
   return { userId, issuedAt, nonce, amount };
 }
 
+function miniAppUrl() {
+  const configured = String(process.env.ALX_MINI_APP_URL || '').trim();
+  return /^https:\/\//i.test(configured) ? configured : DEFAULT_MINI_APP_URL;
+}
+
+const BOT_COMMANDS = Object.freeze([
+  { command: 'start', description: 'Главная и запуск ALX Oracle' },
+  { command: 'pro', description: 'ALX PRO и премиальные направления' },
+  { command: 'help', description: 'Как пользоваться Оракулом' },
+  { command: 'paysupport', description: 'Оплата и восстановление PRO' },
+  { command: 'terms', description: 'Условия использования' },
+]);
+
+let presentationPromise = null;
+function ensureBotPresentation() {
+  if (presentationPromise) return presentationPromise;
+
+  presentationPromise = Promise.all([
+    telegramApi('setMyCommands', {
+      commands: BOT_COMMANDS,
+      scope: { type: 'all_private_chats' },
+    }),
+    telegramApi('setChatMenuButton', {
+      menu_button: {
+        type: 'web_app',
+        text: 'Открыть Оракул',
+        web_app: { url: miniAppUrl() },
+      },
+    }),
+    telegramApi('setMyDescription', {
+      description: 'ALX Oracle — персональный Оракул вкуса: готовые миксы, 7 PRO-направлений, ALX Originals и Community Mixes. 18+.',
+    }),
+    telegramApi('setMyShortDescription', {
+      short_description: 'Оракул вкуса: миксы, ALX PRO, Originals и Community. 18+.',
+    }),
+  ]).catch((error) => {
+    presentationPromise = null;
+    throw error;
+  });
+
+  return presentationPromise;
+}
+
 function publicBaseUrl(req) {
   const configured = String(process.env.ALX_PUBLIC_API_URL || '').trim().replace(/\/$/, '');
   if (/^https:\/\//i.test(configured)) return configured;
@@ -153,6 +197,9 @@ function ensureWebhook(req) {
     secret_token: getWebhookSecret(),
     allowed_updates: ['pre_checkout_query', 'message', 'callback_query'],
     drop_pending_updates: false,
+  }).then(async (result) => {
+    await ensureBotPresentation();
+    return result;
   }).catch((error) => {
     webhookPromise = null;
     throw error;
@@ -244,6 +291,7 @@ module.exports = {
   createProPayload,
   parseProPayload,
   ensureWebhook,
+  ensureBotPresentation,
   verifyWebhookRequest,
   findProEntitlement,
 };
