@@ -1,7 +1,7 @@
 // scenario-ui.js — UI ситуационного режима внутри уже существующего Taste Profile.
 // Главный экран и визуал шара не меняет.
 
-import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.31.0-community-oracle';
+import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.33.0-payment-audit';
 import {
   SCENARIO_OPTIONS,
   COLLECTION_OPTIONS,
@@ -11,7 +11,7 @@ import {
   describeScenario,
   getCollectionCounts,
   hasActiveScenario,
-} from './scenario.js?v=1.31.0-community-oracle';
+} from './scenario.js?v=1.33.0-payment-audit';
 import {
   isProActive,
   isPremiumCollection,
