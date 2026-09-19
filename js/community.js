@@ -1,7 +1,7 @@
 // community.js — ALX Community Mixes UI.
 // PRO-only publishing/rating with safe FREE shared previews.
 
-import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.31.0-community-oracle';
+import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.33.0-payment-audit';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
 const VERSION = '1.32.0-community-choice';
