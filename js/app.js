@@ -6,8 +6,8 @@
 
 import { initMixes } from './mixes.js?v=1.31.0-community-oracle';
 import { createGlobeRotator, spawnMotes } from './effects.js';
-import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js?v=1.31.0-community-oracle';
-import { initScene, requestOracle } from './scene.js?v=1.31.0-community-oracle';
+import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js?v=1.32.0-community-choice';
+import { initScene, requestOracle } from './scene.js?v=1.32.0-community-choice';
 import { getSettings } from './profile.js';
 import { recordVisit } from './daily.js?v=1.10.0';
 import { recordOracleResult, syncAchievements } from './achievements.js?v=1.11.0';
