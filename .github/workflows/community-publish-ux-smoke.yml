@@ -19,7 +19,7 @@ jobs:
           for i in $(seq 1 48); do
             BODY=$(curl -fsSL 'https://alx-pay.alxoracle.workers.dev/api/community/health' || true)
             echo "$BODY"
-            if echo "$BODY" | grep -q '"version":"1.30.3-publish-proof"'; then
+            if echo "$BODY" | grep -q '"version":"1.30.2-publish-feedback"'; then
               echo "BACKEND=$BODY"
               break
             fi
