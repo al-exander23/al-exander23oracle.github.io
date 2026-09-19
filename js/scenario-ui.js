@@ -16,7 +16,7 @@ import {
   isProActive,
   isPremiumCollection,
   requestProPaywall,
-} from './pro.js?v=1.31.0-community-oracle';
+} from './pro.js?v=1.33.0-payment-audit';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
