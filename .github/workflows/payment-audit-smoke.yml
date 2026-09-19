@@ -1,0 +1,238 @@
+name: Temporary Payment Audit
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  payment-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify shared frontend module graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const files = fs.readdirSync('js').filter(name => name.endsWith('.js'));
+          const shared = /from\s+['"]\.\/(pro|mixes|daily|analytics|achievements|scenario|ui|scene|oracle|pro-library)\.js(?:\?v=([^'"]+))?['"]/g;
+          const bad = [];
+          for (const file of files) {
+            const src = fs.readFileSync(path.join('js', file), 'utf8');
+            for (const match of src.matchAll(shared)) {
+              if (match[2] !== '1.33.0-payment-audit') {
+                bad.push(`${file}: ${match[0]}`);
+              }
+            }
+          }
+          if (bad.length) {
+            console.error('Mixed shared module URLs found:\n' + bad.join('\n'));
+            process.exit(1);
+          }
+          console.log('MODULE_GRAPH_OK');
+          NODE
+
+      - name: Unit-test YooKassa webhook hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp cloudflare/worker.js /tmp/alx-worker.mjs
+          node --input-type=module <<'NODE'
+          const { default: worker } = await import('file:///tmp/alx-worker.mjs?' + Date.now());
+
+          function makeDb(storedPayment) {
+            const state = { granted: false, paymentUpdated: false };
+            return {
+              state,
+              prepare(sql) {
+                const stmt = {
+                  args: [],
+                  bind(...args) { this.args = args; return this; },
+                  async first() {
+                    if (/FROM payments/i.test(sql)) return storedPayment;
+                    if (/SELECT expires_at FROM entitlements/i.test(sql)) return null;
+                    return null;
+                  },
+                  async run() {
+                    if (/UPDATE payments SET status/i.test(sql)) state.paymentUpdated = true;
+                    if (/INSERT INTO entitlements/i.test(sql)) state.granted = true;
+                    return { success: true };
+                  }
+                };
+                return stmt;
+              }
+            };
+          }
+
+          const providerPayment = {
+            id: 'pay-audit-1',
+            status: 'succeeded',
+            paid: true,
+            amount: { currency: 'RUB', value: '299.00' },
+            metadata: {
+              telegram_user_id: '424242',
+              plan: 'alx-pro-30d',
+              source: 'yookassa'
+            }
+          };
+
+          globalThis.fetch = async (url) => {
+            if (String(url).includes('api.yookassa.ru/v3/payments/pay-audit-1')) {
+              return new Response(JSON.stringify(providerPayment), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+              });
+            }
+            throw new Error('Unexpected fetch: ' + url);
+          };
+
+          const baseEnv = {
+            YOOKASSA_SHOP_ID: 'live-shop',
+            YOOKASSA_SECRET_KEY: 'test-secret-only-in-ci',
+            ALX_EXTERNAL_PRICE_RUB: '299',
+            SESSION_SECRET: 'session-secret',
+          };
+
+          async function webhook(db) {
+            const request = new Request('https://alx-pay.example/api/yookassa/webhook', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ event: 'payment.succeeded', object: { id: 'pay-audit-1' } })
+            });
+            return worker.fetch(request, { ...baseEnv, DB: db });
+          }
+
+          const missing = makeDb(null);
+          const missingResponse = await webhook(missing);
+          if (missingResponse.status !== 400 || missing.state.granted) {
+            throw new Error('Webhook granted PRO for payment absent from D1');
+          }
+
+          const valid = makeDb({
+            id: 'pay-audit-1',
+            telegram_user_id: '424242',
+            provider: 'yookassa',
+            amount_rub: 299
+          });
+          const validResponse = await webhook(valid);
+          if (validResponse.status !== 200 || !valid.state.granted || !valid.state.paymentUpdated) {
+            throw new Error('Valid ALX Pay payment did not grant PRO');
+          }
+
+          const unauthorizedDb = makeDb(null);
+          const unauthorized = await worker.fetch(
+            new Request('https://alx-pay.example/api/payment/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ method: 'bank_card' })
+            }),
+            { ...baseEnv, DB: unauthorizedDb }
+          );
+          if (unauthorized.status !== 401) {
+            throw new Error('Unauthenticated payment create must return 401, got ' + unauthorized.status);
+          }
+
+          console.log('YOOKASSA_HARDENING_OK');
+          NODE
+
+      - name: Verify Telegram Stars production backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://al-exander23oracle-github-io.vercel.app"
+
+          HEALTH="$(curl -fsSL --max-time 20 "$BASE/api/health")"
+          echo "$HEALTH"
+          HEALTH="$HEALTH" node - <<'NODE'
+          const data = JSON.parse(process.env.HEALTH || '{}');
+          if (data.ok !== true || data.service !== 'alx-oracle-stars') throw new Error('Stars health failed');
+          if (data.telegramConfigured !== true) throw new Error('Telegram bot token is not configured');
+          if (Number(data.priceStars) !== 149) throw new Error('Expected 149 Stars');
+          if (data.externalPayEntitlements !== true) throw new Error('External entitlement bridge is disabled');
+          console.log('STARS_HEALTH_OK');
+          NODE
+
+          for endpoint in stars-create-invoice stars-status; do
+            code="$(curl -sS --max-time 20 -o /tmp/$endpoint.json -w '%{http_code}' \
+              -X POST "$BASE/api/$endpoint" \
+              -H 'Content-Type: application/json' \
+              --data '{"initData":"invalid"}')"
+            cat /tmp/$endpoint.json
+            test "$code" = "401"
+          done
+          echo "STARS_AUTH_GUARDS_OK"
+
+      - name: Verify live YooKassa worker and hardened auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://alx-pay.alxoracle.workers.dev"
+
+          for i in $(seq 1 30); do
+            curl -sS --max-time 20 -D /tmp/config.headers -o /tmp/config.json "$BASE/api/config" || true
+            CREATE_CODE="$(curl -sS --max-time 20 -o /tmp/create.json -w '%{http_code}' \
+              -X POST "$BASE/api/payment/create" \
+              -H 'Content-Type: application/json' \
+              --data '{"method":"bank_card"}' || true)"
+
+            if grep -qi '^x-alx-payment-mode: live' /tmp/config.headers \
+              && grep -qi '^x-alx-live-ready: yes' /tmp/config.headers \
+              && [ "$CREATE_CODE" = "401" ]; then
+              break
+            fi
+            sleep 10
+          done
+
+          cat /tmp/config.json
+          cat /tmp/create.json
+
+          grep -qi '^x-alx-payment-mode: live' /tmp/config.headers
+          grep -qi '^x-alx-live-ready: yes' /tmp/config.headers
+          test "$CREATE_CODE" = "401"
+
+          CONFIG="$(cat /tmp/config.json)"
+          CONFIG="$CONFIG" node - <<'NODE'
+          const data = JSON.parse(process.env.CONFIG || '{}');
+          if (data.ok !== true) throw new Error('ALX Pay config failed');
+          if (data.offer?.enabled !== true) throw new Error('Live YooKassa channel is disabled');
+          if (Number(data.offer?.priceRub) !== 299) throw new Error('Expected live price 299 RUB');
+          if (Number(data.offer?.periodDays) !== 30) throw new Error('Expected 30-day PRO period');
+          console.log('YOOKASSA_LIVE_OK');
+          NODE
+
+          SESSION="$(curl -fsSL --max-time 20 "$BASE/api/session")"
+          SESSION="$SESSION" node - <<'NODE'
+          const data = JSON.parse(process.env.SESSION || '{}');
+          if (data.ok !== true || data.session !== null) throw new Error('Anonymous session endpoint mismatch');
+          NODE
+
+          MINI_CODE="$(curl -sS --max-time 20 -o /tmp/mini.json -w '%{http_code}' \
+            -X POST "$BASE/api/miniapp/status" \
+            -H 'Content-Type: application/json' \
+            --data '{"initData":"invalid"}')"
+          test "$MINI_CODE" = "401"
+          echo "YOOKASSA_AUTH_GUARDS_OK"
+
+      - name: Verify GitHub Pages payment-audit release
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://al-exander23.github.io/al-exander23oracle.github.io"
+          for i in $(seq 1 30); do
+            HTML="$(curl -fsSL --max-time 20 "$BASE/?sha=${GITHUB_SHA}" || true)"
+            if printf '%s' "$HTML" | grep -Fq 'js/pro-ui.js?v=1.33.0-payment-audit' \
+              && printf '%s' "$HTML" | grep -Fq 'js/app.js?v=1.33.0-payment-audit'; then
+              echo "PAGES_PAYMENT_AUDIT_OK"
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
