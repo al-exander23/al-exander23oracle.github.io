@@ -1,7 +1,7 @@
 // oracle.js — «мозг» приложения.
 // Интегрирована персонализация с безопасным откатом к случайному выбору.
 
-import { getMixes, getAllMixes } from './mixes.js?v=1.23.0-originals';
+import { getMixes, getCollectionMixes } from './mixes.js?v=1.31.0-community-oracle';
 import { selectWeightedMix } from './personalization.js';
 import { selectScenarioMix, getScenario } from './scenario.js?v=1.23.0-originals';
 
@@ -181,8 +181,8 @@ function pickMix(mixes) {
 
 export function oracleChooseMix(context = {}) {
   const scenario = getScenario();
-  const mixes = scenario.collection === 'originals'
-    ? getAllMixes().filter((mix) => String(mix?.exclusiveCollection || '').toLowerCase() === 'originals')
+  const mixes = ['originals', 'community'].includes(scenario.collection)
+    ? getCollectionMixes(scenario.collection)
     : getMixes();
 
   if (!mixes.length) {
