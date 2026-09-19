@@ -2,7 +2,7 @@
 // Capture phase prevents the legacy hidden PRO button from opening the old
 // purchase sheet first. Purchase still opens from explicit library CTAs.
 
-import { openProLibrary } from './pro-library.js?v=1.30.0-community-mvp';
+import { openProLibrary } from './pro-library.js?v=1.31.0-community-oracle';
 
 function markProTabActive() {
   document.querySelectorAll('#alxBottomNav .alx-bottom-nav-btn').forEach((button) => {
