@@ -3,7 +3,7 @@
 
 import { getItem, setItem } from './storage.js';
 import { getTasteProfile } from './profile.js';
-import { getVisitStats } from './daily.js?v=1.10.0';
+import { getVisitStats } from './daily.js?v=1.33.0-payment-audit';
 
 const KEY = 'alx_oracle_achievement_stats';
 
