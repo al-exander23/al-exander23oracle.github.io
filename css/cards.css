@@ -64,6 +64,28 @@
 }
 .fav-btn.pop{ animation: heart-pop .4s ease; }
 
+.mix-card-rating--community{
+  white-space:normal;
+  color:#d8c7ff;
+}
+
+.mix-card-community-badge{
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  max-width:100%;
+  margin:7px 0 2px;
+  padding:6px 9px;
+  border-radius:999px;
+  border:1px solid rgba(190,165,255,.24);
+  background:rgba(165,139,255,.07);
+  color:#d8c7ff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  line-height:1.25;
+  letter-spacing:.04em;
+}
+
 .mix-card-desc{
   font-size: 12.5px;
   line-height: 1.55;
