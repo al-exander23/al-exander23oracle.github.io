@@ -2,7 +2,7 @@
 // User recipes are isolated from the official Oracle/ALX Originals pool.
 
 const DEFAULT_PRO_STATUS_API = 'https://al-exander23oracle-github-io.vercel.app/api/stars-status';
-const VERSION = '1.30.2-publish-feedback';
+const VERSION = '1.31.0-community-oracle';
 const UPSTREAM_TIMEOUT_MS = 8000;
 const MAX_CREATE_PER_24H = 5;
 const enc = new TextEncoder();
@@ -385,6 +385,7 @@ async function listMixes(env, userId, mode) {
   let order = 'm.created_at DESC';
   if (mode === 'mine') where += ' AND m.telegram_user_id = ?';
   if (mode === 'saved') where += ' AND (s.telegram_user_id IS NOT NULL OR m.telegram_user_id = ?)';
+  if (mode === 'oracle') order = 'RANDOM()';
   if (mode === 'top') {
     order = `
       (((CASE WHEN m.rating_count > 0 THEN (m.rating_sum * 1.0 / m.rating_count) ELSE 4.0 END) * m.rating_count + 20.0)
@@ -397,12 +398,13 @@ async function listMixes(env, userId, mode) {
 
   const bindings = [String(userId), String(userId)];
   if (mode === 'mine' || mode === 'saved') bindings.push(String(userId));
+  const limit = mode === 'oracle' ? 200 : 50;
 
   const result = await env.DB.prepare(`
     ${baseSelect()}
     WHERE ${where}
     ORDER BY ${order}
-    LIMIT 50
+    LIMIT ${limit}
   `).bind(...bindings).all();
 
   const rows = result?.results || [];
@@ -492,7 +494,7 @@ async function list(request, env, body) {
   const { user } = await authorize(body, env);
   await ensureSchema(env);
   const requested = String(body?.view || 'top').toLowerCase();
-  const mode = ['top', 'new', 'mine', 'saved'].includes(requested) ? requested : 'top';
+  const mode = ['top', 'new', 'mine', 'saved', 'oracle'].includes(requested) ? requested : 'top';
   const mixes = await listMixes(env, user.id, mode);
   return json(request, env, { ok: true, version: VERSION, view: mode, mixes });
 }
