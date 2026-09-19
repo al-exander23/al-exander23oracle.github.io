@@ -3,7 +3,7 @@
 
 import { getMixes, getCollectionMixes } from './mixes.js?v=1.31.0-community-oracle';
 import { selectWeightedMix } from './personalization.js';
-import { selectScenarioMix, getScenario } from './scenario.js?v=1.23.0-originals';
+import { selectScenarioMix, getScenario } from './scenario.js?v=1.31.0-community-oracle';
 
 export const oracleMessages = {
   mysterious: [
