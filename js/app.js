@@ -4,10 +4,10 @@
 // Вся детальная последовательность сцены (fade/дым/фраза/reveal/карточка)
 // теперь целиком живёт в scene.js — этот файл её не знает и не должна.
 
-import { initMixes } from './mixes.js?v=1.31.0-community-oracle';
+import { initMixes } from './mixes.js?v=1.33.0-payment-audit';
 import { createGlobeRotator, spawnMotes } from './effects.js';
-import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js?v=1.32.0-community-choice';
-import { initScene, requestOracle } from './scene.js?v=1.32.0-community-choice';
+import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js?v=1.33.0-payment-audit';
+import { initScene, requestOracle } from './scene.js?v=1.33.0-payment-audit';
 import { getSettings } from './profile.js';
 import { recordVisit } from './daily.js?v=1.10.0';
 import { recordOracleResult, syncAchievements } from './achievements.js?v=1.11.0';
