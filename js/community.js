@@ -459,7 +459,7 @@ function renderPublishSuccess(mix) {
       <div class="community-success-mark" aria-hidden="true">✓</div>
       <span>ОПУБЛИКОВАНО В COMMUNITY</span>
       <h3>${esc(mix.title || 'Новый микс')}</h3>
-      <p>Микс успешно опубликован. Он уже доступен другим участникам Community и автоматически находится в разделах «Мои» и «Сохранённые».</p>
+      <p>Микс успешно опубликован. Он доступен другим участникам Community, находится в «Мои» и «Сохранённые» и может выпадать из шара в режиме Community Mixes.</p>
       <div class="community-success-summary">
         <div><small>Автор</small><b>${esc(mix.author || defaultAuthor())}</b></div>
         <div><small>Статус</small><b>Опубликован</b></div>
@@ -469,7 +469,7 @@ function renderPublishSuccess(mix) {
         <button type="button" class="community-success-primary" data-success-open>Открыть мой микс</button>
         <button type="button" data-success-mine>Перейти в мои миксы</button>
       </div>
-      <small class="community-success-note">После первой оценки у микса появятся рейтинг и место в общем списке.</small>
+      <small class="community-success-note">После первой оценки у микса появятся рейтинг и место в общем списке. В режиме Community Mixes шар выбирает опубликованные рецепты участников.</small>
     </section>`;
 
   const goMine = async (open = false) => {
