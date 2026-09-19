@@ -1,10 +1,10 @@
 // community.js — ALX Community Mixes UI.
 // PRO-only publishing/rating with safe FREE shared previews.
 
-import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.23.0-originals';
+import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.31.0-community-oracle';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.30.3-publish-proof';
+const VERSION = '1.31.0-community-oracle';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';
 const OVERLAY_ID = 'alxCommunity';
 const CONTENT_ID = 'alxCommunityContent';
