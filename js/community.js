@@ -4,7 +4,7 @@
 import { getProState, requestProPaywall } from './pro.js?v=1.23.0-originals';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.30.2-publish-feedback';
+const VERSION = '1.30.3-publish-proof';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';
 const OVERLAY_ID = 'alxCommunity';
 const CONTENT_ID = 'alxCommunityContent';
@@ -451,7 +451,7 @@ function renderCreateForm() {
       <button type="button" data-community-back>← Назад</button>
       <div><span>НОВАЯ ПУБЛИКАЦИЯ</span><h3>Создать Community-микс</h3></div>
     </section>
-    <form id="communityCreateForm" class="community-form">
+    <form id="communityCreateForm" class="community-form" novalidate>
       <label>
         <span>Название</span>
         <input name="title" type="text" maxlength="60" minlength="2" required placeholder="Например: Cherry Night">
@@ -549,35 +549,71 @@ function renderCreateForm() {
     event.preventDefault();
     const submit = form.querySelector('.community-publish');
     const message = root.querySelector('#communityFormMessage');
+    const title = String(form.elements.title.value || '').trim();
+    const authorName = String(form.elements.authorName.value || '').trim();
     const recipe = [...form.querySelectorAll('[data-component-row]')].map((row) => ({
-      flavor: row.querySelector('[data-component-flavor]')?.value || '',
+      flavor: String(row.querySelector('[data-component-flavor]')?.value || '').trim(),
       percent: Number(row.querySelector('[data-component-percent]')?.value || 0),
     }));
-    const total = Math.round(recipe.reduce((sum, item) => sum + item.percent, 0) * 10) / 10;
+    const filledRecipe = recipe.filter((item) => item.flavor || item.percent > 0);
+    const total = Math.round(filledRecipe.reduce((sum, item) => sum + item.percent, 0) * 10) / 10;
+
+    const failBeforeSend = (text) => {
+      message.className = 'community-form-message is-error';
+      message.innerHTML = `<b>НЕ ОПУБЛИКОВАНО</b><span>${esc(text)}</span>`;
+      submit.disabled = false;
+      submit.textContent = 'Опубликовать в Community';
+      message.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      try { window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error'); } catch (error) { /* non-fatal */ }
+    };
+
+    if (title.length < 2) {
+      failBeforeSend('Добавь название микса — минимум 2 символа.');
+      return;
+    }
+    if (authorName.length < 2) {
+      failBeforeSend('Укажи имя автора, которое увидят другие пользователи.');
+      return;
+    }
+    if (filledRecipe.length < MIN_COMPONENTS || filledRecipe.length > MAX_COMPONENTS) {
+      failBeforeSend('Добавь от 2 до 6 заполненных вкусов.');
+      return;
+    }
+    if (filledRecipe.some((item) => !item.flavor || !Number.isFinite(item.percent) || item.percent <= 0)) {
+      failBeforeSend('У каждого вкуса должны быть название и процент больше 0.');
+      return;
+    }
     if (Math.abs(total - 100) > 0.01) {
-      message.textContent = 'Сумма пропорций должна быть ровно 100%.';
+      failBeforeSend(`Сумма пропорций сейчас ${total}%. Нужно ровно 100%.`);
       return;
     }
 
     submit.disabled = true;
     submit.textContent = 'Публикую…';
-    message.textContent = '';
+    message.className = 'community-form-message is-pending';
+    message.innerHTML = '<b>ПУБЛИКАЦИЯ…</b><span>Проверяю Telegram, PRO и сохраняю рецепт в Community.</span>';
 
     try {
       const data = await apiPost('create', {
-        title: form.elements.title.value,
-        authorName: form.elements.authorName.value,
+        title,
+        authorName,
         description: form.elements.description.value,
         strength: form.elements.strength.value ? Number(form.elements.strength.value) : null,
-        recipe,
+        recipe: filledRecipe,
       }, 15000);
       if (!data?.mix?.id) throw new Error('Публикация не подтверждена сервером. Попробуй ещё раз.');
       trackAnalytics('community_create', { version: VERSION, components: recipe.length });
       renderPublishSuccess(data.mix);
     } catch (error) {
-      message.textContent = error.message || 'Не удалось опубликовать микс.';
+      const reason = error?.message || 'Сервер не подтвердил публикацию.';
+      message.className = 'community-form-message is-error';
+      message.innerHTML = `<b>НЕ ОПУБЛИКОВАНО</b><span>${esc(reason)}</span><small>Рецепт не потерян — исправь причину и нажми кнопку ещё раз.</small>`;
       submit.disabled = false;
-      submit.textContent = 'Опубликовать в Community';
+      submit.textContent = 'Попробовать снова';
+      message.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      toast('Микс не опубликован');
+      try { window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error'); } catch (hapticError) { /* non-fatal */ }
+      trackAnalytics('community_create_failed', { version: VERSION, reason: String(error?.status || 'client') });
     }
   });
 }
