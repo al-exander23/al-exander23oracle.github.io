@@ -8,11 +8,15 @@ let cache = null;
 let loadPromise = null;
 let originalsPromise = null;
 let originalsLoaded = false;
+let communityPromise = null;
+let communityLoaded = false;
 
 const DATA_VERSION = '1.23.0-originals';
 const FETCH_TIMEOUT = 6000;
 const ORIGINALS_COLLECTION = 'originals';
+const COMMUNITY_COLLECTION = 'community';
 const DEFAULT_API_BASE = 'https://al-exander23oracle-github-io.vercel.app';
+const COMMUNITY_API_BASE = 'https://alx-pay.alxoracle.workers.dev';
 
 async function fetchJson(path, { required = false } = {}) {
   const abortCtrl = new AbortController();
@@ -48,6 +52,66 @@ function apiBase() {
 
 function telegramInitData() {
   return String(window.Telegram?.WebApp?.initData || '').trim();
+}
+
+function normalizeCommunityMix(item) {
+  if (!item || typeof item.id !== 'string' || !Array.isArray(item.recipe) || !item.recipe.length) return null;
+  return {
+    id: item.id,
+    name: String(item.title || 'Community Mix'),
+    description: String(item.description || ''),
+    recipe: item.recipe.map((part) => ({
+      flavor: String(part?.flavor || '').trim(),
+      percent: Number(part?.percent || 0),
+    })).filter((part) => part.flavor && Number.isFinite(part.percent) && part.percent > 0),
+    rating: Number(item.ratingCount || 0) > 0 ? Number(item.rating || 0) : null,
+    ratingCount: Number(item.ratingCount || 0),
+    popularity: Number(item.ratingCount || 0) > 0
+      ? Math.max(0, Math.min(100, Math.round((Number(item.rating || 0) / 5) * 100)))
+      : 50,
+    strength: Number(item.strength || 0) || null,
+    author: String(item.author || 'Участник Community'),
+    communityMix: true,
+    communityMemberMix: true,
+    proOnly: true,
+    hiddenUntilPro: true,
+    exclusiveCollection: COMMUNITY_COLLECTION,
+    collections: [COMMUNITY_COLLECTION],
+    source: 'community',
+  };
+}
+
+async function fetchCommunitySecure() {
+  if (!isProActive()) return [];
+
+  const initData = telegramInitData();
+  if (!initData) {
+    console.warn('[mixes.js] Community Oracle requires verified Telegram Mini App session');
+    return [];
+  }
+
+  const abortCtrl = new AbortController();
+  const timer = setTimeout(() => abortCtrl.abort(), FETCH_TIMEOUT);
+  try {
+    const response = await fetch(`${COMMUNITY_API_BASE}/api/community/list`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData, view: 'oracle' }),
+      cache: 'no-store',
+      signal: abortCtrl.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data?.ok || !Array.isArray(data.mixes)) {
+      console.warn('[mixes.js] Community Oracle access denied/unavailable:', response.status);
+      return [];
+    }
+    return data.mixes.map(normalizeCommunityMix).filter((mix) => mix && mix.recipe.length);
+  } catch (error) {
+    console.warn('[mixes.js] Community Oracle secure load failed:', error);
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function fetchOriginalsSecure() {
@@ -133,6 +197,27 @@ export function initMixes() {
   return loadPromise;
 }
 
+export async function initCommunityMixes({ force = false } = {}) {
+  if (!isProActive()) return [];
+  if (communityLoaded && !force) return getCollectionMixes(COMMUNITY_COLLECTION);
+  if (communityPromise) return communityPromise;
+
+  communityPromise = fetchCommunitySecure()
+    .then((community) => {
+      cache = mergeUnique(
+        (cache || []).filter((mix) => String(mix?.exclusiveCollection || '').toLowerCase() !== COMMUNITY_COLLECTION),
+        community,
+      );
+      communityLoaded = community.length > 0;
+      return community;
+    })
+    .finally(() => {
+      communityPromise = null;
+    });
+
+  return communityPromise;
+}
+
 export async function initOriginals() {
   if (!isProActive()) return [];
   if (originalsLoaded) return getCollectionMixes(ORIGINALS_COLLECTION);
@@ -177,7 +262,9 @@ export function getCollectionMixes(collectionId) {
 }
 
 export function hasMixes() {
-  return getMixes().length > 0 || (isProActive() && getCollectionMixes(ORIGINALS_COLLECTION).length > 0);
+  return getMixes().length > 0
+    || (isProActive() && getCollectionMixes(ORIGINALS_COLLECTION).length > 0)
+    || (isProActive() && getCollectionMixes(COMMUNITY_COLLECTION).length > 0);
 }
 
 export function getMixById(id) {
