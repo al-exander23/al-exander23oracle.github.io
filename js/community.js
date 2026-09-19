@@ -4,7 +4,7 @@
 import { getProState, requestProPaywall } from './pro.js?v=1.23.0-originals';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.30.0-community-mvp';
+const VERSION = '1.30.2-publish-feedback';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';
 const OVERLAY_ID = 'alxCommunity';
 const CONTENT_ID = 'alxCommunityContent';
@@ -162,7 +162,7 @@ function setActiveTab(root) {
 
 function emptyCopy(view) {
   if (view === 'mine') return ['У тебя пока нет опубликованных миксов.', 'Создай первый рецепт и отправь его в рейтинг Community.'];
-  if (view === 'saved') return ['Сохранённых миксов пока нет.', 'Открывай рецепты других авторов и сохраняй понравившиеся.'];
+  if (view === 'saved') return ['Сохранённых миксов пока нет.', 'Здесь будут твои опубликованные миксы и рецепты других авторов, которые ты сохранишь.'];
   if (view === 'new') return ['Новых миксов пока нет.', 'Стань первым автором Community.'];
   return ['Рейтинг пока пуст.', 'Первый опубликованный рецепт сразу появится здесь.'];
 }
@@ -221,9 +221,11 @@ function mixCard(mix) {
         </div>
         ${ratingButtons(mix)}
         <div class="community-actions">
-          <button type="button" data-community-save="${esc(mix.id)}" class="${mix.saved ? 'active' : ''}">
-            ${mix.saved ? 'Сохранено' : 'Сохранить'}
-          </button>
+          ${mix.isMine
+            ? '<button type="button" class="active" disabled>В сохранённых</button>'
+            : `<button type="button" data-community-save="${esc(mix.id)}" class="${mix.saved ? 'active' : ''}">
+                ${mix.saved ? 'Сохранено' : 'Сохранить'}
+              </button>`}
           <button type="button" data-community-share="${esc(mix.id)}">Поделиться</button>
           ${mix.isMine
             ? `<button type="button" class="danger" data-community-delete="${esc(mix.id)}">Снять с публикации</button>`
@@ -400,6 +402,47 @@ function componentRow(index, flavor = '', percent = '') {
     </div>`;
 }
 
+function renderPublishSuccess(mix) {
+  const root = document.getElementById(CONTENT_ID);
+  if (!root || !mix?.id) return;
+
+  root.innerHTML = `
+    <section class="community-publish-success">
+      <div class="community-success-mark" aria-hidden="true">✓</div>
+      <span>ОПУБЛИКОВАНО В COMMUNITY</span>
+      <h3>${esc(mix.title || 'Новый микс')}</h3>
+      <p>Микс успешно опубликован. Он уже доступен другим участникам Community и автоматически находится в разделах «Мои» и «Сохранённые».</p>
+      <div class="community-success-summary">
+        <div><small>Автор</small><b>${esc(mix.author || defaultAuthor())}</b></div>
+        <div><small>Статус</small><b>Опубликован</b></div>
+        <div><small>Рейтинг</small><b>Ждёт оценок</b></div>
+      </div>
+      <div class="community-success-actions">
+        <button type="button" class="community-success-primary" data-success-open>Открыть мой микс</button>
+        <button type="button" data-success-mine>Перейти в мои миксы</button>
+      </div>
+      <small class="community-success-note">После первой оценки у микса появятся рейтинг и место в общем списке.</small>
+    </section>`;
+
+  const goMine = async (open = false) => {
+    currentView = 'mine';
+    root.innerHTML = shellHtml();
+    wireShell(root);
+    await loadView('mine');
+    if (open) {
+      const exists = mixes.some((item) => item.id === mix.id);
+      if (exists) {
+        openedId = mix.id;
+        renderList();
+        document.querySelector(`[data-community-card="${CSS.escape(mix.id)}"]`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+    }
+  };
+
+  root.querySelector('[data-success-open]')?.addEventListener('click', () => goMine(true));
+  root.querySelector('[data-success-mine]')?.addEventListener('click', () => goMine(false));
+}
+
 function renderCreateForm() {
   const root = document.getElementById(CONTENT_ID);
   if (!root) return;
@@ -521,19 +564,16 @@ function renderCreateForm() {
     message.textContent = '';
 
     try {
-      await apiPost('create', {
+      const data = await apiPost('create', {
         title: form.elements.title.value,
         authorName: form.elements.authorName.value,
         description: form.elements.description.value,
         strength: form.elements.strength.value ? Number(form.elements.strength.value) : null,
         recipe,
       }, 15000);
-      toast('Микс опубликован');
+      if (!data?.mix?.id) throw new Error('Публикация не подтверждена сервером. Попробуй ещё раз.');
       trackAnalytics('community_create', { version: VERSION, components: recipe.length });
-      currentView = 'mine';
-      root.innerHTML = shellHtml();
-      wireShell(root);
-      await loadView('mine');
+      renderPublishSuccess(data.mix);
     } catch (error) {
       message.textContent = error.message || 'Не удалось опубликовать микс.';
       submit.disabled = false;
