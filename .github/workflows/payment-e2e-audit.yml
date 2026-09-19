@@ -221,6 +221,9 @@ jobs:
             const proTab = page.locator('#alxBottomNav [data-tab="pro"]');
             await expect(proTab).toBeVisible({ timeout: 10000 });
             await proTab.click();
+            const unlock = page.locator('#proLibraryUnlock');
+            await expect(unlock).toBeVisible({ timeout: 10000 });
+            await unlock.click();
             const checkout = page.locator('#proCheckout');
             await expect(checkout).toContainText('149 ⭐', { timeout: 10000 });
             await checkout.click();
