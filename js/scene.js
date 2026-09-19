@@ -14,8 +14,9 @@
 // ui.js и effects.js сами ничего не решают, они только делают то, что им
 // сказал SceneController, и отчитываются Promise'ом.
 
-import { initMixes, hasMixes } from './mixes.js?v=1.23.0-originals';
-import { oracleChooseMix } from './oracle.js?v=1.23.0-originals';
+import { initMixes, initCommunityMixes, hasMixes } from './mixes.js?v=1.31.0-community-oracle';
+import { oracleChooseMix } from './oracle.js?v=1.31.0-community-oracle';
+import { getScenario } from './scenario.js?v=1.31.0-community-oracle';
 import { createGlobeRotator, spawnSmoke } from './effects.js';
 import { prepareOrbText, typeOrbText, prepareOraclePhrase, typeOraclePhrase, renderCard, showToast } from './ui.js?v=1.23.0-originals';
 import { addToHistory } from './profile.js';
@@ -196,6 +197,9 @@ export async function requestOracle() {
   try {
     await withTimeout(async (sig) => {
       await initMixes();
+      if (getScenario().collection === 'community') {
+        await initCommunityMixes();
+      }
       if (sig.aborted) throw new DOMException('Сцена отменена', 'AbortError');
       if (!hasMixes()) throw new Error('Список миксов пуст или не загрузился');
     }, signal, 'PREPARING');
