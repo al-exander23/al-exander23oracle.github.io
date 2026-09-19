@@ -64,6 +64,14 @@ function buildRatingLine(mix) {
     return el;
   }
 
+  if (mix?.communityMix === true) {
+    el.className = 'mix-card-rating mix-card-rating--community';
+    el.textContent = mix.rating != null
+      ? `COMMUNITY · ★ ${Number(mix.rating).toFixed(1)} · ${Number(mix.ratingCount || 0)} оценок`
+      : 'COMMUNITY · микс участника';
+    return el;
+  }
+
   if (mix.rating != null) {
     el.className = 'mix-card-rating';
     el.textContent = `★ ${mix.rating.toFixed(1)}`;
@@ -118,9 +126,17 @@ export function renderCard(cardEl, mix) {
   head.appendChild(title);
   head.appendChild(actionsWrap);
 
+  const provenance = mix?.communityMix === true ? document.createElement('div') : null;
+  if (provenance) {
+    provenance.className = 'mix-card-community-badge';
+    provenance.textContent = `Микс участника Community · ${mix.author || 'участник сообщества'}`;
+  }
+
   const desc = document.createElement('div');
   desc.className = 'mix-card-desc';
-  desc.textContent = mix.description;
+  desc.textContent = mix.description || (mix?.communityMix === true
+    ? 'Пользовательский рецепт, опубликованный участником ALX Community.'
+    : '');
 
   const compositionLabel = document.createElement('div');
   compositionLabel.className = 'mix-card-section-label';
@@ -143,6 +159,7 @@ export function renderCard(cardEl, mix) {
   const cardParts = [
     head,
     buildRatingLine(mix),
+    ...(provenance ? [provenance] : []),
     desc,
     compositionLabel,
     buildChips(mix),
