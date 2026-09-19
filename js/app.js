@@ -9,8 +9,8 @@ import { createGlobeRotator, spawnMotes } from './effects.js';
 import { renderIdleState, showToast, openSheet, closeSheet } from './ui.js?v=1.33.0-payment-audit';
 import { initScene, requestOracle } from './scene.js?v=1.33.0-payment-audit';
 import { getSettings } from './profile.js';
-import { recordVisit } from './daily.js?v=1.10.0';
-import { recordOracleResult, syncAchievements } from './achievements.js?v=1.11.0';
+import { recordVisit } from './daily.js?v=1.33.0-payment-audit';
+import { recordOracleResult, syncAchievements } from './achievements.js?v=1.33.0-payment-audit';
 
 // ---------------------------------------------------------------
 // ALX VISUAL FORENSICS (v1.2.5) — временный диагностический код.
