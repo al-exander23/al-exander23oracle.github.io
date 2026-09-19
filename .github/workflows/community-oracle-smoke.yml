@@ -15,6 +15,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify live Community backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          HEALTH="$(curl -fsSL --max-time 20 https://alx-pay.alxoracle.workers.dev/api/community/health)"
+          echo "$HEALTH"
+          HEALTH="$HEALTH" node - <<'NODE'
+          const health = JSON.parse(process.env.HEALTH || '{}');
+          if (health.ok !== true) throw new Error('Community health is not ok');
+          if (health.version !== '1.31.0-community-oracle') {
+            throw new Error(`Expected live backend 1.31.0-community-oracle, got ${health.version}`);
+          }
+          if (Number(health.published || 0) < 1) {
+            throw new Error(`Expected at least 1 published Community mix, got ${health.published}`);
+          }
+          console.log(`LIVE_BACKEND_OK version=${health.version} total=${health.total} published=${health.published}`);
+          NODE
+
       - name: Wait for GitHub Pages to contain current Community Oracle wiring
         shell: bash
         run: |
