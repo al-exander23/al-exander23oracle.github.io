@@ -18,7 +18,7 @@ import { initMixes, initCommunityMixes, hasMixes } from './mixes.js?v=1.31.0-com
 import { oracleChooseMix } from './oracle.js?v=1.31.0-community-oracle';
 import { getScenario } from './scenario.js?v=1.31.0-community-oracle';
 import { createGlobeRotator, spawnSmoke } from './effects.js';
-import { prepareOrbText, typeOrbText, prepareOraclePhrase, typeOraclePhrase, renderCard, showToast } from './ui.js?v=1.31.0-community-oracle';
+import { prepareOrbText, typeOrbText, prepareOraclePhrase, typeOraclePhrase, renderCard, showToast } from './ui.js?v=1.32.0-community-choice';
 import { addToHistory } from './profile.js';
 
 export const SCENES = Object.freeze({
