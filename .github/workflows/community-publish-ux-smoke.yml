@@ -1,0 +1,162 @@
+name: ALX Community Publish UX Smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/community-publish-ux-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Verify live Community backend
+        run: |
+          set -e
+          for i in $(seq 1 48); do
+            BODY=$(curl -fsSL 'https://alx-pay.alxoracle.workers.dev/api/community/health' || true)
+            echo "$BODY"
+            if echo "$BODY" | grep -q '"version":"1.30.2-publish-feedback"'; then
+              echo "BACKEND=$BODY"
+              break
+            fi
+            if [ "$i" = '48' ]; then exit 1; fi
+            sleep 5
+          done
+
+      - name: Wait for frontend
+        run: |
+          set -e
+          for i in $(seq 1 48); do
+            HTML=$(curl -fsSL 'https://al-exander23.github.io/al-exander23oracle.github.io/?community-publish-smoke=1' || true)
+            if echo "$HTML" | grep -q 'community.js?v=1.30.2-publish-feedback' && echo "$HTML" | grep -q 'community.css?v=1.30.2-publish-feedback'; then
+              exit 0
+            fi
+            if [ "$i" = '48' ]; then exit 1; fi
+            sleep 5
+          done
+
+      - name: Prepare Playwright
+        run: |
+          mkdir -p /tmp/alx-community-publish && cd /tmp/alx-community-publish
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+
+      - name: Verify publish confirmation and Saved
+        working-directory: /tmp/alx-community-publish
+        run: |
+          cat > smoke.mjs <<'JS'
+          import { chromium } from 'playwright';
+
+          const APP='https://al-exander23.github.io/al-exander23oracle.github.io/?community-publish-smoke=v1302';
+          const browser=await chromium.launch({headless:true});
+          const context=await browser.newContext({viewport:{width:390,height:844}});
+          await context.addInitScript(()=>{
+            localStorage.setItem('alx_oracle_onboarding_v1','done');
+            localStorage.setItem('alx_oracle_pro_entitlement',JSON.stringify({
+              plan:'pro',status:'active',expiresAt:Date.now()+86400000,source:'smoke'
+            }));
+            window.Telegram={WebApp:{
+              initData:'mock-init',
+              initDataUnsafe:{user:{id:101,first_name:'Test',username:'testuser'}},
+              platform:'ios',
+              openTelegramLink:()=>{},
+              showConfirm:(_m,cb)=>cb(true)
+            }};
+          });
+
+          const mine={
+            id:'cm_publish_test',
+            title:'Publish Test',
+            description:'Проверка UX публикации',
+            author:'@testuser',
+            strength:3,
+            recipe:[
+              {flavor:'Вишня',percent:40},
+              {flavor:'Личи',percent:30},
+              {flavor:'Холод',percent:30}
+            ],
+            rating:0,ratingCount:0,rankPosition:null,saves:0,views:0,
+            myRating:null,saved:false,isMine:true,createdAt:Date.now()
+          };
+          let created=false;
+          const page=await context.newPage();
+          const errors=[];
+          page.on('pageerror',e=>errors.push(String(e)));
+
+          await page.route('**/api/stars-status',route=>route.fulfill({
+            status:200,contentType:'application/json',
+            body:JSON.stringify({ok:true,entitlement:{plan:'pro',status:'active',active:true,expiresAt:Date.now()+86400000,source:'smoke'},offer:{priceStars:149,periodDays:30,recurring:true}})
+          }));
+          await page.route('**/api/originals',route=>route.fulfill({
+            status:200,contentType:'application/json',
+            body:JSON.stringify({ok:true,mixes:[]})
+          }));
+          await page.route('**/api/community/**',async route=>{
+            const url=new URL(route.request().url());
+            const action=url.pathname.split('/').pop();
+            let body={};
+            if(route.request().method()==='POST'){
+              try{body=route.request().postDataJSON()||{};}catch{}
+            }
+            if(action==='list'){
+              const rows=created && (body.view==='mine'||body.view==='saved') ? [mine] : [];
+              return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,view:body.view,mixes:rows})});
+            }
+            if(action==='create'){
+              created=true;
+              return route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({ok:true,mix:mine})});
+            }
+            if(action==='view') return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,views:1})});
+            return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true})});
+          });
+          await page.route('**/*',async route=>{
+            const url=route.request().url();
+            if(url.includes('fonts.googleapis.com')||url.includes('fonts.gstatic.com')||url.includes('telegram.org/js/telegram-web-app.js')) return route.abort();
+            return route.fallback();
+          });
+
+          await page.goto(APP,{waitUntil:'domcontentloaded',timeout:30000});
+          await page.waitForSelector('#alxBottomNav [data-tab="pro"]',{timeout:15000});
+          await page.click('#alxBottomNav [data-tab="pro"]');
+          await page.waitForSelector('#proCommunityOpen',{timeout:10000});
+          await page.click('#proCommunityOpen');
+          await page.waitForSelector('[data-community-create]',{timeout:10000});
+          await page.click('[data-community-create]');
+
+          await page.fill('input[name="title"]','Publish Test');
+          const flavors=page.locator('[data-component-flavor]');
+          const percents=page.locator('[data-component-percent]');
+          await flavors.nth(0).fill('Вишня');
+          await percents.nth(0).fill('40');
+          await flavors.nth(1).fill('Личи');
+          await percents.nth(1).fill('30');
+          await flavors.nth(2).fill('Холод');
+          await percents.nth(2).fill('30');
+          await page.click('.community-publish');
+
+          await page.waitForSelector('.community-publish-success',{timeout:10000});
+          const success=await page.locator('.community-publish-success').textContent();
+          if(!success.includes('ОПУБЛИКОВАНО В COMMUNITY')||!success.includes('Publish Test')||!success.includes('Сохранённые')){
+            throw new Error('Publish confirmation is incomplete: '+success);
+          }
+
+          await page.click('[data-success-open]');
+          await page.waitForSelector('[data-community-card="cm_publish_test"]',{timeout:10000});
+          const myCard=await page.locator('[data-community-card="cm_publish_test"]').textContent();
+          if(!myCard.includes('МОЙ МИКС')||!myCard.includes('В сохранённых')) throw new Error('Own mix state unclear: '+myCard);
+
+          await page.click('[data-community-tab="saved"]');
+          await page.waitForSelector('[data-community-card="cm_publish_test"]',{timeout:10000});
+          const savedText=await page.locator('[data-community-card="cm_publish_test"]').textContent();
+          if(!savedText.includes('Publish Test')) throw new Error('Own published mix missing from Saved');
+
+          if(errors.length) throw new Error('Page errors: '+errors.join(' | '));
+          console.log('PASS: explicit publication confirmation + own mix in My and Saved.');
+          await browser.close();
+          JS
+          node smoke.mjs
