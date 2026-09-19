@@ -373,7 +373,7 @@ jobs:
             await expect(page.locator('#alxProMainBanner')).toContainText('FREE');
             await expect(page.locator('#alxProMainBanner')).toContainText('299 ₽');
 
-            await page.locator('#alxProMainBanner').click();
+            await page.locator('#alxBottomNav [data-tab="pro"]').click();
             await expect(page.locator('#proCheckout')).toContainText('Оплатить картой / СБП · 299 ₽');
 
             await page.locator('#proClose').click();
@@ -416,7 +416,7 @@ jobs:
 
             await page.goto(BASE + '?beta-stars=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
             await expect(page.locator('#alxProMainBanner')).toContainText('149 ⭐', { timeout: 15000 });
-            await page.locator('#alxProMainBanner').click();
+            await page.locator('#alxBottomNav [data-tab="pro"]').click();
             await expect(page.locator('#proCheckout')).toContainText('Подключить PRO · 149 ⭐');
             await page.locator('#proCheckout').click();
             await expect(page.locator('#proCheckoutNote')).toContainText('Оплата отменена — ничего не списано.', { timeout: 10000 });
