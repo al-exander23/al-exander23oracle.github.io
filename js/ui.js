@@ -55,6 +55,12 @@ function buildChips(mix) {
   return wrap;
 }
 
+function isCommunityChoice(mix) {
+  return mix?.communityMix === true
+    && Number(mix?.rating || 0) >= 4.5
+    && Number(mix?.ratingCount || 0) >= 10;
+}
+
 function buildRatingLine(mix) {
   const el = document.createElement('div');
 
@@ -132,6 +138,12 @@ export function renderCard(cardEl, mix) {
     provenance.textContent = `Микс участника Community · ${mix.author || 'участник сообщества'}`;
   }
 
+  const communityChoice = isCommunityChoice(mix) ? document.createElement('div') : null;
+  if (communityChoice) {
+    communityChoice.className = 'mix-card-community-choice';
+    communityChoice.textContent = 'COMMUNITY CHOICE';
+  }
+
   const desc = document.createElement('div');
   desc.className = 'mix-card-desc';
   desc.textContent = mix.description || (mix?.communityMix === true
@@ -160,6 +172,7 @@ export function renderCard(cardEl, mix) {
     head,
     buildRatingLine(mix),
     ...(provenance ? [provenance] : []),
+    ...(communityChoice ? [communityChoice] : []),
     desc,
     compositionLabel,
     buildChips(mix),
