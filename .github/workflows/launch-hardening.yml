@@ -1,0 +1,309 @@
+name: Temporary Launch Hardening
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launch-hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unit-test Telegram bot contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          process.env.TELEGRAM_BOT_TOKEN = '123456789:test_bot_token_for_ci_only';
+          process.env.TELEGRAM_WEBHOOK_SECRET = 'launch-hardening-secret';
+          process.env.ALX_PRO_PRICE_STARS = '149';
+          process.env.ALX_EXTERNAL_PRICE_RUB = '299';
+          process.env.ALX_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
+          process.env.ALX_PUBLIC_API_URL = 'https://al-exander23oracle-github-io.vercel.app';
+
+          const calls = [];
+          global.fetch = async (url, options = {}) => {
+            const href = String(url);
+            if (href.endsWith('/api/bot-visual')) {
+              return new Response(new Uint8Array([255,216,255,217]), {
+                status: 200,
+                headers: { 'content-type': 'image/jpeg' }
+              });
+            }
+
+            const method = href.split('/').pop();
+            let payload = null;
+            if (options.body instanceof FormData) {
+              payload = {};
+              for (const [key, value] of options.body.entries()) {
+                payload[key] = typeof value === 'string' ? value : '[blob]';
+              }
+            } else if (typeof options.body === 'string') {
+              payload = JSON.parse(options.body);
+            }
+
+            calls.push({ method, payload });
+            return new Response(JSON.stringify({ ok: true, result: method === 'sendPhoto' ? { message_id: 1 } : true }), {
+              status: 200,
+              headers: { 'content-type': 'application/json' }
+            });
+          };
+
+          const telegram = require('./server/telegram.js');
+          const handler = require('./api/telegram-webhook.js');
+
+          function responseMock() {
+            return {
+              code: 0,
+              body: null,
+              status(code) { this.code = code; return this; },
+              json(body) { this.body = body; return this; }
+            };
+          }
+
+          async function command(text, id = 1001) {
+            const req = {
+              method: 'POST',
+              headers: { 'x-telegram-bot-api-secret-token': telegram.getWebhookSecret() },
+              body: {
+                update_id: Date.now(),
+                message: {
+                  message_id: 1,
+                  chat: { id, type: 'private' },
+                  from: { id, first_name: 'Launch' },
+                  text
+                }
+              }
+            };
+            const res = responseMock();
+            const before = calls.length;
+            await handler(req, res);
+            if (res.code !== 200 || res.body?.ok !== true) {
+              throw new Error(text + ' webhook failed: ' + JSON.stringify({ code: res.code, body: res.body }));
+            }
+            return calls.slice(before);
+          }
+
+          (async () => {
+            const startCalls = await command('/start');
+            const methods = calls.map(x => x.method);
+            for (const required of ['setMyCommands','setChatMenuButton','setMyDescription','setMyShortDescription']) {
+              if (!methods.includes(required)) throw new Error(required + ' was not configured');
+            }
+
+            const commandSetup = calls.find(x => x.method === 'setMyCommands')?.payload;
+            const registered = (commandSetup?.commands || []).map(x => x.command);
+            const expected = ['start','pro','help','paysupport','terms'];
+            if (JSON.stringify(registered) !== JSON.stringify(expected)) {
+              throw new Error('Bot command menu mismatch: ' + JSON.stringify(registered));
+            }
+
+            const menu = calls.find(x => x.method === 'setChatMenuButton')?.payload?.menu_button;
+            if (menu?.type !== 'web_app' || menu?.text !== 'Открыть Оракул' || !String(menu?.web_app?.url || '').includes('al-exander23oracle.github.io')) {
+              throw new Error('Bot menu button mismatch: ' + JSON.stringify(menu));
+            }
+
+            const startPhoto = startCalls.find(x => x.method === 'sendPhoto')?.payload;
+            if (!startPhoto) throw new Error('/start did not send branded photo');
+            const startCaption = String(startPhoto.caption || '');
+            for (const text of ['5 бесплатных', '7 направлений', 'Community Mixes', '149 ⭐', '299 ₽', '18+']) {
+              if (!startCaption.includes(text)) throw new Error('/start missing: ' + text);
+            }
+            const startMarkup = JSON.parse(startPhoto.reply_markup || '{}');
+            const launch = startMarkup.inline_keyboard?.flat()?.find(x => x.web_app);
+            if (!launch?.web_app?.url?.includes('al-exander23oracle.github.io')) throw new Error('/start launch URL mismatch');
+
+            const proCalls = await command('/pro', 1002);
+            const proCaption = String(proCalls.find(x => x.method === 'sendPhoto')?.payload?.caption || '');
+            for (const text of ['Community Oracle', 'Community Choice', '149 ⭐', '299 ₽']) {
+              if (!proCaption.includes(text)) throw new Error('/pro missing: ' + text);
+            }
+
+            const helpCalls = await command('/help', 1003);
+            const help = helpCalls.find(x => x.method === 'sendMessage')?.payload;
+            for (const text of ['Как работает ALX Oracle', '/start', '/pro', '/paysupport', '/terms']) {
+              if (!String(help?.text || '').includes(text)) throw new Error('/help missing: ' + text);
+            }
+
+            const supportCalls = await command('/paysupport', 1004);
+            const support = supportCalls.find(x => x.method === 'sendMessage')?.payload;
+            if (!String(support?.text || '').includes('Telegram Stars') || !String(support?.text || '').includes('299 ₽')) {
+              throw new Error('/paysupport copy mismatch');
+            }
+            const supportMarkup = support?.reply_markup?.inline_keyboard?.flat() || [];
+            if (!supportMarkup.some(x => String(x.url || '').includes('/support/'))) throw new Error('/paysupport missing Support Center URL');
+
+            const termsCalls = await command('/terms', 1005);
+            const terms = termsCalls.find(x => x.method === 'sendMessage')?.payload;
+            for (const text of ['18+', 'Telegram Stars', 'Telegram-аккаунту']) {
+              if (!String(terms?.text || '').includes(text)) throw new Error('/terms missing: ' + text);
+            }
+
+            console.log('BOT_CONTRACT_OK calls=' + calls.length);
+          })().catch(error => { console.error(error); process.exit(1); });
+          NODE
+
+      - name: Wait for live launch-hardening backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://al-exander23oracle-github-io.vercel.app"
+          for i in $(seq 1 36); do
+            BODY="$(curl -fsSL --max-time 15 "$BASE/api/health" || true)"
+            if printf '%s' "$BODY" | grep -Fq '1.37.0-launch-hardening'; then
+              echo "$BODY"
+              HEALTH="$BODY" node - <<'NODE'
+              const data = JSON.parse(process.env.HEALTH || '{}');
+              if (data.ok !== true) throw new Error('health not ok');
+              if (data.telegramConfigured !== true) throw new Error('Telegram not configured');
+              if (data.priceStars !== 149) throw new Error('Stars price mismatch');
+              if (data.externalPayEntitlements !== true) throw new Error('External entitlement bridge missing');
+              if (data.botPresentationManaged !== true) throw new Error('Bot presentation flag missing');
+              NODE
+              echo "LIVE_BACKEND_HARDENING_OK"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Vercel launch-hardening backend did not become live." >&2
+          exit 1
+
+      - name: Verify live public endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSI https://al-exander23oracle-github-io.vercel.app/api/bot-visual | head -30
+          curl -fsSL https://alx-pay.alxoracle.workers.dev/support/ -o /tmp/support.html
+          grep -Fq 'Support Center' /tmp/support.html
+          grep -Fq '/paysupport' /tmp/support.html
+
+          CONFIG="$(curl -fsSL https://alx-pay.alxoracle.workers.dev/api/config)"
+          CONFIG="$CONFIG" node - <<'NODE'
+          const data = JSON.parse(process.env.CONFIG || '{}');
+          if (data.ok !== true || data.offer?.enabled !== true || data.offer?.priceRub !== 299 || data.offer?.periodDays !== 30) {
+            throw new Error('ALX Pay live config mismatch');
+          }
+          NODE
+
+          STATUS="$(curl -sS -o /tmp/support-session.json -w '%{http_code}' https://alx-pay.alxoracle.workers.dev/api/session)"
+          test "$STATUS" = "200"
+          SESSION="$(cat /tmp/support-session.json)"
+          SESSION="$SESSION" node - <<'NODE'
+          const data = JSON.parse(process.env.SESSION || '{}');
+          if (data.ok !== true || data.session !== null) throw new Error('Anonymous support session mismatch');
+          NODE
+          echo "PUBLIC_ENDPOINTS_OK"
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alx-launch
+          cd /tmp/alx-launch
+          npm init -y >/dev/null 2>&1
+          npm install --save-dev @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run first-user and support smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/alx-launch
+          cat > launch.spec.js <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          const MINI = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
+          const PAY = 'https://alx-pay.alxoracle.workers.dev/';
+
+          test.use({ viewport: { width: 390, height: 844 } });
+
+          test('new user completes onboarding and receives first Oracle mix', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+
+            await page.route('https://telegram.org/js/telegram-web-app.js', route => route.fulfill({
+              status: 200,
+              contentType: 'application/javascript',
+              body: 'window.Telegram={WebApp:{initData:"",platform:"unknown",ready(){},expand(){},setHeaderColor(){},HapticFeedback:{impactOccurred(){}}}};'
+            }));
+
+            await page.goto(MINI + '?launch-new=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+            const tour = page.locator('#alxOnboarding');
+            await expect(tour).toHaveClass(/show/, { timeout: 10000 });
+            for (let i = 0; i < 9; i += 1) {
+              await page.locator('#alxTourNext').click();
+            }
+            expect(await page.evaluate(() => localStorage.getItem('alx_oracle_onboarding_v2'))).toBe('done');
+
+            await expect(page.locator('#alxAccessStrip')).toContainText(/5|FREE/, { timeout: 10000 });
+            await page.locator('#orbWrap').click();
+            await expect(page.locator('#mixCard .mix-card-title')).toBeVisible({ timeout: 30000 });
+            await expect(page.locator('#mixCard')).toContainText('%');
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+
+          test('new user can reach PRO purchase from bottom navigation', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+
+            await page.route('https://telegram.org/js/telegram-web-app.js', route => route.fulfill({
+              status: 200,
+              contentType: 'application/javascript',
+              body: `
+                window.Telegram={WebApp:{
+                  initData:'query_id=launch&user=%7B%22id%22%3A424242%7D&auth_date=1760000000&hash=launch',
+                  platform:'ios',ready(){},expand(){},setHeaderColor(){},HapticFeedback:{impactOccurred(){}},
+                  openInvoice(){}
+                }};
+              `
+            }));
+            await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-status', route => route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                ok:true,
+                entitlement:{plan:'free',status:'inactive',active:false,expiresAt:null,source:null},
+                offer:{priceStars:149,periodDays:30,recurring:true}
+              })
+            }));
+
+            await page.addInitScript(() => localStorage.setItem('alx_oracle_onboarding_v2','done'));
+            await page.goto(MINI + '?launch-pro=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+            const proTab = page.locator('#alxBottomNav [data-tab="pro"]');
+            await expect(proTab).toBeVisible({ timeout: 10000 });
+            await proTab.click();
+            await expect(page.locator('#proLibraryUnlock')).toBeVisible({ timeout: 10000 });
+            await page.locator('#proLibraryUnlock').click();
+            await expect(page.locator('#alxProOverlay')).toHaveClass(/show/, { timeout: 10000 });
+            await expect(page.locator('#proCheckout')).toContainText('149 ⭐');
+            await expect(page.locator('#proStarsHelp')).toBeVisible();
+            await expect(page.locator('#proRestore')).toBeVisible();
+
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+
+          test('Support Center safely handles anonymous visitor', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+
+            await page.goto(PAY + 'support/?launch-support=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+            await expect(page.locator('#accountTitle')).toHaveText('Telegram не подтверждён', { timeout: 10000 });
+            await expect(page.locator('#checkAccess')).toBeDisabled();
+            await expect(page.locator('#loginLink')).toBeVisible();
+            await expect(page.locator('body')).toContainText('/paysupport');
+            await expect(page.locator('body')).toContainText('Telegram Stars');
+
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+          EOF
+
+          npx playwright test launch.spec.js --reporter=line --workers=1
