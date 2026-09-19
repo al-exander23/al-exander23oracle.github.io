@@ -4,12 +4,14 @@
 import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.31.0-community-oracle';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.31.0-community-oracle';
+const VERSION = '1.32.0-community-choice';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';
 const OVERLAY_ID = 'alxCommunity';
 const CONTENT_ID = 'alxCommunityContent';
 const MAX_COMPONENTS = 6;
 const MIN_COMPONENTS = 2;
+const COMMUNITY_CHOICE_MIN_RATING = 4.5;
+const COMMUNITY_CHOICE_MIN_RATINGS = 10;
 
 let currentView = 'top';
 let mixes = [];
@@ -91,6 +93,11 @@ function stars(value) {
 function ratingText(mix) {
   if (!mix.ratingCount) return 'без оценок';
   return `${Number(mix.rating || 0).toFixed(1)} · ${mix.ratingCount} оценок`;
+}
+
+function isCommunityChoice(mix) {
+  return Number(mix?.rating || 0) >= COMMUNITY_CHOICE_MIN_RATING
+    && Number(mix?.ratingCount || 0) >= COMMUNITY_CHOICE_MIN_RATINGS;
 }
 
 function ensureOverlay() {
@@ -195,6 +202,7 @@ function mixCard(mix) {
       <div class="community-card-head">
         <div>
           <span class="community-author">${mix.isMine ? 'МОЙ МИКС' : esc(mix.author)}</span>
+          ${isCommunityChoice(mix) ? '<span class="community-choice-badge">COMMUNITY CHOICE</span>' : ''}
           <h3>${esc(mix.title)}</h3>
         </div>
         <div class="community-rating">
@@ -730,6 +738,7 @@ async function openSharedPreview(id) {
         <span>COMMUNITY MIX</span>
         <h3>${esc(preview.title)}</h3>
         <div class="community-shared-author">от ${esc(preview.author)}</div>
+        ${isCommunityChoice(preview) ? '<div class="community-choice-badge community-choice-badge--shared">COMMUNITY CHOICE</div>' : ''}
         ${preview.description ? `<p>${esc(preview.description)}</p>` : ''}
         <div class="community-shared-rating">
           <b>${preview.ratingCount ? Number(preview.rating).toFixed(1) : '—'}</b>
