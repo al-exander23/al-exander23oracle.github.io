@@ -1,7 +1,7 @@
 // Privacy-minimized analytics storage + owner dashboard for ALX Oracle.
 // Data lives in the existing Cloudflare D1 database used by ALX Pay.
 
-const VERSION = '1.19.0-analytics';
+const VERSION = '1.34.0-funnel-analytics';
 const OWNER_TEST_AMOUNT_RUB = 29;
 const MAX_RETENTION_DAYS = 180;
 const enc = new TextEncoder();
@@ -26,6 +26,36 @@ const ALLOWED_EVENTS = new Set([
   'pro_restore_success',
   'pro_activated',
   'checkout_activation',
+  'pro_library_open',
+  'pro_library_unlock_click',
+  'pro_library_collection_select',
+  'pro_library_all_mixes',
+  'nav_home_open',
+  'nav_favorites_open',
+  'nav_my_alx_open',
+  'nav_pro_open',
+  'nav_history_open',
+  'nav_notifications_open',
+  'nav_achievements_open',
+  'nav_help_open',
+  'my_alx_open',
+  'my_alx_upgrade_click',
+  'my_alx_restore_success',
+  'pro_teaser_shown',
+  'pro_teaser_unlock_click',
+  'community_open',
+  'community_list_open',
+  'community_mix_open',
+  'community_rate',
+  'community_save',
+  'community_share',
+  'community_report',
+  'community_delete',
+  'community_create',
+  'community_create_failed',
+  'community_unlock_click',
+  'community_entry_click',
+  'community_oracle_select',
 ]);
 
 function b64urlDecode(value) {
@@ -249,6 +279,23 @@ async function summaryData(env, days = 30) {
     WHERE created_at >= ? AND event_name IN ('stars_checkout_start', 'external_checkout_open')
   `).bind(since).first();
 
+  const activationChannelsRow = await env.DB.prepare(`
+    SELECT
+      COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"telegram-stars"%' THEN install_id END) AS stars,
+      COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"yookassa"%' THEN install_id END) AS yookassa
+    FROM analytics_events
+    WHERE created_at >= ? AND event_name = 'pro_activated'
+  `).bind(since).first();
+
+  const livePrice = Math.max(1, Math.round(Number(env.ALX_LIVE_PRICE_RUB || env.ALX_EXTERNAL_PRICE_RUB || 299) || 299));
+  const externalPaymentsRow = await env.DB.prepare(`
+    SELECT
+      COUNT(*) AS created,
+      SUM(CASE WHEN status = 'succeeded' THEN 1 ELSE 0 END) AS succeeded
+    FROM payments
+    WHERE created_at >= ? AND provider = 'yookassa' AND amount_rub = ?
+  `).bind(since, livePrice).first();
+
   const funnel = {
     opened: usersFor('app_open'),
     onboardingCompleted: usersFor('onboarding_completed'),
@@ -259,12 +306,32 @@ async function summaryData(env, days = 30) {
     proActivated: usersFor('pro_activated'),
   };
 
+  const paymentChannels = {
+    starsCheckoutStarted: usersFor('stars_checkout_start'),
+    externalCheckoutOpened: usersFor('external_checkout_open'),
+    starsActivated: Number(activationChannelsRow?.stars || 0),
+    yookassaActivated: Number(activationChannelsRow?.yookassa || 0),
+    yookassaPaymentsCreated: Number(externalPaymentsRow?.created || 0),
+    yookassaPaymentsSucceeded: Number(externalPaymentsRow?.succeeded || 0),
+  };
+
+  const community = {
+    opened: usersFor('community_open'),
+    oracleSelected: usersFor('community_oracle_select'),
+    mixesCreated: usersFor('community_create'),
+    ratings: usersFor('community_rate'),
+    saves: usersFor('community_save'),
+    shares: usersFor('community_share'),
+  };
+
   return {
     ok: true,
     version: VERSION,
     generatedAt: Date.now(),
     periodDays,
     funnel,
+    paymentChannels,
+    community,
     totalOracleResults: map.oracle_result?.events || 0,
     events: map,
     daily: daily.results || [],
@@ -317,6 +384,8 @@ function forbiddenPage() {
 
 function dashboardPage(summary) {
   const f = summary.funnel;
+  const payment = summary.paymentChannels || {};
+  const community = summary.community || {};
   const max = Math.max(1, f.opened);
   const stages = [
     ['Открыли приложение', f.opened],
@@ -350,6 +419,18 @@ function dashboardPage(summary) {
       <div class="card"><div class="kpi">${f.proActivated}</div><div class="label">активировали PRO · ${pct(f.proActivated, f.openedPro)} от открывших PRO</div></div>
     </div>
     <div class="section"><h2>Воронка</h2><div class="card funnel">${stageHtml}</div></div>
+    <div class="section"><h2>Оплата по каналам</h2><div class="grid">
+      <div class="card"><div class="kpi">${Number(payment.starsCheckoutStarted || 0)}</div><div class="label">начали Stars checkout</div></div>
+      <div class="card"><div class="kpi">${Number(payment.starsActivated || 0)}</div><div class="label">активаций через Stars</div></div>
+      <div class="card"><div class="kpi">${Number(payment.yookassaPaymentsCreated || 0)}</div><div class="label">создано YooKassa платежей</div></div>
+      <div class="card"><div class="kpi">${Number(payment.yookassaPaymentsSucceeded || 0)}</div><div class="label">успешных YooKassa платежей</div></div>
+    </div></div>
+    <div class="section"><h2>Community</h2><div class="grid">
+      <div class="card"><div class="kpi">${Number(community.opened || 0)}</div><div class="label">открыли Community</div></div>
+      <div class="card"><div class="kpi">${Number(community.oracleSelected || 0)}</div><div class="label">включили Community Oracle</div></div>
+      <div class="card"><div class="kpi">${Number(community.mixesCreated || 0)}</div><div class="label">публиковали микс</div></div>
+      <div class="card"><div class="kpi">${Number(community.ratings || 0)}</div><div class="label">оценивали миксы</div></div>
+    </div></div>
     <div class="section"><h2>По дням</h2><table><thead><tr><th>Дата</th><th>Открыли</th><th>Миксы</th><th>PRO экран</th><th>PRO активации</th></tr></thead><tbody>${dailyRows}</tbody></table></div>
     <div class="section"><h2>Все события</h2><table><thead><tr><th>Событие</th><th>Уникальные установки</th><th>Событий</th></tr></thead><tbody>${eventRows}</tbody></table></div>
     <div class="notice muted">Аналитика намеренно не хранит Telegram ID, имя, username, платёжные реквизиты или содержимое выбранных миксов. Install ID — случайный идентификатор приложения.</div>
