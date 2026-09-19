@@ -187,11 +187,19 @@ jobs:
           set -euo pipefail
           BASE="https://al-exander23oracle-github-io.vercel.app"
 
-          HEALTH="$(curl -fsSL --max-time 20 "$BASE/api/health")"
+          HEALTH=""
+          for i in $(seq 1 30); do
+            HEALTH="$(curl -fsSL --max-time 20 "$BASE/api/health" || true)"
+            if printf '%s' "$HEALTH" | grep -Fq '1.35.0-launch-beta'; then
+              break
+            fi
+            sleep 10
+          done
           echo "$HEALTH"
           HEALTH="$HEALTH" node - <<'NODE'
           const data = JSON.parse(process.env.HEALTH || '{}');
           if (data.ok !== true || data.service !== 'alx-oracle-stars') throw new Error('Stars health failed');
+          if (data.version !== '1.35.0-launch-beta') throw new Error('Stars backend launch-beta version is not live');
           if (data.telegramConfigured !== true) throw new Error('Telegram bot token is not configured');
           if (Number(data.priceStars) !== 149) throw new Error('Expected 149 Stars');
           if (data.externalPayEntitlements !== true) throw new Error('External entitlement bridge is disabled');
@@ -276,6 +284,24 @@ jobs:
           echo "Live analytics did not reach 1.34.0-funnel-analytics" >&2
           exit 1
 
+      - name: Verify launch copy on live ALX Pay
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://alx-pay.alxoracle.workers.dev"
+          for i in $(seq 1 30); do
+            HTML="$(curl -fsSL --max-time 20 "$BASE/?launch=${GITHUB_SHA}" || true)"
+            if printf '%s' "$HTML" | grep -Fq 'Community Oracle' \
+              && printf '%s' "$HTML" | grep -Fq 'Community Choice' \
+              && printf '%s' "$HTML" | grep -Fq '7 направлений'; then
+              echo "ALX_PAY_COPY_OK"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "ALX Pay launch copy is stale" >&2
+          exit 1
+
       - name: Verify GitHub Pages payment-audit release
         shell: bash
         run: |
@@ -293,3 +319,175 @@ jobs:
             sleep 10
           done
           exit 1
+
+
+      - name: Install Playwright for beta regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alx-beta
+          cd /tmp/alx-beta
+          npm init -y >/dev/null 2>&1
+          npm install --save-dev @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run FREE, Stars and Community beta regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/alx-beta
+          cat > beta.spec.js <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          const BASE = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
+          test.use({ viewport: { width: 390, height: 844 } });
+
+          async function mockTelegram(page, { inside = false, invoiceStatus = 'cancelled' } = {}) {
+            await page.route('https://telegram.org/js/telegram-web-app.js', async route => {
+              const body = inside
+                ? "window.Telegram={WebApp:{initData:'query_id=beta&user=%7B%22id%22%3A424242%7D&auth_date=1760000000&hash=beta',initDataUnsafe:{user:{id:424242,first_name:'Beta'}},platform:'ios',ready(){},expand(){},setHeaderColor(){},HapticFeedback:{impactOccurred(){}},openInvoice(url,cb){setTimeout(()=>cb('" + invoiceStatus + "'),10);}}};"
+                : "window.Telegram={WebApp:{initData:'',platform:'unknown',ready(){},expand(){},setHeaderColor(){}}};";
+              await route.fulfill({ status: 200, contentType: 'application/javascript', body });
+            });
+            await page.route('https://alx-pay.alxoracle.workers.dev/api/analytics/event', route =>
+              route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' })
+            );
+          }
+
+          async function initCommon(page) {
+            await page.addInitScript(() => {
+              localStorage.setItem('alx_oracle_onboarding_v2', 'done');
+              localStorage.removeItem('alx_oracle_pro_entitlement');
+              localStorage.removeItem('alx_oracle_scenario');
+            });
+          }
+
+          test('FREE browser flow and external paywall', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+            await mockTelegram(page, { inside: false });
+            await initCommon(page);
+
+            await page.goto(BASE + '?beta-free=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await expect(page.locator('#alxBottomNav')).toBeVisible({ timeout: 15000 });
+            await expect(page.locator('#alxProMainBanner')).toContainText('FREE');
+            await expect(page.locator('#alxProMainBanner')).toContainText('299 ₽');
+
+            await page.locator('#alxProMainBanner').click();
+            await expect(page.locator('#proCheckout')).toContainText('Оплатить картой / СБП · 299 ₽');
+
+            await page.locator('#proClose').click();
+            await page.locator('#orbWrap').click();
+            await expect(page.locator('#mixCard .mix-card-title')).toBeVisible({ timeout: 30000 });
+
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+
+          test('Telegram Stars cancel is safe and does not activate PRO', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+            await mockTelegram(page, { inside: true, invoiceStatus: 'cancelled' });
+            await initCommon(page);
+
+            await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-status', route =>
+              route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  ok: true,
+                  entitlement: { plan: 'free', status: 'inactive', active: false, expiresAt: null, source: null },
+                  offer: { priceStars: 149, periodDays: 30, recurring: true }
+                })
+              })
+            );
+            await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-create-invoice', route =>
+              route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  ok: true,
+                  invoiceLink: 'https://t.me/invoice-beta',
+                  priceStars: 149,
+                  periodDays: 30,
+                  recurring: true
+                })
+              })
+            );
+
+            await page.goto(BASE + '?beta-stars=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await expect(page.locator('#alxProMainBanner')).toContainText('149 ⭐', { timeout: 15000 });
+            await page.locator('#alxProMainBanner').click();
+            await expect(page.locator('#proCheckout')).toContainText('Подключить PRO · 149 ⭐');
+            await page.locator('#proCheckout').click();
+            await expect(page.locator('#proCheckoutNote')).toContainText('Оплата отменена — ничего не списано.', { timeout: 10000 });
+
+            const state = await page.evaluate(() => JSON.parse(localStorage.getItem('alx_oracle_pro_entitlement') || 'null'));
+            expect(state?.status || 'inactive').not.toBe('active');
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+
+          test('PRO Community Oracle regression', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+            await mockTelegram(page, { inside: true });
+            await page.addInitScript(() => {
+              localStorage.setItem('alx_oracle_onboarding_v2', 'done');
+              localStorage.setItem('alx_oracle_pro_entitlement', JSON.stringify({
+                plan: 'pro',
+                status: 'active',
+                expiresAt: Date.now() + 86400000,
+                source: 'telegram-stars'
+              }));
+              localStorage.setItem('alx_oracle_scenario', JSON.stringify({
+                mood: 'any', company: 'any', time: 'any', collection: 'any'
+              }));
+            });
+
+            await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-status', route =>
+              route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  ok: true,
+                  entitlement: { plan: 'pro', status: 'active', active: true, expiresAt: Date.now() + 86400000, source: 'telegram-stars' },
+                  offer: { priceStars: 149, periodDays: 30, recurring: true }
+                })
+              })
+            );
+            await page.route('https://alx-pay.alxoracle.workers.dev/api/community/list', route =>
+              route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  ok: true,
+                  mixes: [{
+                    id: 'beta-community',
+                    title: 'Beta Community',
+                    description: 'Regression recipe',
+                    author: 'Beta Author',
+                    strength: 3,
+                    rating: 4.8,
+                    ratingCount: 12,
+                    recipe: [
+                      { flavor: 'Lemon', percent: 60 },
+                      { flavor: 'Mint', percent: 40 }
+                    ]
+                  }]
+                })
+              })
+            );
+
+            await page.goto(BASE + '?beta-pro=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.locator('#alxBottomNav [data-tab="pro"]').click();
+            await expect(page.locator('#proCommunityOracle')).toBeVisible({ timeout: 10000 });
+            await page.locator('#proCommunityOracle').click();
+            await expect(page.locator('#alxHomeDirection')).toContainText('Community Mixes', { timeout: 10000 });
+            await page.locator('#orbWrap').click();
+            const card = page.locator('#mixCard');
+            await expect(card.locator('.mix-card-community-badge')).toContainText('Beta Author', { timeout: 30000 });
+            await expect(card.locator('.mix-card-community-choice')).toHaveText('COMMUNITY CHOICE');
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+          EOF
+
+          npx playwright test beta.spec.js --reporter=line --workers=1
