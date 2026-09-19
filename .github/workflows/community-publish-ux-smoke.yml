@@ -19,7 +19,7 @@ jobs:
           for i in $(seq 1 48); do
             BODY=$(curl -fsSL 'https://alx-pay.alxoracle.workers.dev/api/community/health' || true)
             echo "$BODY"
-            if echo "$BODY" | grep -q '"version":"1.30.2-publish-feedback"'; then
+            if echo "$BODY" | grep -q '"version":"1.30.3-publish-proof"'; then
               echo "BACKEND=$BODY"
               break
             fi
@@ -32,7 +32,7 @@ jobs:
           set -e
           for i in $(seq 1 48); do
             HTML=$(curl -fsSL 'https://al-exander23.github.io/al-exander23oracle.github.io/?community-publish-smoke=1' || true)
-            if echo "$HTML" | grep -q 'community.js?v=1.30.2-publish-feedback' && echo "$HTML" | grep -q 'community.css?v=1.30.2-publish-feedback'; then
+            if echo "$HTML" | grep -q 'community.js?v=1.30.3-publish-proof' && echo "$HTML" | grep -q 'community.css?v=1.30.3-publish-proof'; then
               exit 0
             fi
             if [ "$i" = '48' ]; then exit 1; fi
@@ -52,7 +52,7 @@ jobs:
           cat > smoke.mjs <<'JS'
           import { chromium } from 'playwright';
 
-          const APP='https://al-exander23.github.io/al-exander23oracle.github.io/?community-publish-smoke=v1302';
+          const APP='https://al-exander23.github.io/al-exander23oracle.github.io/?community-publish-smoke=v1303';
           const browser=await chromium.launch({headless:true});
           const context=await browser.newContext({viewport:{width:390,height:844}});
           await context.addInitScript(()=>{
@@ -136,6 +136,13 @@ jobs:
           await flavors.nth(1).fill('Личи');
           await percents.nth(1).fill('30');
           await flavors.nth(2).fill('Холод');
+          await percents.nth(2).fill('20');
+          await page.click('.community-publish');
+          await page.waitForSelector('.community-form-message.is-error',{timeout:5000});
+          const invalid=await page.locator('.community-form-message.is-error').textContent();
+          if(!invalid.includes('НЕ ОПУБЛИКОВАНО')||!invalid.includes('90%')) throw new Error('Validation failure unclear: '+invalid);
+          if(created) throw new Error('Invalid 90% recipe reached create API');
+
           await percents.nth(2).fill('30');
           await page.click('.community-publish');
 
