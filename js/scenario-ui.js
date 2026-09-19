@@ -1,7 +1,7 @@
 // scenario-ui.js — UI ситуационного режима внутри уже существующего Taste Profile.
 // Главный экран и визуал шара не меняет.
 
-import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.23.0-originals';
+import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.31.0-community-oracle';
 import {
   SCENARIO_OPTIONS,
   COLLECTION_OPTIONS,
@@ -11,12 +11,12 @@ import {
   describeScenario,
   getCollectionCounts,
   hasActiveScenario,
-} from './scenario.js?v=1.23.0-originals';
+} from './scenario.js?v=1.31.0-community-oracle';
 import {
   isProActive,
   isPremiumCollection,
   requestProPaywall,
-} from './pro.js?v=1.23.0-originals';
+} from './pro.js?v=1.31.0-community-oracle';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
@@ -34,7 +34,7 @@ function optionButtons(group, options, selected) {
 
 function collectionButtons(selected, counts) {
   const proActive = isProActive();
-  const visibleCollections = COLLECTION_OPTIONS.filter((collection) => !collection.hiddenUntilPro || proActive);
+  const visibleCollections = COLLECTION_OPTIONS.filter((collection) => collection.id !== 'community' && (!collection.hiddenUntilPro || proActive));
 
   return visibleCollections.map((collection) => {
     const premium = isPremiumCollection(collection.id);
