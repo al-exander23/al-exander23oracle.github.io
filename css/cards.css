@@ -69,6 +69,24 @@
   color:#d8c7ff;
 }
 
+.mix-card-community-choice{
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  max-width:100%;
+  margin:6px 0 1px;
+  padding:5px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.07);
+  color:rgba(255,255,255,.86);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;
+  font-weight:700;
+  line-height:1.2;
+  letter-spacing:.1em;
+}
+
 .mix-card-community-badge{
   display:inline-flex;
   align-items:center;
