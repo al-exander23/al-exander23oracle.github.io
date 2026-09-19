@@ -11,7 +11,7 @@ import {
   syncProEntitlement,
   createStarsInvoice,
   waitForProActivation,
-} from './pro.js?v=1.17.0-mixlab';
+} from './pro.js?v=1.33.0-payment-audit';
 
 const CARD_ID = 'alxProCard';
 const OVERLAY_ID = 'alxProOverlay';
