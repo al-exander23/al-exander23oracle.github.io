@@ -261,7 +261,12 @@ async function yookassa(env, path, options = {}) {
 }
 
 async function createPayment(request, env) {
-  const session = await requireSession(request, env);
+  let session;
+  try {
+    session = await requireSession(request, env);
+  } catch (error) {
+    return json({ ok: false, error: 'Сначала войди через Telegram.' }, 401, corsHeaders(request, env));
+  }
   const body = await request.json().catch(() => ({}));
   const method = body.method === 'bank_card' ? 'bank_card' : body.method === 'sbp' ? 'sbp' : null;
   if (!method) return json({ ok: false, error: 'Выбери карту или СБП.' }, 400, corsHeaders(request, env));
@@ -331,7 +336,31 @@ async function processYookassaWebhook(request, env) {
   const payment = await yookassa(env, `/payments/${encodeURIComponent(body.object.id)}`, { method: 'GET' });
   const expected = amountString(env);
   const userId = Number(payment.metadata?.telegram_user_id);
-  if (payment.status !== 'succeeded' || !payment.paid || payment.amount?.currency !== 'RUB' || payment.amount?.value !== expected || !Number.isFinite(userId)) {
+  const stored = await env.DB.prepare(`
+    SELECT id, telegram_user_id, provider, amount_rub
+    FROM payments
+    WHERE id = ?
+    LIMIT 1
+  `).bind(String(payment.id || '')).first();
+
+  const metadataValid = payment.metadata?.plan === 'alx-pro-30d'
+    && payment.metadata?.source === 'yookassa';
+  const storedValid = Boolean(
+    stored
+    && stored.provider === 'yookassa'
+    && String(stored.telegram_user_id) === String(userId)
+    && Number(stored.amount_rub) === Number(expected)
+  );
+
+  if (
+    payment.status !== 'succeeded'
+    || !payment.paid
+    || payment.amount?.currency !== 'RUB'
+    || payment.amount?.value !== expected
+    || !Number.isFinite(userId)
+    || !metadataValid
+    || !storedValid
+  ) {
     return json({ ok: false, error: 'Payment verification failed' }, 400);
   }
 
