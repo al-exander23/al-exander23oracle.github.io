@@ -145,6 +145,38 @@
 .community-rules span{font:400 10px/1.45 "Inter",sans-serif;color:rgba(255,255,255,.45)}
 .community-publish:disabled{opacity:.55}
 .community-form-message{min-height:16px;text-align:center;color:rgba(255,220,220,.8);font:500 10px/1.4 "Inter",sans-serif}
+.community-publish-success{
+  display:grid;gap:12px;text-align:center;padding:24px 18px;border-radius:19px;
+  border:1px solid rgba(255,255,255,.11);
+  background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+}
+.community-success-mark{
+  width:54px;height:54px;margin:0 auto 2px;display:grid;place-items:center;border-radius:50%;
+  background:#f1efe8;color:#111216;font:700 27px/1 "Sora",sans-serif;
+  box-shadow:0 10px 30px rgba(0,0,0,.22)
+}
+.community-publish-success>span{
+  font:600 10px/1.2 "JetBrains Mono",monospace;letter-spacing:.14em;color:rgba(255,255,255,.5)
+}
+.community-publish-success h3{margin:-3px 0 0;font:600 23px/1.18 "Sora",sans-serif;color:#f4f4ef}
+.community-publish-success>p{margin:0 auto;max-width:470px;font:400 12px/1.55 "Inter",sans-serif;color:rgba(255,255,255,.62)}
+.community-success-summary{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:2px
+}
+.community-success-summary>div{
+  display:grid;gap:4px;padding:11px 8px;border-radius:11px;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.055)
+}
+.community-success-summary small{font:400 9px/1.2 "Inter",sans-serif;color:rgba(255,255,255,.4)}
+.community-success-summary b{font:600 11px/1.25 "Inter",sans-serif;color:#f0f0ec;overflow:hidden;text-overflow:ellipsis}
+.community-success-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
+.community-success-actions button{
+  border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 9px;
+  background:rgba(255,255,255,.045);color:#f2f2ee;font:600 11px/1.15 "Inter",sans-serif
+}
+.community-success-actions .community-success-primary{background:#f1efe8;color:#111216;border-color:#f1efe8}
+.community-success-note{font:400 9px/1.4 "Inter",sans-serif;color:rgba(255,255,255,.38)}
+
 .community-toast{
   position:fixed;z-index:260;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,12px);
   opacity:0;pointer-events:none;padding:9px 13px;border-radius:11px;background:rgba(245,245,240,.94);color:#111;
@@ -187,6 +219,8 @@
   .community-create-main{width:100%}
   .community-tabs{grid-template-columns:repeat(2,1fr)}
   .community-author-stats{grid-template-columns:repeat(2,1fr)}
+  .community-success-summary{grid-template-columns:1fr}
+  .community-success-actions{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
   .community-overlay,.community-toast{transition:none}
