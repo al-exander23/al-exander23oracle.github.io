@@ -48,6 +48,7 @@ export const COLLECTION_OPTIONS = [
   { id: 'sour', label: 'С кислинкой' },
   { id: 'strong', label: 'Крепкие' },
   { id: 'originals', label: 'ALX Originals', pro: true, hiddenUntilPro: true },
+  { id: 'community', label: 'Community Mixes', pro: true, hiddenUntilPro: true },
   { id: 'signature', label: 'ALX Signature', pro: true },
   { id: 'parfum', label: 'Parfum Lab', pro: true },
   { id: 'limited', label: 'LIMITED 2026', pro: true },
@@ -115,7 +116,7 @@ export function collectionMatches(mix, collectionId) {
 
   // Строго кураторские коллекции: туда не попадают старые миксы только
   // из-за совпадения отдельных вкусовых или числовых характеристик.
-  if (['parfum', 'limited', 'originals'].includes(normalizedCollection)) return false;
+  if (['parfum', 'limited', 'originals', 'community'].includes(normalizedCollection)) return false;
 
   switch (normalizedCollection) {
     case 'fresh':
@@ -300,6 +301,7 @@ function scenarioBonus(mix, scenario) {
   if (scenario.collection === 'parfum' && normalize(mix.theme) === 'perfume') bonus += 4;
   if (scenario.collection === 'limited' && explicitCollections(mix).includes('limited')) bonus += 4;
   if (scenario.collection === 'originals' && normalize(mix.exclusiveCollection) === 'originals') bonus += 5;
+  if (scenario.collection === 'community' && normalize(mix.exclusiveCollection) === 'community') bonus += 5;
 
   return bonus;
 }
