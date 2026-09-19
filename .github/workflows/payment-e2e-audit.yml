@@ -1,0 +1,196 @@
+name: Temporary Payment E2E Audit
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  payment-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify live payment endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "== ALX Pay live config =="
+          curl -fsS -D /tmp/alx-config.headers -o /tmp/alx-config.json             https://alx-pay.alxoracle.workers.dev/api/config
+          cat /tmp/alx-config.json
+          CONFIG="$(cat /tmp/alx-config.json)"
+          CONFIG="$CONFIG" node - <<'NODE'
+          const data = JSON.parse(process.env.CONFIG || '{}');
+          if (data.ok !== true) throw new Error('ALX Pay config not ok');
+          if (data.offer?.priceRub !== 299) throw new Error(`Expected 299 RUB, got ${data.offer?.priceRub}`);
+          if (data.offer?.periodDays !== 30) throw new Error(`Expected 30 days, got ${data.offer?.periodDays}`);
+          if (data.offer?.enabled !== true) throw new Error('ALX Pay offer is not enabled');
+          NODE
+          grep -qi '^x-alx-payment-mode: live' /tmp/alx-config.headers
+          grep -qi '^x-alx-live-ready: yes' /tmp/alx-config.headers
+
+          echo "== ALX Pay unauthenticated safety =="
+          STATUS="$(curl -sS -o /tmp/alx-create.json -w '%{http_code}'             -X POST https://alx-pay.alxoracle.workers.dev/api/payment/create             -H 'content-type: application/json'             --data '{"method":"bank_card"}')"
+          test "$STATUS" = "401"
+          cat /tmp/alx-create.json
+
+          STATUS="$(curl -sS -o /tmp/alx-miniapp.json -w '%{http_code}'             -X POST https://alx-pay.alxoracle.workers.dev/api/miniapp/status             -H 'content-type: application/json'             --data '{"initData":"invalid"}')"
+          test "$STATUS" = "401"
+          cat /tmp/alx-miniapp.json
+
+          echo "== Stars backend health =="
+          curl -fsS -o /tmp/stars-health.json             https://al-exander23oracle-github-io.vercel.app/api/health
+          cat /tmp/stars-health.json
+          HEALTH="$(cat /tmp/stars-health.json)"
+          HEALTH="$HEALTH" node - <<'NODE'
+          const data = JSON.parse(process.env.HEALTH || '{}');
+          if (data.ok !== true) throw new Error('Stars health not ok');
+          if (data.telegramConfigured !== true) throw new Error('Telegram backend is not configured');
+          if (data.priceStars !== 149) throw new Error(`Expected 149 Stars, got ${data.priceStars}`);
+          if (data.externalPayEntitlements !== true) throw new Error('External entitlement bridge is disabled');
+          NODE
+
+          echo "== Stars auth guards =="
+          STATUS="$(curl -sS -o /tmp/stars-status.json -w '%{http_code}'             -X POST https://al-exander23oracle-github-io.vercel.app/api/stars-status             -H 'content-type: application/json'             --data '{"initData":"invalid"}')"
+          test "$STATUS" = "401"
+          cat /tmp/stars-status.json
+
+          STATUS="$(curl -sS -o /tmp/stars-invoice.json -w '%{http_code}'             -X POST https://al-exander23oracle-github-io.vercel.app/api/stars-create-invoice             -H 'content-type: application/json'             --data '{"initData":"invalid"}')"
+          test "$STATUS" = "401"
+          cat /tmp/stars-invoice.json
+
+          STATUS="$(curl -sS -o /tmp/stars-webhook.json -w '%{http_code}'             -X POST https://al-exander23oracle-github-io.vercel.app/api/telegram-webhook             -H 'content-type: application/json'             --data '{}')"
+          test "$STATUS" = "401"
+          cat /tmp/stars-webhook.json
+
+          echo "PAYMENT_ENDPOINTS_OK"
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alx-payment-smoke
+          cd /tmp/alx-payment-smoke
+          npm init -y >/dev/null 2>&1
+          npm install --save-dev @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run payment UI smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/alx-payment-smoke
+          cat > payment.spec.js <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          const MINI = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
+          const PAY = 'https://alx-pay.alxoracle.workers.dev/';
+
+          test.use({ viewport: { width: 390, height: 844 } });
+
+          test('external ALX Pay shows live 299 RUB and requires Telegram login', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+
+            await page.goto(PAY + '?audit=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+            await expect(page.locator('#price')).toContainText('299 ₽', { timeout: 10000 });
+            await expect(page.locator('#telegramLogin')).toHaveText('Войти через Telegram');
+            await expect(page.locator('[data-method="sbp"]')).toBeDisabled();
+            await expect(page.locator('[data-method="bank_card"]')).toBeDisabled();
+
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+
+          test('Telegram Stars paid callback restores verified PRO', async ({ page }) => {
+            const errors = [];
+            page.on('pageerror', e => errors.push(String(e?.stack || e)));
+
+            await page.route('https://telegram.org/js/telegram-web-app.js', async route => {
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/javascript',
+                body: `
+                  window.Telegram = {
+                    WebApp: {
+                      initData: 'query_id=audit&user=%7B%22id%22%3A424242%7D&auth_date=1760000000&hash=audit',
+                      platform: 'ios',
+                      ready() {},
+                      expand() {},
+                      setHeaderColor() {},
+                      HapticFeedback: { impactOccurred() {} },
+                      openInvoice(url, callback) {
+                        window.__auditInvoiceUrl = url;
+                        setTimeout(() => callback('paid'), 20);
+                      }
+                    }
+                  };
+                `
+              });
+            });
+
+            let statusCalls = 0;
+            await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-status', async route => {
+              statusCalls += 1;
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  ok: true,
+                  offer: { priceStars: 149, periodDays: 30, recurring: true },
+                  entitlement: statusCalls >= 2
+                    ? { plan: 'pro', status: 'active', active: true, expiresAt: Date.now() + 2592000000, source: 'telegram-stars' }
+                    : { plan: 'free', status: 'inactive', active: false, expiresAt: null, source: 'telegram-stars' }
+                })
+              });
+            });
+
+            await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-create-invoice', async route => {
+              const body = JSON.parse(route.request().postData() || '{}');
+              expect(body.initData).toContain('query_id=audit');
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  ok: true,
+                  invoiceLink: 'https://t.me/$audit_invoice',
+                  priceStars: 149,
+                  periodDays: 30,
+                  recurring: true
+                })
+              });
+            });
+
+            await page.addInitScript(() => {
+              localStorage.setItem('alx_oracle_onboarding_v2', 'done');
+            });
+
+            await page.goto(MINI + '?payment-audit=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+            await page.locator('#alxProTopButton').click();
+            const checkout = page.locator('#proCheckout');
+            await expect(checkout).toContainText('149 ⭐', { timeout: 10000 });
+            await checkout.click();
+
+            await expect.poll(async () => {
+              return page.evaluate(() => {
+                try {
+                  return JSON.parse(localStorage.getItem('alx_oracle_pro_entitlement') || '{}').status || '';
+                } catch {
+                  return '';
+                }
+              });
+            }, { timeout: 20000 }).toBe('active');
+
+            await expect(page.locator('#proCheckout')).toContainText('ALX PRO активирован', { timeout: 10000 });
+            expect(await page.evaluate(() => window.__auditInvoiceUrl)).toBe('https://t.me/$audit_invoice');
+            expect(errors, errors.join('\n\n')).toEqual([]);
+          });
+          EOF
+
+          npx playwright test payment.spec.js --reporter=line --workers=1
