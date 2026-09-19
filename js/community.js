@@ -2,7 +2,7 @@
 // PRO-only publishing/rating with safe FREE shared previews.
 
 import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
+import { trackAnalytics } from './analytics.js?v=1.33.0-payment-audit';
 
 const VERSION = '1.32.0-community-choice';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';
