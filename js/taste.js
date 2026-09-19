@@ -1,7 +1,7 @@
 // taste.js — отдельная UI-панель профиля вкуса.
 // Не вмешивается в SceneController, Orb lifecycle или механизм вывода текста.
 
-import { initMixes, getMixes } from './mixes.js';
+import { initMixes, getMixes } from './mixes.js?v=1.33.0-payment-audit';
 import { buildDerivedProfile } from './personalization.js';
 import {
   getTasteProfile,
@@ -11,8 +11,8 @@ import {
   toggleFavorite,
   toggleDislike,
 } from './profile.js';
-import { getOrCreateDailyMix, getVisitStats } from './daily.js?v=1.10.0';
-import { getAchievementState, getStreakRewardState } from './achievements.js?v=1.11.0';
+import { getOrCreateDailyMix, getVisitStats } from './daily.js?v=1.33.0-payment-audit';
+import { getAchievementState, getStreakRewardState } from './achievements.js?v=1.33.0-payment-audit';
 
 const LEVELS = [
   { max: 0, label: 'Новый профиль', note: 'Поставь ❤️ или 👎 нескольким миксам — Оракул начнёт подстраиваться.', progress: 0 },
