@@ -8,7 +8,7 @@ const ENDPOINT = 'https://alx-pay.alxoracle.workers.dev/api/analytics/event';
 const INSTALL_KEY = 'alx_analytics_install_v1';
 const LIMIT_KEY_PREFIX = 'alx_analytics_limit_seen_';
 const ACTIVATION_KEY = 'alx_analytics_activation_v1';
-const APP_VERSION = '1.19.0-analytics';
+const APP_VERSION = '1.34.0-funnel-analytics';
 const sessionId = makeId();
 let restorePendingUntil = 0;
 let checkoutPendingUntil = 0;
@@ -205,8 +205,9 @@ function wireEvents() {
     if (!target) return;
 
     if (target.id === 'alxTourNext') {
-      const finalStep = onboardingStepNumber() >= 5 || /Попробовать/i.test(target.textContent || '');
-      if (finalStep) trackAnalytics('onboarding_completed', { steps: 5 });
+      const currentStep = onboardingStepNumber();
+      const finalStep = /Попробовать/i.test(target.textContent || '');
+      if (finalStep) trackAnalytics('onboarding_completed', { steps: currentStep || 1 });
       else setTimeout(() => trackAnalytics('onboarding_step', { step: onboardingStepNumber() }), 0);
       return;
     }
