@@ -1,0 +1,192 @@
+name: Temporary Community Oracle Smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  community-oracle-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for GitHub Pages to contain current Community Oracle wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://al-exander23.github.io/al-exander23oracle.github.io/js/mixes.js?sha=${GITHUB_SHA}"
+          for i in $(seq 1 24); do
+            BODY="$(curl -fsSL --max-time 15 "$URL" || true)"
+            if printf '%s' "$BODY" | grep -Fq "import { isProActive } from './pro.js?v=1.31.0-community-oracle';" \
+              && printf '%s' "$BODY" | grep -Fq "const DATA_VERSION = '1.31.0-community-oracle';"; then
+              echo "GitHub Pages contains Community Oracle 1.31 wiring."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "GitHub Pages did not update to the expected Community Oracle wiring." >&2
+          exit 1
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/alx-smoke
+          cd /tmp/alx-smoke
+          npm init -y >/dev/null 2>&1
+          npm install --save-dev @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run mobile Community Oracle smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/alx-smoke
+          cat > community-oracle.spec.js <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          const BASE = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
+          const COMMUNITY_API = 'https://alx-pay.alxoracle.workers.dev/api/community/list';
+
+          const mockedMixes = [
+            {
+              id: 'community-smoke-a',
+              title: 'Smoke Citrus',
+              description: 'Playwright Community recipe A',
+              author: 'Smoke Author A',
+              strength: 3,
+              rating: 4.8,
+              ratingCount: 26,
+              recipe: [
+                { flavor: 'Lemon', percent: 55 },
+                { flavor: 'Mint', percent: 45 }
+              ]
+            },
+            {
+              id: 'community-smoke-b',
+              title: 'Smoke Berry',
+              description: 'Playwright Community recipe B',
+              author: 'Smoke Author B',
+              strength: 4,
+              rating: 4.6,
+              ratingCount: 14,
+              recipe: [
+                { flavor: 'Raspberry', percent: 60 },
+                { flavor: 'Grapefruit', percent: 40 }
+              ]
+            }
+          ];
+
+          test.use({ viewport: { width: 390, height: 844 } });
+
+          test('Community Mixes -> Выбирать шаром', async ({ page }) => {
+            const pageErrors = [];
+            page.on('pageerror', error => pageErrors.push(String(error?.stack || error)));
+
+            await page.route('https://telegram.org/js/telegram-web-app.js', async route => {
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/javascript',
+                body: `
+                  window.Telegram = {
+                    WebApp: {
+                      initData: 'query_id=smoke&user=%7B%22id%22%3A424242%7D&auth_date=1760000000&hash=smoke',
+                      ready() {},
+                      expand() {},
+                      setHeaderColor() {},
+                      openInvoice() {},
+                      HapticFeedback: { impactOccurred() {} }
+                    }
+                  };
+                `
+              });
+            });
+
+            await page.route(COMMUNITY_API, async route => {
+              const request = route.request();
+              expect(request.method()).toBe('POST');
+              const body = JSON.parse(request.postData() || '{}');
+              expect(body.view).toBe('oracle');
+              expect(body.initData).toContain('query_id=smoke');
+
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  ok: true,
+                  version: '1.31.0-community-oracle',
+                  mixes: mockedMixes
+                })
+              });
+            });
+
+            await page.addInitScript(() => {
+              localStorage.setItem('alx_oracle_onboarding_v1', 'done');
+              localStorage.setItem('alx_oracle_pro_entitlement', JSON.stringify({
+                plan: 'pro',
+                status: 'active',
+                expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+                source: 'playwright-smoke'
+              }));
+              localStorage.setItem('alx_oracle_scenario', JSON.stringify({
+                mood: 'any',
+                company: 'any',
+                time: 'any',
+                collection: 'any'
+              }));
+            });
+
+            await page.goto(BASE + '?community-oracle-smoke=' + Date.now(), {
+              waitUntil: 'domcontentloaded',
+              timeout: 30000
+            });
+
+            const proTab = page.locator('#alxBottomNav [data-tab="pro"]');
+            await expect(proTab).toBeVisible({ timeout: 15000 });
+            await proTab.click();
+
+            await expect(page.locator('#proCommunityOpen')).toBeVisible({ timeout: 10000 });
+            const oracleButton = page.locator('#proCommunityOracle');
+            await expect(oracleButton).toBeVisible();
+            await expect(oracleButton).toContainText('Выбирать шаром');
+
+            await oracleButton.click();
+
+            await expect.poll(async () => {
+              return page.evaluate(() => JSON.parse(localStorage.getItem('alx_oracle_scenario') || '{}').collection);
+            }).toBe('community');
+
+            await expect(page.locator('#alxHomeDirection')).toContainText('Community Mixes', { timeout: 10000 });
+
+            const invariants = await page.evaluate(async () => {
+              const mixes = await import('./js/mixes.js?v=1.31.0-community-oracle');
+              return {
+                communityIds: mixes.getCollectionMixes('community').map(item => item.id).sort(),
+                anyHasCommunity: mixes.getMixes().some(item => item.communityMix === true || item.source === 'community'),
+                originalsHasCommunity: mixes.getCollectionMixes('originals').some(item => item.communityMix === true || item.source === 'community')
+              };
+            });
+
+            expect(invariants.communityIds).toEqual(['community-smoke-a', 'community-smoke-b']);
+            expect(invariants.anyHasCommunity).toBe(false);
+            expect(invariants.originalsHasCommunity).toBe(false);
+
+            await page.locator('#orbWrap').click();
+
+            const card = page.locator('#mixCard');
+            await expect(card.locator('.mix-card-community-badge')).toContainText('Микс участника Community', { timeout: 30000 });
+            await expect(card.locator('.mix-card-community-badge')).toContainText(/Smoke Author (A|B)/);
+            await expect(card.locator('.mix-card-rating--community')).toContainText('COMMUNITY · ★');
+            await expect(card).toContainText(/55%|45%|60%|40%/);
+            await expect(card.locator('.mix-card-foot')).toContainText(/Автор: Smoke Author (A|B)/);
+
+            expect(pageErrors, pageErrors.join('\n\n')).toEqual([]);
+          });
+          EOF
+
+          npx playwright test community-oracle.spec.js --reporter=line --workers=1
