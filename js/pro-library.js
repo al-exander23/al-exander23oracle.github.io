@@ -3,11 +3,11 @@
 // then let the Oracle reveal a concrete mix through the orb.
 
 import { getProState, requestProPaywall } from './pro.js?v=1.26.0-oracle-first';
-import { initMixes, initOriginals, getAllMixes } from './mixes.js?v=1.26.0-oracle-first';
-import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.26.0-oracle-first';
+import { initMixes, initOriginals, initCommunityMixes, getAllMixes } from './mixes.js?v=1.31.0-community-oracle';
+import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.31.0-community-oracle';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
-const VERSION = '1.30.0-community-mvp';
+const VERSION = '1.31.0-community-oracle';
 const OVERLAY_ID = 'alxProLibrary';
 const CONTENT_ID = 'alxProLibraryContent';
 
@@ -204,8 +204,11 @@ async function render() {
         </div>
         <span>${activePlan ? 'ДОСТУПНО' : 'ALX PRO'}</span>
       </div>
-      <p>Создавай свои миксы, публикуй их для сообщества, получай оценки, следи за рейтингом и делись рецептами с другими пользователями.</p>
-      <button id="proCommunityOpen" type="button">${activePlan ? 'Открыть Community' : 'Открыть с PRO'}</button>
+      <p>Создавай свои миксы, публикуй их для сообщества, получай оценки и делись рецептами. Отдельный режим шара выбирает опубликованные миксы участников Community.</p>
+      <div class="pro-community-actions">
+        <button id="proCommunityOpen" type="button">${activePlan ? 'Открыть Community' : 'Открыть с PRO'}</button>
+        ${activePlan ? `<button id="proCommunityOracle" type="button" class="${current.collection === 'community' ? 'is-selected' : ''}"${current.collection === 'community' ? ' disabled' : ''}>${current.collection === 'community' ? 'Выбрано для шара' : 'Выбирать шаром'}</button>` : ''}
+      </div>
     </section>
 
     <div class="pro-library-section-title">
@@ -240,6 +243,26 @@ async function render() {
     closeProLibrary({ returnHome: false });
     window.dispatchEvent(new CustomEvent('alx-community-open', { detail: { view: 'top' } }));
     trackAnalytics('community_entry_click', { version: VERSION, source: 'pro_library' });
+  });
+
+  content.querySelector('#proCommunityOracle')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    if (!getProState().active) return;
+    button.disabled = true;
+    button.textContent = 'Загружаю Community…';
+    try {
+      const community = await initCommunityMixes({ force: true });
+      if (!community.length) throw new Error('В Community пока нет доступных опубликованных миксов.');
+      setScenario({ collection: 'community' });
+      trackAnalytics('community_oracle_select', { version: VERSION, count: community.length });
+      closeProLibrary({ returnHome: false });
+      document.querySelector('#alxBottomNav [data-tab="home"]')?.click();
+    } catch (error) {
+      console.warn('[ALX Community Oracle]', error);
+      button.disabled = false;
+      button.textContent = 'Попробовать снова';
+      button.title = error?.message || 'Не удалось загрузить Community';
+    }
   });
 
   content.querySelectorAll('[data-pro-select]').forEach((button) => {
