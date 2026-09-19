@@ -3,8 +3,8 @@
 // then let the Oracle reveal a concrete mix through the orb.
 
 import { getProState, requestProPaywall } from './pro.js?v=1.33.0-payment-audit';
-import { initMixes, initOriginals, initCommunityMixes, getAllMixes } from './mixes.js?v=1.31.0-community-oracle';
-import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.31.0-community-oracle';
+import { initMixes, initOriginals, initCommunityMixes, getAllMixes } from './mixes.js?v=1.33.0-payment-audit';
+import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.33.0-payment-audit';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
 const VERSION = '1.31.0-community-oracle';
