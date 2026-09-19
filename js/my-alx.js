@@ -7,7 +7,7 @@ import {
   requestProPaywall,
   syncProEntitlement,
   isTelegramPaymentContext,
-} from './pro.js?v=1.17.0-mixlab';
+} from './pro.js?v=1.33.0-payment-audit';
 import { getFavorites, getHistory } from './profile.js';
 import { getVisitStats } from './daily.js?v=1.10.0';
 import { initMixes, getAllMixes } from './mixes.js';
