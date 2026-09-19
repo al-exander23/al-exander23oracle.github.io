@@ -28,8 +28,11 @@ jobs:
           for (const file of files) {
             const src = fs.readFileSync(path.join('js', file), 'utf8');
             for (const match of src.matchAll(shared)) {
-              if (match[2] !== '1.33.0-payment-audit') {
-                bad.push(`${file}: ${match[0]}`);
+              const expected = ['analytics', 'pro-library'].includes(match[1])
+                ? '1.34.0-funnel-analytics'
+                : '1.33.0-payment-audit';
+              if (match[2] !== expected) {
+                bad.push(`${file}: ${match[0]} (expected ${expected})`);
               }
             }
           }
@@ -38,6 +41,41 @@ jobs:
             process.exit(1);
           }
           console.log('MODULE_GRAPH_OK');
+          NODE
+
+      - name: Verify analytics event coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const clientEvents = new Set();
+          for (const file of fs.readdirSync('js').filter(name => name.endsWith('.js'))) {
+            const src = fs.readFileSync(path.join('js', file), 'utf8');
+            for (const match of src.matchAll(/trackAnalytics\(['"]([^'"]+)['"]/g)) {
+              clientEvents.add(match[1]);
+            }
+          }
+
+          const backend = fs.readFileSync('cloudflare/analytics.js', 'utf8');
+          const block = backend.match(/const ALLOWED_EVENTS = new Set\(\[([\s\S]*?)\]\);/);
+          if (!block) throw new Error('ALLOWED_EVENTS block not found');
+          const allowed = new Set([...block[1].matchAll(/['"]([^'"]+)['"]/g)].map(m => m[1]));
+          const missing = [...clientEvents].filter(event => !allowed.has(event)).sort();
+          if (missing.length) {
+            console.error('Analytics events rejected by backend: ' + missing.join(', '));
+            process.exit(1);
+          }
+
+          const frontend = fs.readFileSync('js/analytics.js', 'utf8');
+          if (!frontend.includes("const APP_VERSION = '1.34.0-funnel-analytics';")) {
+            throw new Error('Frontend analytics version mismatch');
+          }
+          if (!frontend.includes("trackAnalytics('onboarding_completed', { steps: currentStep || 1 })")) {
+            throw new Error('Onboarding completion still uses stale step count');
+          }
+          console.log('ANALYTICS_EVENT_COVERAGE_OK events=' + clientEvents.size);
           NODE
 
       - name: Unit-test YooKassa webhook hardening
@@ -221,6 +259,23 @@ jobs:
           test "$MINI_CODE" = "401"
           echo "YOOKASSA_AUTH_GUARDS_OK"
 
+      - name: Verify live funnel analytics
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://alx-pay.alxoracle.workers.dev"
+          for i in $(seq 1 30); do
+            BODY="$(curl -fsSL --max-time 20 "$BASE/api/analytics/health" || true)"
+            if printf '%s' "$BODY" | grep -Fq '1.34.0-funnel-analytics'; then
+              echo "$BODY"
+              echo "ANALYTICS_LIVE_OK"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Live analytics did not reach 1.34.0-funnel-analytics" >&2
+          exit 1
+
       - name: Verify GitHub Pages payment-audit release
         shell: bash
         run: |
@@ -229,7 +284,9 @@ jobs:
           for i in $(seq 1 30); do
             HTML="$(curl -fsSL --max-time 20 "$BASE/?sha=${GITHUB_SHA}" || true)"
             if printf '%s' "$HTML" | grep -Fq 'js/pro-ui.js?v=1.33.0-payment-audit' \
-              && printf '%s' "$HTML" | grep -Fq 'js/app.js?v=1.33.0-payment-audit'; then
+              && printf '%s' "$HTML" | grep -Fq 'js/app.js?v=1.33.0-payment-audit' \
+              && printf '%s' "$HTML" | grep -Fq 'js/analytics.js?v=1.34.0-funnel-analytics' \
+              && printf '%s' "$HTML" | grep -Fq 'js/community.js?v=1.34.0-funnel-analytics'; then
               echo "PAGES_PAYMENT_AUDIT_OK"
               exit 0
             fi
