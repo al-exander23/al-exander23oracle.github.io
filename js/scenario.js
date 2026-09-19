@@ -4,7 +4,7 @@
 
 import { getItem, setItem } from './storage.js';
 import { buildDerivedProfile, calculateMixScore } from './personalization.js';
-import { isPremiumCollection, isProActive } from './pro.js?v=1.23.0-originals';
+import { isPremiumCollection, isProActive } from './pro.js?v=1.31.0-community-oracle';
 
 const KEY = 'alx_oracle_scenario';
 
