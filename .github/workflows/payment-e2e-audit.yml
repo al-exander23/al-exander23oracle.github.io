@@ -180,16 +180,15 @@ jobs:
               });
             });
 
-            let statusCalls = 0;
+            let invoiceCreated = false;
             await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-status', async route => {
-              statusCalls += 1;
               await route.fulfill({
                 status: 200,
                 contentType: 'application/json',
                 body: JSON.stringify({
                   ok: true,
                   offer: { priceStars: 149, periodDays: 30, recurring: true },
-                  entitlement: statusCalls >= 2
+                  entitlement: invoiceCreated
                     ? { plan: 'pro', status: 'active', active: true, expiresAt: Date.now() + 2592000000, source: 'telegram-stars' }
                     : { plan: 'free', status: 'inactive', active: false, expiresAt: null, source: 'telegram-stars' }
                 })
@@ -197,6 +196,7 @@ jobs:
             });
 
             await page.route('https://al-exander23oracle-github-io.vercel.app/api/stars-create-invoice', async route => {
+              invoiceCreated = true;
               const body = JSON.parse(route.request().postData() || '{}');
               expect(body.initData).toContain('query_id=audit');
               await route.fulfill({
