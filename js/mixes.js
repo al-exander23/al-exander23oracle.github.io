@@ -2,7 +2,7 @@
 // Обычные миксы загружаются из статики, а ALX Originals — только через
 // защищённый API после подтверждения активного ALX PRO.
 
-import { isProActive } from './pro.js?v=1.23.0-originals';
+import { isProActive } from './pro.js?v=1.31.0-community-oracle';
 
 let cache = null;
 let loadPromise = null;
@@ -11,7 +11,7 @@ let originalsLoaded = false;
 let communityPromise = null;
 let communityLoaded = false;
 
-const DATA_VERSION = '1.23.0-originals';
+const DATA_VERSION = '1.31.0-community-oracle';
 const FETCH_TIMEOUT = 6000;
 const ORIGINALS_COLLECTION = 'originals';
 const COMMUNITY_COLLECTION = 'community';
