@@ -239,10 +239,13 @@
 .pro-community-entry span{font:600 9px/1.2 "JetBrains Mono",monospace;letter-spacing:.12em;color:rgba(255,255,255,.45)}
 .pro-community-entry h3{margin:4px 0 0;font:600 17px/1.2 "Sora",sans-serif;color:#f4f4ef}
 .pro-community-entry p{margin:8px 0 11px;font:400 11px/1.5 "Inter",sans-serif;color:rgba(255,255,255,.55)}
+.pro-community-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .pro-community-entry button{
   width:100%;border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px;background:rgba(255,255,255,.07);
   color:#fff;font:600 11px/1 "Inter",sans-serif
 }
+.pro-community-entry button.is-selected{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.11)}
+.pro-community-entry button:disabled{opacity:.72}
 
 @media (max-width:430px){
   .community-content{padding:13px}
@@ -252,6 +255,7 @@
   .community-author-stats{grid-template-columns:repeat(2,1fr)}
   .community-success-summary{grid-template-columns:1fr}
   .community-success-actions{grid-template-columns:1fr}
+  .pro-community-actions{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
   .community-overlay,.community-toast{transition:none}
