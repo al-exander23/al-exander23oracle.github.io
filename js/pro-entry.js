@@ -6,7 +6,7 @@ import {
   getProOffer,
   requestProPaywall,
   isTelegramPaymentContext,
-} from './pro.js?v=1.17.0-mixlab';
+} from './pro.js?v=1.33.0-payment-audit';
 
 const FREE_DAILY_LIMIT = 5;
 const EXTERNAL_PRICE_RUB = 299;
