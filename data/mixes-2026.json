@@ -3,240 +3,960 @@
     "id": "mix-229",
     "name": "Чёрный Чай & Вишня",
     "description": "Тёмная вишня на старте, терпкий чёрный чай в середине и бергамот в сухом цитрусовом финале.",
-    "recipe": [{"flavor":"Вишня","percent":45},{"flavor":"Чёрный чай","percent":35},{"flavor":"Бергамот","percent":20}],
-    "strength": 3, "freshness": 1, "sweetness": 1, "sourness": 2, "difficulty": 2, "popularity": 84,
-    "brands": [], "season": "всесезонный", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 45
+      },
+      {
+        "flavor": "Чёрный чай",
+        "percent": 35
+      },
+      {
+        "flavor": "Бергамот",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 2,
+    "popularity": 84,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-230",
     "name": "Matcha Fig",
     "description": "Зелёная матча делает профиль сухим и чайным, инжир добавляет молочную фруктовость, сливки округляют вкус.",
-    "recipe": [{"flavor":"Матча","percent":40},{"flavor":"Инжир","percent":35},{"flavor":"Сливки","percent":25}],
-    "strength": 2, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 3, "popularity": 82,
-    "brands": [], "season": "всесезонный", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Матча",
+        "percent": 40
+      },
+      {
+        "flavor": "Инжир",
+        "percent": 35
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 82,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-231",
     "name": "Hojicha Peach",
     "description": "Обжаренный чай даёт тёплую основу, персик — сочность, мёд связывает всё в спокойный вечерний профиль.",
-    "recipe": [{"flavor":"Ходзича","percent":45},{"flavor":"Персик","percent":35},{"flavor":"Мёд","percent":20}],
-    "strength": 2, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 3, "popularity": 76,
-    "brands": [], "season": "осень", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Ходзича",
+        "percent": 45
+      },
+      {
+        "flavor": "Персик",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 76,
+    "brands": [],
+    "season": "осень",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-232",
     "name": "Guava Bergamot Tonic",
     "description": "Гуава остаётся сочной базой, бергамот делает аромат взрослее, тоник оставляет сухое искристое послевкусие.",
-    "recipe": [{"flavor":"Гуава","percent":45},{"flavor":"Бергамот","percent":30},{"flavor":"Тоник","percent":25}],
-    "strength": 2, "freshness": 3, "sweetness": 1, "sourness": 2, "difficulty": 3, "popularity": 80,
-    "brands": [], "season": "лето", "mood": "бодрит", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Гуава",
+        "percent": 45
+      },
+      {
+        "flavor": "Бергамот",
+        "percent": 30
+      },
+      {
+        "flavor": "Тоник",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 3,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 3,
+    "popularity": 80,
+    "brands": [],
+    "season": "лето",
+    "mood": "бодрит",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-233",
     "name": "Yuzu Honey Tea",
     "description": "Юдзу даёт яркую цитрусовую кислотность, зелёный чай — сухую структуру, мёд смягчает края.",
-    "recipe": [{"flavor":"Юдзу","percent":45},{"flavor":"Зелёный чай","percent":35},{"flavor":"Мёд","percent":20}],
-    "strength": 2, "freshness": 2, "sweetness": 1, "sourness": 3, "difficulty": 2, "popularity": 85,
-    "brands": [], "season": "всесезонный", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Юдзу",
+        "percent": 45
+      },
+      {
+        "flavor": "Зелёный чай",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 2,
+    "popularity": 85,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-234",
     "name": "Salted Pistachio",
     "description": "Фисташка и солёная карамель дают плотный современный гурманский профиль без приторности, ваниль добавляет мягкость.",
-    "recipe": [{"flavor":"Фисташка","percent":45},{"flavor":"Солёная карамель","percent":35},{"flavor":"Ваниль","percent":20}],
-    "strength": 3, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 2, "popularity": 88,
-    "brands": [], "season": "зима", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Фисташка",
+        "percent": 45
+      },
+      {
+        "flavor": "Солёная карамель",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 88,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-235",
     "name": "Rice Pudding",
     "description": "Рисовый пудинг — мягкая сливочная база, корица добавляет тепло, ваниль делает профиль собранным и уютным.",
-    "recipe": [{"flavor":"Рисовый пудинг","percent":50},{"flavor":"Корица","percent":25},{"flavor":"Ваниль","percent":25}],
-    "strength": 3, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 2, "popularity": 79,
-    "brands": [], "season": "зима", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Рисовый пудинг",
+        "percent": 50
+      },
+      {
+        "flavor": "Корица",
+        "percent": 25
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 2,
+    "popularity": 79,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-236",
     "name": "Dark Plum Cardamom",
     "description": "Спелая слива идёт плотной тёмной базой, кардамон даёт сухую пряность, ваниль смягчает финал.",
-    "recipe": [{"flavor":"Слива","percent":50},{"flavor":"Кардамон","percent":25},{"flavor":"Ваниль","percent":25}],
-    "strength": 3, "freshness": 1, "sweetness": 2, "sourness": 2, "difficulty": 3, "popularity": 83,
-    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Слива",
+        "percent": 50
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 25
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 3,
+    "popularity": 83,
+    "brands": [],
+    "season": "осень",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-237",
     "name": "Juniper Cucumber",
     "description": "Холодный огурец, сухой можжевельник и лайм собираются в чистый зелёный профиль без лишней сладости.",
-    "recipe": [{"flavor":"Огурец","percent":50},{"flavor":"Можжевельник","percent":25},{"flavor":"Лайм","percent":25}],
-    "strength": 2, "freshness": 4, "sweetness": 1, "sourness": 2, "difficulty": 3, "popularity": 75,
-    "brands": [], "season": "лето", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Огурец",
+        "percent": 50
+      },
+      {
+        "flavor": "Можжевельник",
+        "percent": 25
+      },
+      {
+        "flavor": "Лайм",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 4,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 3,
+    "popularity": 75,
+    "brands": [],
+    "season": "лето",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-238",
     "name": "Blackberry Sage",
     "description": "Ежевика даёт сочную тёмную ягоду, шалфей — сухой травяной акцент, лимон удерживает композицию свежей.",
-    "recipe": [{"flavor":"Ежевика","percent":50},{"flavor":"Шалфей","percent":25},{"flavor":"Лимон","percent":25}],
-    "strength": 3, "freshness": 2, "sweetness": 1, "sourness": 3, "difficulty": 3, "popularity": 77,
-    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Ежевика",
+        "percent": 50
+      },
+      {
+        "flavor": "Шалфей",
+        "percent": 25
+      },
+      {
+        "flavor": "Лимон",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 3,
+    "difficulty": 3,
+    "popularity": 77,
+    "brands": [],
+    "season": "осень",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-239",
     "name": "Mango Chamomile",
     "description": "Манго остаётся главным, ромашка снимает лишнюю тропическую сладость, груша добавляет мягкий сочный объём.",
-    "recipe": [{"flavor":"Манго","percent":50},{"flavor":"Ромашка","percent":30},{"flavor":"Груша","percent":20}],
-    "strength": 2, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 3, "popularity": 81,
-    "brands": [], "season": "весна", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Манго",
+        "percent": 50
+      },
+      {
+        "flavor": "Ромашка",
+        "percent": 30
+      },
+      {
+        "flavor": "Груша",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 81,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-240",
     "name": "Raspberry Espresso",
     "description": "Малина даёт кисло-сладкий вход, кофе формирует тёмное тело, ваниль оставляет мягкий кофейный шлейф.",
-    "recipe": [{"flavor":"Малина","percent":45},{"flavor":"Кофе","percent":35},{"flavor":"Ваниль","percent":20}],
-    "strength": 4, "freshness": 1, "sweetness": 2, "sourness": 2, "difficulty": 3, "popularity": 78,
-    "brands": [], "season": "зима", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Oracle · Trend Lab"
+    "recipe": [
+      {
+        "flavor": "Малина",
+        "percent": 45
+      },
+      {
+        "flavor": "Кофе",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 2,
+    "difficulty": 3,
+    "popularity": 78,
+    "brands": [],
+    "season": "зима",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Oracle · Trend Lab"
   },
   {
     "id": "mix-241",
     "name": "Velvet Rose",
     "description": "Парфюмная композиция: личи открывает вкус, роза формирует сердце, малина оставляет бархатный ягодный шлейф.",
-    "recipe": [{"flavor":"Личи","percent":40},{"flavor":"Роза","percent":35},{"flavor":"Малина","percent":25}],
-    "strength": 2, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 3, "popularity": 91,
-    "brands": [], "season": "весна", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["date-night", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Личи",
+        "percent": 40
+      },
+      {
+        "flavor": "Роза",
+        "percent": 35
+      },
+      {
+        "flavor": "Малина",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 91,
+    "brands": [],
+    "season": "весна",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "date-night",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-242",
     "name": "Noir Fig",
     "description": "Парфюмная композиция: зелёно-молочный инжир, терпкий чёрный чай и мягкая ваниль в тёмном спокойном финале.",
-    "recipe": [{"flavor":"Инжир","percent":45},{"flavor":"Чёрный чай","percent":35},{"flavor":"Ваниль","percent":20}],
-    "strength": 3, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 3, "popularity": 90,
-    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["signature", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Инжир",
+        "percent": 45
+      },
+      {
+        "flavor": "Чёрный чай",
+        "percent": 35
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 90,
+    "brands": [],
+    "season": "осень",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "signature",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-243",
     "name": "Jasmine Pear",
     "description": "Парфюмная композиция: сочная груша сверху, жасмин в сердце и бергамот в сухом цитрусовом шлейфе.",
-    "recipe": [{"flavor":"Груша","percent":45},{"flavor":"Жасмин","percent":35},{"flavor":"Бергамот","percent":20}],
-    "strength": 2, "freshness": 2, "sweetness": 1, "sourness": 1, "difficulty": 3, "popularity": 88,
-    "brands": [], "season": "весна", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["date-night", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Груша",
+        "percent": 45
+      },
+      {
+        "flavor": "Жасмин",
+        "percent": 35
+      },
+      {
+        "flavor": "Бергамот",
+        "percent": 20
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 88,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "date-night",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-244",
     "name": "Saffron Cherry",
     "description": "Парфюмная композиция: тёмная вишня, сухой шафран и ванильный шлейф — насыщенно, пряно и очень вечерне.",
-    "recipe": [{"flavor":"Вишня","percent":50},{"flavor":"Шафран","percent":20},{"flavor":"Ваниль","percent":30}],
-    "strength": 4, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 4, "popularity": 93,
-    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["after-dark", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 50
+      },
+      {
+        "flavor": "Шафран",
+        "percent": 20
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 4,
+    "popularity": 93,
+    "brands": [],
+    "season": "осень",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "after-dark",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-245",
     "name": "Lavender Milk",
     "description": "Парфюмная композиция: мягкое молоко, лаванда и мёд создают интимный кремово-цветочный профиль без резкой сладости.",
-    "recipe": [{"flavor":"Молоко","percent":45},{"flavor":"Лаванда","percent":25},{"flavor":"Мёд","percent":30}],
-    "strength": 2, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 3, "popularity": 86,
-    "brands": [], "season": "зима", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["date-night", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Молоко",
+        "percent": 45
+      },
+      {
+        "flavor": "Лаванда",
+        "percent": 25
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 30
+      }
+    ],
+    "strength": 2,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 86,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "date-night",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-246",
     "name": "White Tea Peony",
     "description": "Парфюмная композиция: белый чай даёт прозрачность, пион — цветочное сердце, личи — чистую сочную верхнюю ноту.",
-    "recipe": [{"flavor":"Белый чай","percent":45},{"flavor":"Пион","percent":30},{"flavor":"Личи","percent":25}],
-    "strength": 2, "freshness": 2, "sweetness": 1, "sourness": 1, "difficulty": 3, "popularity": 89,
-    "brands": [], "season": "весна", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["signature", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Белый чай",
+        "percent": 45
+      },
+      {
+        "flavor": "Пион",
+        "percent": 30
+      },
+      {
+        "flavor": "Личи",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 2,
+    "sweetness": 1,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 89,
+    "brands": [],
+    "season": "весна",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "signature",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-247",
     "name": "Green Neroli",
     "description": "Парфюмная композиция: бергамот и огурец дают зелёный свежий старт, жасмин смягчает композицию в финале.",
-    "recipe": [{"flavor":"Бергамот","percent":40},{"flavor":"Огурец","percent":35},{"flavor":"Жасмин","percent":25}],
-    "strength": 2, "freshness": 4, "sweetness": 1, "sourness": 2, "difficulty": 4, "popularity": 84,
-    "brands": [], "season": "лето", "mood": "лёгкость", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["signature", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Бергамот",
+        "percent": 40
+      },
+      {
+        "flavor": "Огурец",
+        "percent": 35
+      },
+      {
+        "flavor": "Жасмин",
+        "percent": 25
+      }
+    ],
+    "strength": 2,
+    "freshness": 4,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 4,
+    "popularity": 84,
+    "brands": [],
+    "season": "лето",
+    "mood": "лёгкость",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "signature",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-248",
     "name": "Amber Plum",
     "description": "Парфюмная композиция: слива даёт густой фруктовый объём, кардамон — пряность, ваниль — тёплый амбровый эффект.",
-    "recipe": [{"flavor":"Слива","percent":50},{"flavor":"Кардамон","percent":25},{"flavor":"Ваниль","percent":25}],
-    "strength": 4, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 3, "popularity": 92,
-    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["after-dark", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Слива",
+        "percent": 45
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 35
+      },
+      {
+        "flavor": "Кардамон",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 92,
+    "brands": [],
+    "season": "осень",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "after-dark",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-249",
     "name": "Cacao Violet",
     "description": "Парфюмная композиция: сухое какао, фиалка и ваниль — пудровый тёмный гурманский профиль на границе десерта и парфюма.",
-    "recipe": [{"flavor":"Какао","percent":45},{"flavor":"Фиалка","percent":30},{"flavor":"Ваниль","percent":25}],
-    "strength": 4, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 4, "popularity": 87,
-    "brands": [], "season": "зима", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["after-dark", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Какао",
+        "percent": 45
+      },
+      {
+        "flavor": "Фиалка",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 25
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 4,
+    "popularity": 87,
+    "brands": [],
+    "season": "зима",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "after-dark",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-250",
     "name": "Rose Tea Pomegranate",
     "description": "Парфюмная композиция: гранат остаётся сочным центром, роза добавляет цветочное сердце, чёрный чай сушит финал.",
-    "recipe": [{"flavor":"Гранат","percent":40},{"flavor":"Роза","percent":30},{"flavor":"Чёрный чай","percent":30}],
-    "strength": 3, "freshness": 1, "sweetness": 1, "sourness": 2, "difficulty": 3, "popularity": 90,
-    "brands": [], "season": "всесезонный", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["date-night", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Гранат",
+        "percent": 40
+      },
+      {
+        "flavor": "Роза",
+        "percent": 30
+      },
+      {
+        "flavor": "Чёрный чай",
+        "percent": 30
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 3,
+    "popularity": 90,
+    "brands": [],
+    "season": "всесезонный",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "date-night",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-251",
     "name": "Pistachio Iris",
     "description": "LIMITED · Парфюмный гурман: фисташка и ваниль дают кремовое тело, ирис добавляет сухой пудровый акцент.",
-    "recipe": [{"flavor":"Фисташка","percent":45},{"flavor":"Ирис","percent":25},{"flavor":"Ваниль","percent":30}],
-    "strength": 3, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 4, "popularity": 94,
-    "brands": [], "season": "зима", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["limited", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Фисташка",
+        "percent": 45
+      },
+      {
+        "flavor": "Ирис",
+        "percent": 25
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 30
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 4,
+    "popularity": 94,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "limited",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-252",
     "name": "Cherry Kashmir",
     "description": "Парфюмная композиция: вишня на первом плане, кашмир даёт пряно-древесное ощущение, бергамот делает финал сухим.",
-    "recipe": [{"flavor":"Вишня","percent":50},{"flavor":"Кашмир","percent":30},{"flavor":"Бергамот","percent":20}],
-    "strength": 4, "freshness": 1, "sweetness": 1, "sourness": 2, "difficulty": 4, "popularity": 91,
-    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Perfume Lab",
-    "proOnly": true, "collections": ["after-dark", "parfum"], "theme": "perfume"
+    "recipe": [
+      {
+        "flavor": "Вишня",
+        "percent": 50
+      },
+      {
+        "flavor": "Кашмир",
+        "percent": 30
+      },
+      {
+        "flavor": "Бергамот",
+        "percent": 20
+      }
+    ],
+    "strength": 4,
+    "freshness": 1,
+    "sweetness": 1,
+    "sourness": 2,
+    "difficulty": 4,
+    "popularity": 91,
+    "brands": [],
+    "season": "осень",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Perfume Lab",
+    "proOnly": true,
+    "collections": [
+      "after-dark",
+      "parfum"
+    ],
+    "theme": "perfume"
   },
   {
     "id": "mix-253",
     "name": "Sesame Rice Cream",
     "description": "LIMITED · Поджаренный кунжут, рисовый пудинг и сливки — тёплый несладкий гурманский профиль с ореховым характером.",
-    "recipe": [{"flavor":"Рисовый пудинг","percent":45},{"flavor":"Кунжут","percent":30},{"flavor":"Сливки","percent":25}],
-    "strength": 3, "freshness": 1, "sweetness": 2, "sourness": 1, "difficulty": 4, "popularity": 92,
-    "brands": [], "season": "зима", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Limited 2026",
-    "proOnly": true, "collections": ["limited", "experimental"]
+    "recipe": [
+      {
+        "flavor": "Рисовый пудинг",
+        "percent": 45
+      },
+      {
+        "flavor": "Кунжут",
+        "percent": 30
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 25
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 1,
+    "difficulty": 4,
+    "popularity": 92,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Limited 2026",
+    "proOnly": true,
+    "collections": [
+      "limited",
+      "experimental"
+    ]
   },
   {
     "id": "mix-254",
     "name": "Burnt Sugar Coffee",
     "description": "LIMITED · Кофе держит основу, жжёный сахар даёт тёмную карамельную грань, ваниль делает послевкусие длиннее.",
-    "recipe": [{"flavor":"Кофе","percent":50},{"flavor":"Жжёный сахар","percent":30},{"flavor":"Ваниль","percent":20}],
-    "strength": 5, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 3, "popularity": 93,
-    "brands": [], "season": "зима", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Limited 2026",
-    "proOnly": true, "collections": ["limited", "after-dark"]
+    "recipe": [
+      {
+        "flavor": "Кофе",
+        "percent": 50
+      },
+      {
+        "flavor": "Жжёный сахар",
+        "percent": 30
+      },
+      {
+        "flavor": "Ваниль",
+        "percent": 20
+      }
+    ],
+    "strength": 5,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 3,
+    "popularity": 93,
+    "brands": [],
+    "season": "зима",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Limited 2026",
+    "proOnly": true,
+    "collections": [
+      "limited",
+      "after-dark"
+    ]
   },
   {
     "id": "mix-255",
     "name": "Pistachio Lavender Cream",
     "description": "LIMITED · Фисташка и сливки создают плотную основу, лаванда превращает десертный профиль в необычный ароматный акцент.",
-    "recipe": [{"flavor":"Фисташка","percent":45},{"flavor":"Сливки","percent":35},{"flavor":"Лаванда","percent":20}],
-    "strength": 3, "freshness": 1, "sweetness": 3, "sourness": 1, "difficulty": 4, "popularity": 95,
-    "brands": [], "season": "зима", "mood": "уют", "rating": null, "favorites": 0, "author": "ALX Limited 2026",
-    "proOnly": true, "collections": ["limited", "parfum"]
+    "recipe": [
+      {
+        "flavor": "Фисташка",
+        "percent": 45
+      },
+      {
+        "flavor": "Сливки",
+        "percent": 35
+      },
+      {
+        "flavor": "Лаванда",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 3,
+    "sourness": 1,
+    "difficulty": 4,
+    "popularity": 95,
+    "brands": [],
+    "season": "зима",
+    "mood": "уют",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Limited 2026",
+    "proOnly": true,
+    "collections": [
+      "limited",
+      "parfum"
+    ]
   },
   {
     "id": "mix-256",
     "name": "Blackcurrant Honey Tea",
     "description": "LIMITED · Чёрная смородина, мёд и чёрный чай — насыщенный чайно-ягодный профиль с длинной терпкостью.",
-    "recipe": [{"flavor":"Смородина","percent":45},{"flavor":"Чёрный чай","percent":35},{"flavor":"Мёд","percent":20}],
-    "strength": 3, "freshness": 1, "sweetness": 2, "sourness": 3, "difficulty": 3, "popularity": 90,
-    "brands": [], "season": "осень", "mood": "вечер", "rating": null, "favorites": 0, "author": "ALX Limited 2026",
-    "proOnly": true, "collections": ["limited", "signature"]
+    "recipe": [
+      {
+        "flavor": "Смородина",
+        "percent": 45
+      },
+      {
+        "flavor": "Чёрный чай",
+        "percent": 35
+      },
+      {
+        "flavor": "Мёд",
+        "percent": 20
+      }
+    ],
+    "strength": 3,
+    "freshness": 1,
+    "sweetness": 2,
+    "sourness": 3,
+    "difficulty": 3,
+    "popularity": 90,
+    "brands": [],
+    "season": "осень",
+    "mood": "вечер",
+    "rating": null,
+    "favorites": 0,
+    "author": "ALX Limited 2026",
+    "proOnly": true,
+    "collections": [
+      "limited",
+      "signature"
+    ]
   }
 ]
