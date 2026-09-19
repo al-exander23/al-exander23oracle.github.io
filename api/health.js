@@ -5,9 +5,10 @@ module.exports = async function handler(req, res) {
   res.status(200).json({
     ok: true,
     service: 'alx-oracle-stars',
-    version: '1.35.0-launch-beta',
+    version: '1.37.0-launch-hardening',
     telegramConfigured: Boolean(String(process.env.TELEGRAM_BOT_TOKEN || '').trim()),
     priceStars: Math.max(1, Math.min(10000, Math.floor(Number(process.env.ALX_PRO_PRICE_STARS || 149) || 149))),
     externalPayEntitlements: true,
+    botPresentationManaged: true,
   });
 };
