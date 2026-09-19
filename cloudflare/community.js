@@ -2,7 +2,7 @@
 // User recipes are isolated from the official Oracle/ALX Originals pool.
 
 const DEFAULT_PRO_STATUS_API = 'https://al-exander23oracle-github-io.vercel.app/api/stars-status';
-const VERSION = '1.30.1-community-rank';
+const VERSION = '1.30.2-publish-feedback';
 const UPSTREAM_TIMEOUT_MS = 8000;
 const MAX_CREATE_PER_24H = 5;
 const enc = new TextEncoder();
@@ -384,7 +384,7 @@ async function listMixes(env, userId, mode) {
   let where = "m.status = 'published'";
   let order = 'm.created_at DESC';
   if (mode === 'mine') where += ' AND m.telegram_user_id = ?';
-  if (mode === 'saved') where += ' AND s.telegram_user_id IS NOT NULL';
+  if (mode === 'saved') where += ' AND (s.telegram_user_id IS NOT NULL OR m.telegram_user_id = ?)';
   if (mode === 'top') {
     order = `
       (((CASE WHEN m.rating_count > 0 THEN (m.rating_sum * 1.0 / m.rating_count) ELSE 4.0 END) * m.rating_count + 20.0)
@@ -396,7 +396,7 @@ async function listMixes(env, userId, mode) {
   }
 
   const bindings = [String(userId), String(userId)];
-  if (mode === 'mine') bindings.push(String(userId));
+  if (mode === 'mine' || mode === 'saved') bindings.push(String(userId));
 
   const result = await env.DB.prepare(`
     ${baseSelect()}
