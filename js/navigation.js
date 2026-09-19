@@ -3,7 +3,7 @@
 // clear four-section bottom navigation with readable labels.
 
 import { getProState } from './pro.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.33.0-payment-audit';
+import { trackAnalytics } from './analytics.js?v=1.34.0-funnel-analytics';
 
 const VERSION = '1.30.0-community-mvp';
 const NAV_ID = 'alxBottomNav';
