@@ -16,11 +16,12 @@ export const PREMIUM_COLLECTION_IDS = Object.freeze([
   'parfum',
   'limited',
   'originals',
+  'community',
 ]);
 
 export const PRO_BENEFITS = Object.freeze([
   'Безлимитные подборы без дневного ограничения FREE',
-  'Community Mixes — создавай свои рецепты, получай оценки, рейтинг и делись миксами',
+  'Community Mixes — создавай свои рецепты, получай оценки, рейтинг, делись миксами и запускай их через шар',
   '7 PRO-направлений: выбери настроение, а конкретный микс раскроет Оракул',
   'ALX Originals — закрытые авторские миксы ALX, доступные только через PRO-направление',
   'Parfum Lab и LIMITED 2026 — отдельные премиальные направления',
