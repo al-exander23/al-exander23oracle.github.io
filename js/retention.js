@@ -1,7 +1,7 @@
 // retention.js — daily habit + opt-in reminder + share layer for ALX Oracle.
 // Kept separate from the orb/scene lifecycle so retention UX cannot break mixing.
 
-import { getVisitStats } from './daily.js?v=1.10.0';
+import { getVisitStats } from './daily.js?v=1.33.0-payment-audit';
 
 const VERSION = '1.20.0-retention';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';
