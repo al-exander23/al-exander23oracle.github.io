@@ -4,7 +4,7 @@
 
 import { typeText } from './effects.js';
 import { isFavorite, toggleFavorite, getFavorites, getHistory, isDisliked, toggleDislike, resetTaste } from './profile.js';
-import { getMixById } from './mixes.js?v=1.31.0-community-oracle';
+import { getMixById } from './mixes.js?v=1.33.0-payment-audit';
 
 const STAT_FIELDS = [
   { key: 'strength', label: 'Крепость' },
