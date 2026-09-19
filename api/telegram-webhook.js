@@ -6,6 +6,7 @@ const {
   telegramApi,
   parseProPayload,
   verifyWebhookRequest,
+  ensureBotPresentation,
 } = require('../server/telegram.js');
 
 const DEFAULT_MINI_APP_URL = 'https://al-exander23.github.io/al-exander23oracle.github.io/';
@@ -309,6 +310,12 @@ module.exports = async function handler(req, res) {
             ok: false,
             error_message: 'Счёт ALX PRO устарел или изменился. Открой приложение и создай новый счёт.',
           });
+    }
+
+    if (!pre && (update.callback_query || update.message)) {
+      await ensureBotPresentation().catch((error) => {
+        console.warn('[ALX Bot presentation]', error);
+      });
     }
 
     if (update.callback_query) await handleCallback(update.callback_query);
