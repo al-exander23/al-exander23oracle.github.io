@@ -1,7 +1,7 @@
 // community.js — ALX Community Mixes UI.
 // PRO-only publishing/rating with safe FREE shared previews.
 
-import { getProState, requestProPaywall } from './pro.js?v=1.23.0-originals';
+import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.23.0-originals';
 import { trackAnalytics } from './analytics.js?v=1.19.0-analytics';
 
 const VERSION = '1.30.3-publish-proof';
@@ -280,9 +280,57 @@ async function loadView(view = currentView) {
     renderList();
     trackAnalytics('community_list_open', { version: VERSION, view: currentView });
   } catch (error) {
+    if (error?.status === 401) {
+      root.innerHTML = `
+        <section class="community-access-block">
+          <span>COMMUNITY НЕДОСТУПЕН</span>
+          <h3>Telegram-сессия не подтверждена</h3>
+          <p>${esc(error.message || 'Не удалось подтвердить Telegram-сессию.')}</p>
+          <b>Закрой Mini App и открой ALX Oracle заново через @Orcmix_bot. После нового запуска Telegram выдаст свежую защищённую сессию.</b>
+          <button type="button" data-community-access-retry>Проверить снова</button>
+        </section>`;
+      root.querySelector('[data-community-access-retry]')?.addEventListener('click', () => openCommunity(currentView));
+      return;
+    }
+
+    if (error?.status === 403) {
+      root.innerHTML = `
+        <section class="community-access-block">
+          <span>ALX PRO REQUIRED</span>
+          <h3>PRO не подтверждён сервером</h3>
+          <p>Community разрешает публикацию только после серверной проверки активного ALX PRO.</p>
+          <b id="communityProCheckMessage">Нажми «Проверить PRO», чтобы синхронизировать подписку.</b>
+          <button type="button" data-community-pro-check>Проверить PRO</button>
+        </section>`;
+      root.querySelector('[data-community-pro-check]')?.addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        const status = root.querySelector('#communityProCheckMessage');
+        button.disabled = true;
+        button.textContent = 'Проверяю…';
+        try {
+          const state = await syncProEntitlement({ attempts: 2, delayMs: 700 });
+          if (state.active) {
+            await openCommunity(currentView);
+            return;
+          }
+          status.textContent = 'Активный ALX PRO не найден.';
+          button.textContent = 'Открыть ALX PRO';
+          button.disabled = false;
+          button.onclick = () => {
+            closeCommunity();
+            requestProPaywall('Community Mixes');
+          };
+        } catch (syncError) {
+          status.textContent = syncError.message || 'Не удалось проверить ALX PRO.';
+          button.textContent = 'Повторить проверку';
+          button.disabled = false;
+        }
+      });
+      return;
+    }
+
     list.innerHTML = `<div class="community-error"><b>Не удалось открыть Community</b><span>${esc(error.message)}</span><button type="button" data-community-retry>Повторить</button></div>`;
     list.querySelector('[data-community-retry]')?.addEventListener('click', () => loadView(currentView));
-    if (error?.status === 403) requestProPaywall('Community Mixes');
   }
 }
 
