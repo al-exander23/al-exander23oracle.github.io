@@ -59,6 +59,12 @@
   max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 .community-card h3{margin:5px 0 0;font:600 17px/1.18 "Sora",sans-serif;color:#f2f2ee}
+.community-choice-badge{
+  display:inline-flex;align-items:center;width:max-content;max-width:100%;margin-top:6px;padding:4px 7px;
+  border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(255,255,255,.07);
+  font:700 8px/1 "JetBrains Mono",monospace;letter-spacing:.1em;color:rgba(255,255,255,.82)
+}
+.community-choice-badge--shared{margin:9px 0 0}
 .community-rating{text-align:right;min-width:88px}
 .community-rating em{display:inline-block;margin-bottom:4px;padding:3px 6px;border-radius:7px;background:rgba(255,255,255,.08);font:700 9px/1 "JetBrains Mono",monospace;color:rgba(255,255,255,.7);font-style:normal}
 .community-rating b{display:block;font:700 18px/1 "Sora",sans-serif;color:#fff}
