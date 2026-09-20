@@ -166,10 +166,10 @@ function ensureBotPresentation() {
       },
     }),
     telegramApi('setMyDescription', {
-      description: 'ALX Oracle — персональный Оракул вкуса: готовые миксы, 7 PRO-направлений, ALX Originals и Community Mixes. 18+.',
+      description: 'Не знаешь, что заказать? ALX Oracle подберёт готовый микс с точными пропорциями. 5 FREE-подборов в день, ALX PRO, Originals и Community. 18+.',
     }),
     telegramApi('setMyShortDescription', {
-      short_description: 'Оракул вкуса: миксы, ALX PRO, Originals и Community. 18+.',
+      short_description: 'Не знаешь, что заказать? Открой Oracle — один тап, один готовый микс. 18+.',
     }),
   ]).catch((error) => {
     presentationPromise = null;
