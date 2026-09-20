@@ -1,0 +1,69 @@
+name: Temporary Acquisition Smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acquisition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for GitHub Pages acquisition release
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://al-exander23.github.io/al-exander23oracle.github.io/index.html"
+          for i in $(seq 1 30); do
+            BODY="$(curl -fsSL --max-time 15 "$URL" || true)"
+            if printf '%s' "$BODY" | grep -Fq '1.38.0-acquisition'; then
+              echo "ACQUISITION_RELEASE_LIVE"
+              exit 0
+            fi
+            sleep 8
+          done
+          exit 1
+
+      - name: Install Playwright
+        shell: bash
+        run: |
+          mkdir -p /tmp/alx-acq
+          cd /tmp/alx-acq
+          npm init -y >/dev/null 2>&1
+          npm install --save-dev @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Verify source attribution
+        shell: bash
+        run: |
+          cd /tmp/alx-acq
+          cat > acquisition.spec.js <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          test('src parameter is attached to app_open analytics', async ({ page }) => {
+            let appOpen = null;
+            await page.route('https://telegram.org/js/telegram-web-app.js', route => route.fulfill({
+              status: 200,
+              contentType: 'application/javascript',
+              body: 'window.Telegram={WebApp:{initData:"",initDataUnsafe:{},platform:"unknown",ready(){},expand(){},setHeaderColor(){},HapticFeedback:{impactOccurred(){}}}};'
+            }));
+            await page.route('https://alx-pay.alxoracle.workers.dev/api/analytics/event', async route => {
+              const data = route.request().postDataJSON();
+              if (data?.event === 'app_open') appOpen = data;
+              await route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+            });
+
+            await page.goto('https://al-exander23.github.io/al-exander23oracle.github.io/?src=threads', { waitUntil: 'domcontentloaded' });
+            await expect.poll(() => appOpen, { timeout: 10000 }).not.toBeNull();
+            expect(appOpen.props.acquisitionSource).toBe('threads');
+            expect(appOpen.props.firstAcquisitionSource).toBe('threads');
+            expect(appOpen.props.startParam).toBe('threads');
+          });
+          EOF
+          npx playwright test acquisition.spec.js --reporter=line --workers=1
