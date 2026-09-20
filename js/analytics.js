@@ -8,7 +8,8 @@ const ENDPOINT = 'https://alx-pay.alxoracle.workers.dev/api/analytics/event';
 const INSTALL_KEY = 'alx_analytics_install_v1';
 const LIMIT_KEY_PREFIX = 'alx_analytics_limit_seen_';
 const ACTIVATION_KEY = 'alx_analytics_activation_v1';
-const APP_VERSION = '1.34.0-funnel-analytics';
+const ACQUISITION_KEY = 'alx_analytics_first_source_v1';
+const APP_VERSION = '1.38.0-acquisition';
 const sessionId = makeId();
 let restorePendingUntil = 0;
 let checkoutPendingUntil = 0;
@@ -40,6 +41,42 @@ function telegramContext() {
   if (isTelegramPaymentContext()) return true;
   const platform = String(window.Telegram?.WebApp?.platform || '').trim().toLowerCase();
   return Boolean(platform && platform !== 'unknown');
+}
+
+function cleanSource(value) {
+  const source = String(value || '').trim().toLowerCase();
+  if (!source) return '';
+  const normalized = source.replace(/[^a-z0-9_-]/g, '').slice(0, 48);
+  return normalized || '';
+}
+
+export function getAcquisitionAttribution() {
+  const params = new URLSearchParams(window.location.search || '');
+  const telegramStart = cleanSource(window.Telegram?.WebApp?.initDataUnsafe?.start_param);
+  const webStart = cleanSource(
+    params.get('tgWebAppStartParam')
+      || params.get('startapp')
+      || params.get('src')
+      || params.get('utm_source')
+  );
+  const currentSource = telegramStart || webStart || 'direct';
+
+  let firstSource = '';
+  try {
+    firstSource = cleanSource(localStorage.getItem(ACQUISITION_KEY));
+    if (!firstSource && currentSource !== 'direct') {
+      firstSource = currentSource;
+      localStorage.setItem(ACQUISITION_KEY, firstSource);
+    }
+  } catch (error) {
+    firstSource = currentSource !== 'direct' ? currentSource : '';
+  }
+
+  return {
+    source: currentSource,
+    firstSource: firstSource || 'direct',
+    startParam: telegramStart || webStart || '',
+  };
 }
 
 function cleanProps(input = {}) {
@@ -247,8 +284,12 @@ function init() {
   observeOracleCounter();
   observeOnboarding();
 
+  const acquisition = getAcquisitionAttribution();
   trackAnalytics('app_open', {
     ...proProps(),
+    acquisitionSource: acquisition.source,
+    firstAcquisitionSource: acquisition.firstSource,
+    startParam: acquisition.startParam,
     language: String(document.documentElement.lang || navigator.language || '').slice(0, 16),
   });
 }
