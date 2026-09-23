@@ -1,7 +1,7 @@
 // Privacy-minimized analytics storage + owner dashboard for ALX Oracle.
 // Data lives in the existing Cloudflare D1 database used by ALX Pay.
 
-const VERSION = '1.34.0-funnel-analytics';
+const VERSION = '1.39.0-acquisition-analytics';
 const OWNER_TEST_AMOUNT_RUB = 29;
 const MAX_RETENTION_DAYS = 180;
 const enc = new TextEncoder();
@@ -263,6 +263,64 @@ async function summaryData(env, days = 30) {
     LIMIT 31
   `).bind(since).all();
 
+  const sourceOpens = await env.DB.prepare(`
+    SELECT
+      COALESCE(
+        NULLIF(json_extract(props_json, '$.firstAcquisitionSource'), ''),
+        NULLIF(json_extract(props_json, '$.acquisitionSource'), ''),
+        'direct'
+      ) AS source,
+      COUNT(*) AS opens,
+      COUNT(DISTINCT install_id) AS users
+    FROM analytics_events
+    WHERE created_at >= ? AND event_name = 'app_open'
+    GROUP BY source
+    ORDER BY users DESC, opens DESC
+  `).bind(since).all();
+
+  const sourceFunnel = await env.DB.prepare(`
+    WITH install_sources AS (
+      SELECT
+        install_id,
+        COALESCE(
+          MAX(NULLIF(json_extract(props_json, '$.firstAcquisitionSource'), '')),
+          MAX(NULLIF(json_extract(props_json, '$.acquisitionSource'), '')),
+          'direct'
+        ) AS source
+      FROM analytics_events
+      WHERE created_at >= ? AND event_name = 'app_open'
+      GROUP BY install_id
+    )
+    SELECT
+      s.source AS source,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'oracle_result' THEN s.install_id END) AS used_oracle,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'pro_paywall_open' THEN s.install_id END) AS opened_pro,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'pro_activated' THEN s.install_id END) AS activated
+    FROM install_sources s
+    LEFT JOIN analytics_events e
+      ON e.install_id = s.install_id AND e.created_at >= ?
+    GROUP BY s.source
+  `).bind(since, since).all();
+
+  const sourceFunnelMap = Object.fromEntries((sourceFunnel.results || []).map((row) => [
+    String(row.source || 'direct'),
+    {
+      usedOracle: Number(row.used_oracle || 0),
+      openedPro: Number(row.opened_pro || 0),
+      activated: Number(row.activated || 0),
+    },
+  ]));
+
+  const acquisition = (sourceOpens.results || []).map((row) => {
+    const source = String(row.source || 'direct');
+    return {
+      source,
+      users: Number(row.users || 0),
+      opens: Number(row.opens || 0),
+      ...(sourceFunnelMap[source] || { usedOracle: 0, openedPro: 0, activated: 0 }),
+    };
+  });
+
   const map = Object.fromEntries((events.results || []).map((row) => [row.event_name, {
     events: Number(row.events || 0),
     users: Number(row.users || 0),
@@ -332,7 +390,9 @@ async function summaryData(env, days = 30) {
     funnel,
     paymentChannels,
     community,
+    totalAppOpens: map.app_open?.events || 0,
     totalOracleResults: map.oracle_result?.events || 0,
+    acquisition,
     events: map,
     daily: daily.results || [],
   };
@@ -386,6 +446,7 @@ function dashboardPage(summary) {
   const f = summary.funnel;
   const payment = summary.paymentChannels || {};
   const community = summary.community || {};
+  const acquisition = summary.acquisition || [];
   const max = Math.max(1, f.opened);
   const stages = [
     ['Открыли приложение', f.opened],
@@ -410,14 +471,34 @@ function dashboardPage(summary) {
     .map(([name, row]) => `<tr><td>${escapeHtml(name)}</td><td>${row.users}</td><td>${row.events}</td></tr>`)
     .join('') || '<tr><td colspan="3">Пока нет данных</td></tr>';
 
+  const sourceLabels = {
+    direct: 'Direct',
+    threads: 'Threads',
+    pinterest: 'Pinterest',
+    qr: 'QR',
+    share: 'Share',
+  };
+  const acquisitionRows = acquisition.map((row) => `
+    <tr>
+      <td>${escapeHtml(sourceLabels[row.source] || row.source)}</td>
+      <td>${Number(row.users || 0)}</td>
+      <td>${Number(row.opens || 0)}</td>
+      <td>${Number(row.usedOracle || 0)}</td>
+      <td>${pct(row.usedOracle, row.users)}</td>
+      <td>${Number(row.openedPro || 0)}</td>
+      <td>${Number(row.activated || 0)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="7">Пока нет данных по источникам</td></tr>';
+
   return dashboardShell(`
     <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">Последние ${summary.periodDays} дней · обновлено ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a href="?days=7">7 дней</a><a href="?days=30">30 дней</a><a href="?days=90">90 дней</a></div></div>
     <div class="grid">
-      <div class="card"><div class="kpi">${f.opened}</div><div class="label">установок открыли приложение</div></div>
+      <div class="card"><div class="kpi">${f.opened}</div><div class="label">уникальных пользователей</div></div>
+      <div class="card"><div class="kpi">${Number(summary.totalAppOpens || 0)}</div><div class="label">открытий приложения</div></div>
       <div class="card"><div class="kpi">${summary.totalOracleResults}</div><div class="label">подборов микса</div></div>
       <div class="card"><div class="kpi">${f.openedPro}</div><div class="label">открыли PRO</div></div>
-      <div class="card"><div class="kpi">${f.proActivated}</div><div class="label">активировали PRO · ${pct(f.proActivated, f.openedPro)} от открывших PRO</div></div>
     </div>
+    <div class="section"><h2>Источники трафика</h2><table><thead><tr><th>Источник</th><th>Пользователи</th><th>Открытия</th><th>Получили микс</th><th>Конверсия в микс</th><th>Открыли PRO</th><th>PRO активации</th></tr></thead><tbody>${acquisitionRows}</tbody></table></div>
     <div class="section"><h2>Воронка</h2><div class="card funnel">${stageHtml}</div></div>
     <div class="section"><h2>Оплата по каналам</h2><div class="grid">
       <div class="card"><div class="kpi">${Number(payment.starsCheckoutStarted || 0)}</div><div class="label">начали Stars checkout</div></div>
