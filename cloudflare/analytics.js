@@ -1,7 +1,7 @@
 // Privacy-minimized analytics storage + owner dashboard for ALX Oracle.
 // Data lives in the existing Cloudflare D1 database used by ALX Pay.
 
-const VERSION = '1.39.0-acquisition-analytics';
+const VERSION = '1.40.0-stars-ledger';
 const OWNER_TEST_AMOUNT_RUB = 29;
 const MAX_RETENTION_DAYS = 180;
 const enc = new TextEncoder();
@@ -69,6 +69,120 @@ async function hmacHex(secret, value) {
   const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(value)));
   return [...sig].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function b64urlEncode(bytes) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/g, '');
+}
+
+async function hmacB64url(secret, value) {
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(value)));
+  return b64urlEncode(sig);
+}
+
+async function telegramBotApi(env, method, payload = {}) {
+  const token = String(env.TELEGRAM_BOT_TOKEN || '').trim();
+  if (!token) throw new Error('TELEGRAM_BOT_TOKEN_NOT_CONFIGURED');
+  const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data?.ok) throw new Error(data?.description || `Telegram API ${method} failed`);
+  return data.result;
+}
+
+async function parseStarsProPayload(payload, env) {
+  const parts = String(payload || '').split('.');
+  if (parts.length !== 6 || parts[0] !== 'ap1') return null;
+
+  const [, userRaw, issuedRaw, nonce, amountRaw, signature] = parts;
+  const userId = Number(userRaw);
+  const issuedAt = Number(issuedRaw);
+  const amount = Number(amountRaw);
+  if (!Number.isFinite(userId) || !Number.isFinite(issuedAt) || !Number.isFinite(amount)) return null;
+  if (!/^[a-f0-9]{12}$/i.test(nonce)) return null;
+
+  const base = `ap1.${userId}.${issuedAt}.${nonce}.${amount}`;
+  const expected = (await hmacB64url(String(env.TELEGRAM_BOT_TOKEN || ''), `alx-pro|${base}`)).slice(0, 24);
+  if (signature !== expected) return null;
+
+  return { userId, issuedAt, amount };
+}
+
+async function starsLedgerData(env) {
+  const periodSeconds = 30 * 24 * 60 * 60;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const purchases = [];
+  const refundedIds = new Set();
+
+  try {
+    for (let page = 0; page < 20; page += 1) {
+      const result = await telegramBotApi(env, 'getStarTransactions', { offset: page * 100, limit: 100 });
+      const transactions = Array.isArray(result?.transactions) ? result.transactions : [];
+      if (!transactions.length) break;
+
+      for (const tx of transactions) {
+        const receiver = tx?.receiver;
+        if (receiver?.type === 'user' && String(tx.id || '')) {
+          refundedIds.add(String(tx.id));
+        }
+
+        const source = tx?.source;
+        if (source?.type !== 'user' || source?.transaction_type !== 'invoice_payment') continue;
+        if (Number(source?.subscription_period || 0) !== periodSeconds) continue;
+
+        const parsed = await parseStarsProPayload(source?.invoice_payload, env);
+        if (!parsed) continue;
+        if (Number(tx?.amount) !== Number(parsed.amount)) continue;
+
+        const date = Number(tx?.date || 0);
+        if (!Number.isFinite(date) || date <= 0) continue;
+
+        purchases.push({
+          id: String(tx.id || ''),
+          date,
+          amount: Number(tx.amount || 0),
+          expiresAt: (date + periodSeconds) * 1000,
+        });
+      }
+
+      if (transactions.length < 100) break;
+    }
+
+    const rows = purchases
+      .map((item) => ({
+        ...item,
+        refunded: refundedIds.has(item.id),
+        active: !refundedIds.has(item.id) && item.expiresAt > Date.now(),
+      }))
+      .sort((a, b) => b.date - a.date);
+
+    const successful = rows.filter((item) => !item.refunded);
+    return {
+      available: true,
+      purchases: successful.length,
+      refunds: rows.filter((item) => item.refunded).length,
+      activeSubscriptions: successful.filter((item) => item.active).length,
+      grossStars: successful.reduce((sum, item) => sum + Number(item.amount || 0), 0),
+      recent: rows.slice(0, 25),
+    };
+  } catch (error) {
+    console.error('[ALX Analytics Stars ledger]', error);
+    return {
+      available: false,
+      purchases: 0,
+      refunds: 0,
+      activeSubscriptions: 0,
+      grossStars: 0,
+      recent: [],
+      error: String(error?.message || 'Telegram Stars unavailable').slice(0, 160),
+    };
+  }
 }
 
 function getCookie(request, name) {
@@ -382,6 +496,8 @@ async function summaryData(env, days = 30) {
     shares: usersFor('community_share'),
   };
 
+  const starsLedger = await starsLedgerData(env);
+
   return {
     ok: true,
     version: VERSION,
@@ -390,6 +506,7 @@ async function summaryData(env, days = 30) {
     funnel,
     paymentChannels,
     community,
+    starsLedger,
     totalAppOpens: map.app_open?.events || 0,
     totalOracleResults: map.oracle_result?.events || 0,
     acquisition,
@@ -446,6 +563,7 @@ function dashboardPage(summary) {
   const f = summary.funnel;
   const payment = summary.paymentChannels || {};
   const community = summary.community || {};
+  const stars = summary.starsLedger || {};
   const acquisition = summary.acquisition || [];
   const max = Math.max(1, f.opened);
   const stages = [
@@ -490,6 +608,15 @@ function dashboardPage(summary) {
     </tr>
   `).join('') || '<tr><td colspan="7">Пока нет данных по источникам</td></tr>';
 
+  const starsRows = (stars.recent || []).map((row) => `
+    <tr>
+      <td>${escapeHtml(new Date(Number(row.date || 0) * 1000).toLocaleString('ru-RU'))}</td>
+      <td>${Number(row.amount || 0)} ⭐</td>
+      <td>${row.refunded ? 'Возврат' : row.active ? 'Активна' : 'Завершена'}</td>
+      <td>${row.refunded ? '—' : escapeHtml(new Date(Number(row.expiresAt || 0)).toLocaleDateString('ru-RU'))}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4">Покупок через Telegram Stars пока нет</td></tr>';
+
   return dashboardShell(`
     <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">Последние ${summary.periodDays} дней · обновлено ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a href="?days=7">7 дней</a><a href="?days=30">30 дней</a><a href="?days=90">90 дней</a></div></div>
     <div class="grid">
@@ -506,6 +633,16 @@ function dashboardPage(summary) {
       <div class="card"><div class="kpi">${Number(payment.yookassaPaymentsCreated || 0)}</div><div class="label">создано YooKassa платежей</div></div>
       <div class="card"><div class="kpi">${Number(payment.yookassaPaymentsSucceeded || 0)}</div><div class="label">успешных YooKassa платежей</div></div>
     </div></div>
+    <div class="section"><h2>Telegram Stars · журнал покупок</h2>
+      ${stars.available === false ? `<div class="notice">Не удалось прочитать журнал Telegram Stars: ${escapeHtml(stars.error || 'временная ошибка')}</div>` : `
+      <div class="grid">
+        <div class="card"><div class="kpi">${Number(stars.purchases || 0)}</div><div class="label">успешных покупок / продлений</div></div>
+        <div class="card"><div class="kpi">${Number(stars.grossStars || 0)} ⭐</div><div class="label">получено Stars</div></div>
+        <div class="card"><div class="kpi">${Number(stars.activeSubscriptions || 0)}</div><div class="label">активных периодов PRO</div></div>
+        <div class="card"><div class="kpi">${Number(stars.refunds || 0)}</div><div class="label">возвратов</div></div>
+      </div>
+      <div style="margin-top:12px"><table><thead><tr><th>Дата</th><th>Сумма</th><th>Статус</th><th>PRO до</th></tr></thead><tbody>${starsRows}</tbody></table></div>`}
+    </div>
     <div class="section"><h2>Community</h2><div class="grid">
       <div class="card"><div class="kpi">${Number(community.opened || 0)}</div><div class="label">открыли Community</div></div>
       <div class="card"><div class="kpi">${Number(community.oracleSelected || 0)}</div><div class="label">включили Community Oracle</div></div>
