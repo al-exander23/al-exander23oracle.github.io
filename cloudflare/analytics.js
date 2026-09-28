@@ -1,7 +1,7 @@
 // Privacy-minimized analytics storage + owner dashboard for ALX Oracle.
 // Data lives in the existing Cloudflare D1 database used by ALX Pay.
 
-const VERSION = '1.40.0-stars-ledger';
+const VERSION = '1.41.0-period-tabs';
 const OWNER_TEST_AMOUNT_RUB = 29;
 const MAX_RETENTION_DAYS = 180;
 const enc = new TextEncoder();
@@ -392,6 +392,22 @@ async function summaryData(env, days = 30) {
     ORDER BY users DESC, opens DESC
   `).bind(since).all();
 
+  const contextOpens = await env.DB.prepare(`
+    SELECT
+      context,
+      COUNT(*) AS opens,
+      COUNT(DISTINCT install_id) AS users
+    FROM analytics_events
+    WHERE created_at >= ? AND event_name = 'app_open'
+    GROUP BY context
+    ORDER BY users DESC, opens DESC
+  `).bind(since).all();
+
+  const trafficContexts = Object.fromEntries((contextOpens.results || []).map((row) => [
+    String(row.context || 'unknown'),
+    { users: Number(row.users || 0), opens: Number(row.opens || 0) },
+  ]));
+
   const sourceFunnel = await env.DB.prepare(`
     WITH install_sources AS (
       SELECT
@@ -507,6 +523,7 @@ async function summaryData(env, days = 30) {
     paymentChannels,
     community,
     starsLedger,
+    trafficContexts,
     totalAppOpens: map.app_open?.events || 0,
     totalOracleResults: map.oracle_result?.events || 0,
     acquisition,
@@ -538,7 +555,7 @@ function escapeHtml(value) {
 
 function dashboardShell(body, title = 'ALX Analytics') {
   return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><style>
-  :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#09070e;color:#eee7da;font:14px/1.45 Inter,system-ui,sans-serif}.wrap{max-width:980px;margin:auto;padding:28px 18px 60px}.head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:24px}.brand{font-size:11px;letter-spacing:.18em;color:#b99a62}.title{font:600 30px/1.1 Georgia,serif;margin:6px 0}.muted{color:#938a9b;font-size:12px}.periods{display:flex;gap:7px;flex-wrap:wrap}.periods a,.btn{color:#e8d2a4;text-decoration:none;border:1px solid #5d4c36;border-radius:999px;padding:7px 11px;background:#15101b}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{border:1px solid #2e2634;background:linear-gradient(145deg,#15111c,#0e0b13);border-radius:16px;padding:15px}.kpi{font-size:28px;font-weight:700;color:#f7e8c8}.label{font-size:11px;color:#9b91a3;margin-top:3px}.funnel{margin-top:18px;display:grid;gap:8px}.row{display:grid;grid-template-columns:190px 1fr 60px;align-items:center;gap:10px}.bar{height:9px;background:#221c27;border-radius:99px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#8d7148,#ddbd7a);border-radius:99px}.section{margin-top:28px}.section h2{font:600 20px Georgia,serif;margin:0 0 12px}table{width:100%;border-collapse:collapse;border:1px solid #2e2634;border-radius:14px;overflow:hidden}th,td{text-align:left;padding:10px;border-bottom:1px solid #241e29;font-size:12px}th{color:#a99eb0;background:#121018}tr:last-child td{border-bottom:0}.notice{border:1px solid #493b2b;background:#15110d;border-radius:16px;padding:16px;margin-top:16px}@media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:130px 1fr 48px}.head{align-items:flex-start;flex-direction:column}}@media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.kpi{font-size:22px}}
+  :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#09070e;color:#eee7da;font:14px/1.45 Inter,system-ui,sans-serif}.wrap{max-width:980px;margin:auto;padding:28px 18px 60px}.head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:24px}.brand{font-size:11px;letter-spacing:.18em;color:#b99a62}.title{font:600 30px/1.1 Georgia,serif;margin:6px 0}.muted{color:#938a9b;font-size:12px}.periods{display:flex;gap:7px;flex-wrap:wrap}.periods a,.btn{color:#e8d2a4;text-decoration:none;border:1px solid #5d4c36;border-radius:999px;padding:7px 11px;background:#15101b}.periods a.active{background:#e0bf7c;color:#130e18;border-color:#e0bf7c;font-weight:700}.periods a:hover{border-color:#b89558}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{border:1px solid #2e2634;background:linear-gradient(145deg,#15111c,#0e0b13);border-radius:16px;padding:15px}.kpi{font-size:28px;font-weight:700;color:#f7e8c8}.label{font-size:11px;color:#9b91a3;margin-top:3px}.funnel{margin-top:18px;display:grid;gap:8px}.row{display:grid;grid-template-columns:190px 1fr 60px;align-items:center;gap:10px}.bar{height:9px;background:#221c27;border-radius:99px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#8d7148,#ddbd7a);border-radius:99px}.section{margin-top:28px}.section h2{font:600 20px Georgia,serif;margin:0 0 12px}table{width:100%;border-collapse:collapse;border:1px solid #2e2634;border-radius:14px;overflow:hidden}th,td{text-align:left;padding:10px;border-bottom:1px solid #241e29;font-size:12px}th{color:#a99eb0;background:#121018}tr:last-child td{border-bottom:0}.notice{border:1px solid #493b2b;background:#15110d;border-radius:16px;padding:16px;margin-top:16px}@media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:130px 1fr 48px}.head{align-items:flex-start;flex-direction:column}}@media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.kpi{font-size:22px}}
   </style></head><body><div class="wrap">${body}</div></body></html>`;
 }
 
@@ -565,6 +582,10 @@ function dashboardPage(summary) {
   const community = summary.community || {};
   const stars = summary.starsLedger || {};
   const acquisition = summary.acquisition || [];
+  const traffic = summary.trafficContexts || {};
+  const telegramTraffic = traffic.telegram || { users: 0, opens: 0 };
+  const periodName = summary.periodDays === 1 ? 'День' : summary.periodDays === 7 ? 'Неделя' : 'Месяц';
+  const periodCaption = summary.periodDays === 1 ? 'последние 24 часа' : summary.periodDays === 7 ? 'последние 7 дней' : 'последние 30 дней';
   const max = Math.max(1, f.opened);
   const stages = [
     ['Открыли приложение', f.opened],
@@ -618,12 +639,12 @@ function dashboardPage(summary) {
   `).join('') || '<tr><td colspan="4">Покупок через Telegram Stars пока нет</td></tr>';
 
   return dashboardShell(`
-    <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">Последние ${summary.periodDays} дней · обновлено ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a href="?days=7">7 дней</a><a href="?days=30">30 дней</a><a href="?days=90">90 дней</a></div></div>
+    <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">${periodName}: ${periodCaption} · данные обновляются при каждом открытии · ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a class="${summary.periodDays === 1 ? 'active' : ''}" href="?days=1">День</a><a class="${summary.periodDays === 7 ? 'active' : ''}" href="?days=7">Неделя</a><a class="${summary.periodDays === 30 ? 'active' : ''}" href="?days=30">Месяц</a></div></div>
     <div class="grid">
       <div class="card"><div class="kpi">${f.opened}</div><div class="label">уникальных пользователей</div></div>
-      <div class="card"><div class="kpi">${Number(summary.totalAppOpens || 0)}</div><div class="label">открытий приложения</div></div>
+      <div class="card"><div class="kpi">${Number(telegramTraffic.users || 0)}</div><div class="label">пользователей открыли в Telegram</div></div>
+      <div class="card"><div class="kpi">${Number(summary.totalAppOpens || 0)}</div><div class="label">всего открытий приложения</div></div>
       <div class="card"><div class="kpi">${summary.totalOracleResults}</div><div class="label">подборов микса</div></div>
-      <div class="card"><div class="kpi">${f.openedPro}</div><div class="label">открыли PRO</div></div>
     </div>
     <div class="section"><h2>Источники трафика</h2><table><thead><tr><th>Источник</th><th>Пользователи</th><th>Открытия</th><th>Получили микс</th><th>Конверсия в микс</th><th>Открыли PRO</th><th>PRO активации</th></tr></thead><tbody>${acquisitionRows}</tbody></table></div>
     <div class="section"><h2>Воронка</h2><div class="card funnel">${stageHtml}</div></div>
@@ -651,7 +672,7 @@ function dashboardPage(summary) {
     </div></div>
     <div class="section"><h2>По дням</h2><table><thead><tr><th>Дата</th><th>Открыли</th><th>Миксы</th><th>PRO экран</th><th>PRO активации</th></tr></thead><tbody>${dailyRows}</tbody></table></div>
     <div class="section"><h2>Все события</h2><table><thead><tr><th>Событие</th><th>Уникальные установки</th><th>Событий</th></tr></thead><tbody>${eventRows}</tbody></table></div>
-    <div class="notice muted">Аналитика намеренно не хранит Telegram ID, имя, username, платёжные реквизиты или содержимое выбранных миксов. Install ID — случайный идентификатор приложения.</div>
+    <div class="notice muted">Данные собираются автоматически при действиях пользователей и пересчитываются при каждом открытии панели. Вкладки «День / Неделя / Месяц» меняют период для всей воронки и источников трафика. Аналитика намеренно не хранит Telegram ID, имя, username, платёжные реквизиты или содержимое выбранных миксов. Install ID — случайный идентификатор приложения.</div>
   `);
 }
 
