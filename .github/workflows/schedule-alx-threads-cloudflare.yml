@@ -53,7 +53,7 @@ jobs:
             fi
 
             PARAMS="$(jq -c --arg id "$JOB_ID" '. + {jobId: $id}' "$file")"
-            BODY="$(jq -cn               --arg instance_id "$JOB_ID"               --arg params "$PARAMS"               '{instance_id:$instance_id, params:$params, instance_retention:{success_retention:"3 days", error_retention:"3 days"}}')"
+            BODY="$(jq -cn               --arg instance_id "$JOB_ID"               --argjson params "$PARAMS"               '{instance_id:$instance_id, params:$params, instance_retention:{success_retention:"3 days", error_retention:"3 days"}}')"
 
             echo "Queueing $file as $JOB_ID"
 
