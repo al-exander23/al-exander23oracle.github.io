@@ -1,0 +1,35 @@
+name: Check ALX Threads Cloudflare instance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'threads-cloudflare/checks/*.json'
+
+permissions:
+  contents: read
+
+jobs:
+  check-instance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read check request
+        id: req
+        shell: bash
+        run: |
+          FILE="$(git diff --name-only HEAD^ HEAD -- 'threads-cloudflare/checks/*.json' | head -n1)"
+          test -n "$FILE"
+          JOB_ID="$(jq -r '.jobId' "$FILE")"
+          echo "job_id=$JOB_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Get Cloudflare Workflow instance
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          JOB_ID: ${{ steps.req.outputs.job_id }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body             "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workflows/alx-threads-autoposter/instances/$JOB_ID"             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"             -H "Content-Type: application/json"
