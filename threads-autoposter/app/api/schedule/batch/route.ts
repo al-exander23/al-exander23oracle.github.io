@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const inputs = body.posts.map(validateScheduleInput);
     const runs = await Promise.all(inputs.map(async (input) => {
       const jobId = input.jobId ?? crypto.randomUUID();
-      const run = await start(scheduledThreadsPost, [{ ...input, jobId }], { deploymentId: "latest" });
+      const run = await start(scheduledThreadsPost, [{ ...input, jobId }]);
       return { jobId, runId: run.runId, publishAt: input.publishAt };
     }));
     return Response.json({ ok: true, runs });
