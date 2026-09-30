@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   try {
     const input = validateScheduleInput(await request.json());
     const jobId = input.jobId ?? crypto.randomUUID();
-    const run = await start(scheduledThreadsPost, [{ ...input, jobId }], { deploymentId: "latest" });
+    const run = await start(scheduledThreadsPost, [{ ...input, jobId }]);
     return Response.json({ ok: true, jobId, runId: run.runId, publishAt: input.publishAt });
   } catch (error) {
     return Response.json({ ok: false, error: error instanceof Error ? error.message : String(error) }, { status: 400 });
