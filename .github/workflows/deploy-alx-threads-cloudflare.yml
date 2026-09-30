@@ -1,0 +1,32 @@
+name: Deploy ALX Threads Cloudflare
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'threads-cloudflare/**'
+      - '.github/workflows/deploy-alx-threads-cloudflare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Deploy Worker and Workflow
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: threads-cloudflare
+          wranglerVersion: "latest"
+          command: deploy
+          secrets: |
+            THREADS_ACCESS_TOKEN
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.ALX_THREADS_ACCESS_TOKEN }}
