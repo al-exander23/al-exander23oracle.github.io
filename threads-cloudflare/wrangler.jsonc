@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "alx-threads-autoposter",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "THREADS_EXPECTED_USERNAME": "alxoracle"
+  },
+  "workflows": [
+    {
+      "name": "alx-threads-autoposter",
+      "binding": "ALX_THREADS_WORKFLOW",
+      "class_name": "AlxThreadsWorkflow"
+    }
+  ]
+}
