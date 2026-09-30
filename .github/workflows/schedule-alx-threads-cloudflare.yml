@@ -1,0 +1,63 @@
+name: Queue ALX Threads Cloudflare jobs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'threads-cloudflare/jobs/*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  queue-new-jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Find newly added jobs
+        shell: bash
+        run: |
+          BEFORE='${{ github.event.before }}'
+          AFTER='${{ github.sha }}'
+
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            git ls-tree -r --name-only "$AFTER" -- 'threads-cloudflare/jobs/*.json' > /tmp/jobs.txt
+          else
+            git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- 'threads-cloudflare/jobs/*.json' > /tmp/jobs.txt
+          fi
+
+          cat /tmp/jobs.txt
+
+      - name: Queue each Cloudflare Workflow instance
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WORKFLOW_NAME: alx-threads-autoposter
+        run: |
+          set -euo pipefail
+
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+
+            JOB_ID="$(jq -r '.jobId // empty' "$file")"
+            if [ -z "$JOB_ID" ]; then
+              JOB_ID="$(basename "$file" .json)"
+            fi
+
+            PARAMS="$(jq -c --arg id "$JOB_ID" '. + {jobId: $id}' "$file")"
+            BODY="$(jq -cn               --arg instance_id "$JOB_ID"               --arg params "$PARAMS"               '{instance_id:$instance_id, params:$params, instance_retention:{success_retention:"3 days", error_retention:"3 days"}}')"
+
+            echo "Queueing $file as $JOB_ID"
+
+            curl --fail-with-body --retry 3 --retry-all-errors               -X POST               "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workflows/$WORKFLOW_NAME/instances"               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"               -H "Content-Type: application/json"               --data "$BODY"
+
+            echo
+          done < /tmp/jobs.txt
