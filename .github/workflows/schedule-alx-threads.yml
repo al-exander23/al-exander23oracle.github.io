@@ -1,0 +1,50 @@
+name: Schedule ALX Threads jobs
+
+on:
+  push:
+    paths:
+      - 'threads-autoposter/jobs/*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schedule-added-jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Find newly added job files
+        shell: bash
+        run: |
+          BEFORE='${{ github.event.before }}'
+          AFTER='${{ github.sha }}'
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            git ls-tree -r --name-only "$AFTER" -- 'threads-autoposter/jobs/*.json' > /tmp/jobs.txt
+          else
+            git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- 'threads-autoposter/jobs/*.json' > /tmp/jobs.txt
+          fi
+          cat /tmp/jobs.txt
+
+      - name: Schedule each new post
+        shell: bash
+        env:
+          AUTOPOSTER_URL: ${{ secrets.ALX_AUTOPOSTER_URL }}
+          ADMIN_SECRET: ${{ secrets.ALX_AUTOPOSTER_ADMIN_SECRET }}
+        run: |
+          set -euo pipefail
+          test -n "$AUTOPOSTER_URL"
+          test -n "$ADMIN_SECRET"
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            echo "Scheduling $file"
+            curl --fail-with-body --retry 3 --retry-all-errors \
+              -X POST "$AUTOPOSTER_URL/api/schedule" \
+              -H 'content-type: application/json' \
+              -H "x-admin-secret: $ADMIN_SECRET" \
+              --data-binary "@$file"
+            echo
+          done < /tmp/jobs.txt
