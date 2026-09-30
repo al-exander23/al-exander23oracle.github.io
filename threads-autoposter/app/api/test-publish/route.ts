@@ -16,7 +16,6 @@ export async function POST(request: Request) {
   const run = await start(
     scheduledThreadsPost,
     [{ text, publishAt: new Date().toISOString(), jobId }],
-    { deploymentId: "latest" },
   );
   return Response.json({ ok: true, runId: run.runId, jobId });
 }
