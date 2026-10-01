@@ -114,75 +114,42 @@ async function publishIdempotently(env, payload) {
   const created = await graphPost("/me/threads", {
     media_type: "TEXT",
     text: payload.text,
+    auto_publish_text: "true",
     access_token: token
   });
 
   if (!created.res.ok) {
     if (shouldRetry(created.res.status)) {
       throw new Error(
-        `Transient create-container error ${created.res.status}: ${safeProviderError(created.body)}`
+        `Transient auto-publish error ${created.res.status}: ${safeProviderError(created.body)}`
       );
     }
     return {
       status: "failed",
-      reason: `Create Threads container failed ${created.res.status}`,
+      reason: `Auto-publish Threads text failed ${created.res.status}`,
       providerError: created.body,
       jobId: payload.jobId
     };
   }
 
-  const creationId = String(created.body.id || "");
-  if (!creationId) {
-    throw new Error("Threads returned no container ID");
+  const returnedId = String(created.body.id || "");
+  if (!returnedId) {
+    throw new Error("Threads auto-publish returned no ID");
   }
 
-  const published = await graphPost("/me/threads_publish", {
-    creation_id: creationId,
-    access_token: token
-  });
-
-  if (!published.res.ok) {
-    const recovered = await findExactPost(token, payload.text);
-    if (recovered && !recovered.error) {
-      return {
-        status: "recovered",
-        mediaId: recovered.id,
-        permalink: recovered.permalink || null,
-        jobId: payload.jobId
-      };
-    }
-
-    if (shouldRetry(published.res.status)) {
-      throw new Error(
-        `Transient publish error ${published.res.status}: ${safeProviderError(published.body)}`
-      );
-    }
-
+  const verified = await findExactPost(token, payload.text);
+  if (verified && !verified.error) {
     return {
-      status: "failed",
-      reason: `Publish Threads container failed ${published.res.status}`,
-      providerError: published.body,
+      status: "published",
+      mediaId: verified.id,
+      permalink: verified.permalink || null,
       jobId: payload.jobId
     };
   }
 
-  const mediaId = String(published.body.id || "");
-  if (!mediaId) {
-    const recovered = await findExactPost(token, payload.text);
-    if (recovered && !recovered.error) {
-      return {
-        status: "recovered",
-        mediaId: recovered.id,
-        permalink: recovered.permalink || null,
-        jobId: payload.jobId
-      };
-    }
-    throw new Error("Publish succeeded without a Media ID");
-  }
-
   return {
     status: "published",
-    mediaId,
+    mediaId: returnedId,
     permalink: null,
     jobId: payload.jobId
   };
