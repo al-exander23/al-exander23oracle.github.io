@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'threads-cloudflare/**'
+      - 'threads-cloudflare/src/**'
+      - 'threads-cloudflare/wrangler.jsonc'
+      - 'threads-cloudflare/package.json'
       - '.github/workflows/deploy-alx-threads-cloudflare.yml'
   workflow_dispatch:
 
