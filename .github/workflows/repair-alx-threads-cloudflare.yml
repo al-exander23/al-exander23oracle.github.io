@@ -1,0 +1,38 @@
+name: Repair ALX Threads Cloudflare schedule
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'threads-cloudflare/repair/*.json'
+
+permissions:
+  contents: read
+
+jobs:
+  terminate-old-instances:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Find repair request
+        id: req
+        shell: bash
+        run: |
+          FILE="$(git diff --name-only HEAD^ HEAD -- 'threads-cloudflare/repair/*.json' | head -n1)"
+          test -n "$FILE"
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Terminate old workflow instances
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          REPAIR_FILE: ${{ steps.req.outputs.file }}
+        run: |
+          set -euo pipefail
+          jq -r '.terminate[]' "$REPAIR_FILE" | while IFS= read -r id; do
+            echo "Terminating $id"
+            curl --fail-with-body               -X PATCH               "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workflows/alx-threads-autoposter/instances/$id/status"               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"               -H "Content-Type: application/json"               --data '{"status":"terminate"}' || true
+            echo
+          done
