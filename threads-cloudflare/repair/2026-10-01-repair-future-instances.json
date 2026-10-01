@@ -1,0 +1,10 @@
+{
+  "terminate": [
+    "2026-10-01-2000-aggressive",
+    "2026-10-01-2345-aggressive",
+    "2026-10-02-1000-aggressive",
+    "2026-10-02-1400-aggressive",
+    "2026-10-02-2000-aggressive",
+    "2026-10-02-2345-aggressive"
+  ]
+}
