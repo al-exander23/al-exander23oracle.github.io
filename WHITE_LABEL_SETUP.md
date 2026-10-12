@@ -20,7 +20,7 @@ The visual system, layout and product logic remain standardized.
 Configure the venue bot's Mini App URL as:
 
 ```
-https://al-exander23.github.io/?tenant=<tenant-id>
+https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=<tenant-id>
 ```
 
 Example tenant IDs: `alx`, `lounge-one`, `hookah-city`.
