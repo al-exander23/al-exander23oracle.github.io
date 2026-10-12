@@ -99,7 +99,7 @@ export function trackAnalytics(event, props = {}) {
     event: String(event || '').slice(0, 64),
     context: telegramContext() ? 'telegram' : 'browser',
     appVersion: APP_VERSION,
-    props: cleanProps({ tenant: getTenantId(), ...props }),
+    props: cleanProps({ ...props, tenant: getTenantId() }),
   };
 
   if (!payload.event) return;
