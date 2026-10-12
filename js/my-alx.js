@@ -12,6 +12,7 @@ import { getFavorites, getHistory } from './profile.js';
 import { getVisitStats } from './daily.js?v=1.33.0-payment-audit';
 import { initMixes, getAllMixes } from './mixes.js?v=1.33.0-payment-audit';
 import { trackAnalytics } from './analytics.js?v=1.34.0-funnel-analytics';
+import { getTenant, getTenantId } from './tenant.js?v=1.39.0-white-label';
 
 const VERSION = '1.21.0-my-alx';
 const FREE_LIMIT = 5;
@@ -21,6 +22,8 @@ const BUTTON_ID = 'myAlxTopButton';
 const OVERLAY_ID = 'myAlxOverlay';
 const TEASER_ID = 'alxProTeaser';
 const EXTERNAL_PRICE_RUB = 299;
+const TENANT = getTenant();
+const IS_WHITE_LABEL = getTenantId() !== 'alx';
 
 function telegramContext() {
   if (isTelegramPaymentContext()) return true;
@@ -79,8 +82,8 @@ function ensureButton() {
   button.id = BUTTON_ID;
   button.className = 'icon-btn my-alx-top-btn';
   button.type = 'button';
-  button.textContent = 'A';
-  button.setAttribute('aria-label', 'Мой ALX');
+  button.textContent = IS_WHITE_LABEL ? '◉' : 'A';
+  button.setAttribute('aria-label', IS_WHITE_LABEL ? 'Профиль' : 'Мой ALX');
   button.addEventListener('click', openDashboard);
   toolbar.appendChild(button);
 }
@@ -93,7 +96,7 @@ function ensureOverlay() {
   overlay.innerHTML = `
     <section class="my-alx-panel" role="dialog" aria-modal="true" aria-labelledby="myAlxTitle">
       <div class="my-alx-head">
-        <div><div class="my-alx-kicker">ALX ORACLE</div><h2 id="myAlxTitle">Мой ALX</h2></div>
+        <div><div class="my-alx-kicker">${IS_WHITE_LABEL ? TENANT.displayName : 'ALX ORACLE'}</div><h2 id="myAlxTitle">${IS_WHITE_LABEL ? 'Профиль' : 'Мой ALX'}</h2></div>
         <button class="my-alx-close" id="myAlxClose" type="button" aria-label="Закрыть">✕</button>
       </div>
       <div id="myAlxContent"></div>
@@ -109,6 +112,9 @@ function ensureOverlay() {
 }
 
 function statusCardHtml(state) {
+  if (IS_WHITE_LABEL) {
+    return `\n      <div class="my-alx-status my-alx-status--pro">\n        <div class="my-alx-status-top"><span class="my-alx-plan">${TENANT.displayName || 'Микс Оракул'}</span><span class="my-alx-live">ДОСТУП</span></div>\n        <b>Гостевые возможности открыты</b>\n        <p>Подборы без дневного лимита, избранное, история и Community Mixes.</p>\n      </div>`;
+  }
   const offer = getProOffer();
   const telegram = telegramContext();
   if (state.active) {
@@ -150,10 +156,10 @@ function dashboardHtml() {
     <div class="my-alx-section">
       <div class="my-alx-section-title">Доступ и аккаунт</div>
       <button class="my-alx-row" id="myAlxTaste" type="button"><span>✦ Профиль вкуса</span><small>персонализация и Микс дня</small></button>
-      ${telegram ? '<button class="my-alx-row" id="myAlxRestore" type="button"><span>↻ Восстановить PRO</span><small>проверить активную подписку</small></button>' : ''}
-      <button class="my-alx-row" id="myAlxProDetails" type="button"><span>◆ Возможности ALX PRO</span><small>закрытые коллекции и безлимит</small></button>
+      ${!IS_WHITE_LABEL && telegram ? '<button class="my-alx-row" id="myAlxRestore" type="button"><span>↻ Восстановить PRO</span><small>проверить активную подписку</small></button>' : ''}
+      ${!IS_WHITE_LABEL ? '<button class="my-alx-row" id="myAlxProDetails" type="button"><span>◆ Возможности ALX PRO</span><small>закрытые коллекции и безлимит</small></button>' : ''}
     </div>
-    <div class="my-alx-foot">${state.active ? 'PRO подтверждается сервером; локально хранится только кэш статуса.' : 'FREE-статистика и профиль хранятся локально на этом устройстве.'}</div>`;
+    <div class="my-alx-foot">${IS_WHITE_LABEL ? 'Профиль и локальная статистика сохраняются на этом устройстве.' : state.active ? 'PRO подтверждается сервером; локально хранится только кэш статуса.' : 'FREE-статистика и профиль хранятся локально на этом устройстве.'}</div>`;
 }
 
 function renderDashboard() {
@@ -268,7 +274,7 @@ function closeTeaser() {
 }
 
 async function showLimitTeaser() {
-  if (getProState().active || teaserSeenToday() || document.getElementById(TEASER_ID)) return;
+  if (IS_WHITE_LABEL || getProState().active || teaserSeenToday() || document.getElementById(TEASER_ID)) return;
   await initMixes();
   const mix = premiumTeaserMix(getAllMixes());
   if (!mix) return;
@@ -306,6 +312,7 @@ async function showLimitTeaser() {
 }
 
 function handleUsage(detail = {}) {
+  if (IS_WHITE_LABEL) return;
   if (Number(detail.remaining) === 0 && Number(detail.used) >= FREE_LIMIT) {
     setTimeout(() => showLimitTeaser().catch(() => {}), 900);
   }
