@@ -7,7 +7,7 @@ import {
   requestProPaywall,
   isTelegramPaymentContext,
 } from './pro.js?v=1.33.0-payment-audit';
-import { getTenantId } from './tenant.js?v=1.39.0-white-label';
+import { getTenantId } from './tenant.js?v=1.39.1-white-label';
 
 const FREE_DAILY_LIMIT = 5;
 const EXTERNAL_PRICE_RUB = 299;
