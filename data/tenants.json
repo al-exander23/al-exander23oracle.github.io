@@ -1,0 +1,17 @@
+{
+  "alx": {
+    "id": "alx",
+    "displayName": "ALX Oracle",
+    "wordmark": "МИКС ОРАКУЛ",
+    "pageTitle": "ALX Oracle — Микс Оракул",
+    "logoUrl": "",
+    "botUsername": "Orcmix_bot",
+    "communityName": "Community Mixes",
+    "communityKicker": "ALX PRO COMMUNITY",
+    "communityIntroLabel": "СООБЩЕСТВО ALX",
+    "requirePro": true,
+    "contacts": {
+      "telegram": "@Orcmix_bot"
+    }
+  }
+}
