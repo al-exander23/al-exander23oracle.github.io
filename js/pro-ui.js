@@ -12,7 +12,7 @@ import {
   createStarsInvoice,
   waitForProActivation,
 } from './pro.js?v=1.33.0-payment-audit';
-import { getTenantId } from './tenant.js?v=1.39.1-white-label';
+import { getTenantId } from './tenant.js?v=1.42.0-venue-plans';
 
 const CARD_ID = 'alxProCard';
 const OVERLAY_ID = 'alxProOverlay';

@@ -2,8 +2,8 @@
 // PRO-only publishing/rating with safe FREE shared previews.
 
 import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.39.1-white-label';
-import { getTenant, getTenantId, tenantRequiresPro, getTenantBotUsername } from './tenant.js?v=1.39.1-white-label';
+import { trackAnalytics } from './analytics.js?v=1.42.0-venue-plans';
+import { getTenant, getTenantId, tenantRequiresPro, getTenantBotUsername } from './tenant.js?v=1.42.0-venue-plans';
 
 const VERSION = '1.39.0-white-label';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';

@@ -1,0 +1,36 @@
+.venue-promo-card{
+  width:min(330px,calc(100% - 32px));
+  margin:12px auto 0;
+  padding:14px 15px;
+  border-radius:16px;
+  border:1px solid rgba(217,184,120,.26);
+  background:linear-gradient(145deg,rgba(31,24,42,.88),rgba(15,11,22,.94));
+  box-shadow:0 14px 32px rgba(0,0,0,.28);
+  text-align:left;
+}
+.venue-promo-kicker{
+  font:700 8px/1.2 'JetBrains Mono',monospace;
+  letter-spacing:.14em;
+  color:var(--gold-soft);
+  margin-bottom:6px;
+}
+.venue-promo-title{
+  font:600 16px/1.25 'Lora',serif;
+  color:#fff8ea;
+}
+.venue-promo-text{
+  margin-top:5px;
+  font-size:11.5px;
+  line-height:1.45;
+  color:var(--text-muted);
+}
+.venue-promo-cta{
+  margin-top:10px;
+  border:1px solid rgba(217,184,120,.38);
+  background:rgba(217,184,120,.1);
+  color:var(--gold-soft);
+  border-radius:999px;
+  padding:7px 11px;
+  font:600 10px/1 'Inter',sans-serif;
+  cursor:pointer;
+}

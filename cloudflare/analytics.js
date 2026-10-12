@@ -1,7 +1,7 @@
 // Privacy-minimized analytics storage + owner dashboard for ALX Oracle.
 // Data lives in the existing Cloudflare D1 database used by ALX Pay.
 
-const VERSION = '1.41.0-period-tabs';
+const VERSION = '1.42.0-venue-plans';
 const OWNER_TEST_AMOUNT_RUB = 29;
 const MAX_RETENTION_DAYS = 180;
 const enc = new TextEncoder();
@@ -56,6 +56,11 @@ const ALLOWED_EVENTS = new Set([
   'community_unlock_click',
   'community_entry_click',
   'community_oracle_select',
+  'venue_mix_result',
+  'favorite_toggle',
+  'mix_share',
+  'venue_promo_view',
+  'venue_promo_click',
 ]);
 
 function b64urlDecode(value) {
@@ -183,6 +188,64 @@ async function starsLedgerData(env) {
       error: String(error?.message || 'Telegram Stars unavailable').slice(0, 160),
     };
   }
+}
+
+function normalizeTenantAnalyticsId(value) {
+  const tenantId = String(value || '').trim().toLowerCase();
+  return /^[a-z0-9][a-z0-9-]{0,47}$/.test(tenantId) ? tenantId : '';
+}
+
+function tenantAnalyticsSecretName(tenantId) {
+  return `TENANT_ANALYTICS_KEY_${String(tenantId || '').toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
+}
+
+function tenantAnalyticsSecret(env, tenantId) {
+  const normalized = normalizeTenantAnalyticsId(tenantId);
+  if (!normalized || normalized === 'alx') return '';
+  return String(env?.[tenantAnalyticsSecretName(normalized)] || '').trim();
+}
+
+function safeEqualText(a, b) {
+  const left = String(a || '');
+  const right = String(b || '');
+  if (!left || !right || left.length !== right.length) return false;
+  let diff = 0;
+  for (let i = 0; i < left.length; i += 1) diff |= left.charCodeAt(i) ^ right.charCodeAt(i);
+  return diff === 0;
+}
+
+async function createVenueAnalyticsSession(env, tenantId) {
+  const secret = tenantAnalyticsSecret(env, tenantId);
+  if (!secret) return '';
+  const payload = b64urlEncode(enc.encode(JSON.stringify({
+    tenant: tenantId,
+    exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+  })));
+  const sig = await hmacHex(secret, payload);
+  return `${payload}.${sig}`;
+}
+
+async function venueAnalyticsSession(request, env, tenantId) {
+  const expectedTenant = normalizeTenantAnalyticsId(tenantId);
+  const secret = tenantAnalyticsSecret(env, expectedTenant);
+  if (!expectedTenant || !secret) return false;
+  const token = getCookie(request, 'alx_venue_analytics');
+  const [payload, sig] = String(token || '').split('.');
+  if (!payload || !sig) return false;
+  const expectedSig = await hmacHex(secret, payload);
+  if (!safeEqualText(expectedSig, sig)) return false;
+  try {
+    const object = JSON.parse(dec.decode(b64urlDecode(payload)));
+    return object?.tenant === expectedTenant && Number(object?.exp || 0) >= Math.floor(Date.now() / 1000);
+  } catch (error) {
+    return false;
+  }
+}
+
+function tenantEventClause(tenantId, alias = '') {
+  if (!tenantId) return '';
+  const prefix = alias ? `${alias}.` : '';
+  return ` AND json_extract(${prefix}props_json, '$.tenant') = ?`;
 }
 
 function getCookie(request, name) {
@@ -350,32 +413,37 @@ function clampDays(value) {
   return Math.max(1, Math.min(180, Math.floor(days)));
 }
 
-async function summaryData(env, days = 30) {
+async function summaryData(env, days = 30, tenantRaw = '') {
   await ensureSchema(env);
   const periodDays = clampDays(days);
   const since = Date.now() - periodDays * 24 * 60 * 60 * 1000;
+  const tenantId = normalizeTenantAnalyticsId(tenantRaw);
+  const tenantClause = tenantEventClause(tenantId);
+  const tenantBindings = tenantId ? [tenantId] : [];
 
   const events = await env.DB.prepare(`
     SELECT event_name, COUNT(*) AS events, COUNT(DISTINCT install_id) AS users
     FROM analytics_events
-    WHERE created_at >= ?
+    WHERE created_at >= ?${tenantClause}
     GROUP BY event_name
     ORDER BY users DESC, events DESC
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const daily = await env.DB.prepare(`
     SELECT
       date(created_at / 1000, 'unixepoch') AS day,
       COUNT(DISTINCT CASE WHEN event_name = 'app_open' THEN install_id END) AS opens,
       SUM(CASE WHEN event_name = 'oracle_result' THEN 1 ELSE 0 END) AS mixes,
+      SUM(CASE WHEN event_name = 'venue_mix_result' THEN 1 ELSE 0 END) AS venue_mixes,
+      COUNT(DISTINCT CASE WHEN event_name = 'community_open' THEN install_id END) AS community_users,
       COUNT(DISTINCT CASE WHEN event_name = 'pro_paywall_open' THEN install_id END) AS paywalls,
       COUNT(DISTINCT CASE WHEN event_name = 'pro_activated' THEN install_id END) AS activations
     FROM analytics_events
-    WHERE created_at >= ?
+    WHERE created_at >= ?${tenantClause}
     GROUP BY day
     ORDER BY day DESC
     LIMIT 31
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const sourceOpens = await env.DB.prepare(`
     SELECT
@@ -387,10 +455,10 @@ async function summaryData(env, days = 30) {
       COUNT(*) AS opens,
       COUNT(DISTINCT install_id) AS users
     FROM analytics_events
-    WHERE created_at >= ? AND event_name = 'app_open'
+    WHERE created_at >= ? AND event_name = 'app_open'${tenantClause}
     GROUP BY source
     ORDER BY users DESC, opens DESC
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const contextOpens = await env.DB.prepare(`
     SELECT
@@ -398,10 +466,10 @@ async function summaryData(env, days = 30) {
       COUNT(*) AS opens,
       COUNT(DISTINCT install_id) AS users
     FROM analytics_events
-    WHERE created_at >= ? AND event_name = 'app_open'
+    WHERE created_at >= ? AND event_name = 'app_open'${tenantClause}
     GROUP BY context
     ORDER BY users DESC, opens DESC
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const trafficContexts = Object.fromEntries((contextOpens.results || []).map((row) => [
     String(row.context || 'unknown'),
@@ -418,24 +486,28 @@ async function summaryData(env, days = 30) {
           'direct'
         ) AS source
       FROM analytics_events
-      WHERE created_at >= ? AND event_name = 'app_open'
+      WHERE created_at >= ? AND event_name = 'app_open'${tenantClause}
       GROUP BY install_id
     )
     SELECT
       s.source AS source,
       COUNT(DISTINCT CASE WHEN e.event_name = 'oracle_result' THEN s.install_id END) AS used_oracle,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'community_open' THEN s.install_id END) AS opened_community,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'venue_mix_result' THEN s.install_id END) AS saw_venue_mix,
       COUNT(DISTINCT CASE WHEN e.event_name = 'pro_paywall_open' THEN s.install_id END) AS opened_pro,
       COUNT(DISTINCT CASE WHEN e.event_name = 'pro_activated' THEN s.install_id END) AS activated
     FROM install_sources s
     LEFT JOIN analytics_events e
       ON e.install_id = s.install_id AND e.created_at >= ?
     GROUP BY s.source
-  `).bind(since, since).all();
+  `).bind(since, ...tenantBindings, since).all();
 
   const sourceFunnelMap = Object.fromEntries((sourceFunnel.results || []).map((row) => [
     String(row.source || 'direct'),
     {
       usedOracle: Number(row.used_oracle || 0),
+      openedCommunity: Number(row.opened_community || 0),
+      sawVenueMix: Number(row.saw_venue_mix || 0),
       openedPro: Number(row.opened_pro || 0),
       activated: Number(row.activated || 0),
     },
@@ -447,7 +519,7 @@ async function summaryData(env, days = 30) {
       source,
       users: Number(row.users || 0),
       opens: Number(row.opens || 0),
-      ...(sourceFunnelMap[source] || { usedOracle: 0, openedPro: 0, activated: 0 }),
+      ...(sourceFunnelMap[source] || { usedOracle: 0, openedCommunity: 0, sawVenueMix: 0, openedPro: 0, activated: 0 }),
     };
   });
 
@@ -456,33 +528,56 @@ async function summaryData(env, days = 30) {
     users: Number(row.users || 0),
   }]));
 
-  const usersFor = (...names) => {
-    const values = names.map((name) => map[name]?.users || 0);
-    return names.length === 1 ? values[0] : null;
+  const usersFor = (name) => map[name]?.users || 0;
+
+  const favoriteSavesRow = await env.DB.prepare(`
+    SELECT COUNT(*) AS events, COUNT(DISTINCT install_id) AS users
+    FROM analytics_events
+    WHERE created_at >= ?
+      AND event_name = 'favorite_toggle'
+      AND json_extract(props_json, '$.saved') = 1
+      ${tenantClause}
+  `).bind(since, ...tenantBindings).first();
+
+  let checkoutUsersRow = { users: 0 };
+  let activationChannelsRow = { stars: 0, yookassa: 0 };
+  let externalPaymentsRow = { created: 0, succeeded: 0 };
+  let starsLedger = {
+    available: true,
+    purchases: 0,
+    refunds: 0,
+    activeSubscriptions: 0,
+    grossStars: 0,
+    recent: [],
   };
 
-  const checkoutUsersRow = await env.DB.prepare(`
-    SELECT COUNT(DISTINCT install_id) AS users
-    FROM analytics_events
-    WHERE created_at >= ? AND event_name IN ('stars_checkout_start', 'external_checkout_open')
-  `).bind(since).first();
+  // Consumer payment analytics belong only to ALX Oracle, not to B2B venue dashboards.
+  if (!tenantId || tenantId === 'alx') {
+    checkoutUsersRow = await env.DB.prepare(`
+      SELECT COUNT(DISTINCT install_id) AS users
+      FROM analytics_events
+      WHERE created_at >= ? AND event_name IN ('stars_checkout_start', 'external_checkout_open')${tenantClause}
+    `).bind(since, ...tenantBindings).first();
 
-  const activationChannelsRow = await env.DB.prepare(`
-    SELECT
-      COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"telegram-stars"%' THEN install_id END) AS stars,
-      COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"yookassa"%' THEN install_id END) AS yookassa
-    FROM analytics_events
-    WHERE created_at >= ? AND event_name = 'pro_activated'
-  `).bind(since).first();
+    activationChannelsRow = await env.DB.prepare(`
+      SELECT
+        COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"telegram-stars"%' THEN install_id END) AS stars,
+        COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"yookassa"%' THEN install_id END) AS yookassa
+      FROM analytics_events
+      WHERE created_at >= ? AND event_name = 'pro_activated'${tenantClause}
+    `).bind(since, ...tenantBindings).first();
 
-  const livePrice = Math.max(1, Math.round(Number(env.ALX_LIVE_PRICE_RUB || env.ALX_EXTERNAL_PRICE_RUB || 299) || 299));
-  const externalPaymentsRow = await env.DB.prepare(`
-    SELECT
-      COUNT(*) AS created,
-      SUM(CASE WHEN status = 'succeeded' THEN 1 ELSE 0 END) AS succeeded
-    FROM payments
-    WHERE created_at >= ? AND provider = 'yookassa' AND amount_rub = ?
-  `).bind(since, livePrice).first();
+    const livePrice = Math.max(1, Math.round(Number(env.ALX_LIVE_PRICE_RUB || env.ALX_EXTERNAL_PRICE_RUB || 299) || 299));
+    externalPaymentsRow = await env.DB.prepare(`
+      SELECT
+        COUNT(*) AS created,
+        SUM(CASE WHEN status = 'succeeded' THEN 1 ELSE 0 END) AS succeeded
+      FROM payments
+      WHERE created_at >= ? AND provider = 'yookassa' AND amount_rub = ?
+    `).bind(since, livePrice).first();
+
+    starsLedger = await starsLedgerData(env);
+  }
 
   const funnel = {
     opened: usersFor('app_open'),
@@ -512,16 +607,29 @@ async function summaryData(env, days = 30) {
     shares: usersFor('community_share'),
   };
 
-  const starsLedger = await starsLedgerData(env);
+  const engagement = {
+    venueMixResults: Number(map.venue_mix_result?.events || 0),
+    venueMixUsers: Number(map.venue_mix_result?.users || 0),
+    favoriteSaves: Number(favoriteSavesRow?.events || 0),
+    favoriteUsers: Number(favoriteSavesRow?.users || 0),
+    shares: Number(map.mix_share?.events || 0),
+    shareUsers: Number(map.mix_share?.users || 0),
+    promoViews: Number(map.venue_promo_view?.events || 0),
+    promoViewUsers: Number(map.venue_promo_view?.users || 0),
+    promoClicks: Number(map.venue_promo_click?.events || 0),
+    promoClickUsers: Number(map.venue_promo_click?.users || 0),
+  };
 
   return {
     ok: true,
     version: VERSION,
     generatedAt: Date.now(),
     periodDays,
+    tenantId: tenantId || null,
     funnel,
     paymentChannels,
     community,
+    engagement,
     starsLedger,
     trafficContexts,
     totalAppOpens: map.app_open?.events || 0,
@@ -574,6 +682,179 @@ function forbiddenPage() {
     <h1 class="title">Доступ закрыт</h1>
     <p class="muted">Эта Telegram-сессия не является владельцем аналитики ALX Oracle.</p>
   `, 'ALX Analytics · Access denied');
+}
+
+function venueAnalyticsLoginPage(tenantId, message = '') {
+  const safeTenant = normalizeTenantAnalyticsId(tenantId);
+  return dashboardShell(`
+    <div class="brand">VENUE ANALYTICS · ${escapeHtml(safeTenant.toUpperCase())}</div>
+    <h1 class="title">Аналитика заведения</h1>
+    <p class="muted">Введите код доступа, выданный вместе с Business / Pro подключением.</p>
+    ${message ? `<div class="notice">${escapeHtml(message)}</div>` : ''}
+    <form method="post" action="/venue-analytics/login" style="margin-top:22px;display:grid;gap:12px;max-width:420px">
+      <input type="hidden" name="tenant" value="${escapeHtml(safeTenant)}">
+      <input name="accessKey" type="password" autocomplete="current-password" required placeholder="Код доступа" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid #493b2b;background:#15101b;color:#eee7da">
+      <button class="btn" type="submit" style="cursor:pointer;width:max-content">Открыть аналитику</button>
+    </form>
+  `, 'Venue Analytics');
+}
+
+function venueDashboardPage(summary, tenantId) {
+  const f = summary.funnel || {};
+  const community = summary.community || {};
+  const engagement = summary.engagement || {};
+  const acquisition = summary.acquisition || [];
+  const periodCaption = summary.periodDays === 1 ? '24 часа' : summary.periodDays === 7 ? '7 дней' : '30 дней';
+  const base = `/venue-analytics?tenant=${encodeURIComponent(tenantId)}`;
+
+  const sourceRows = acquisition.map((row) => `
+    <tr>
+      <td>${escapeHtml(row.source || 'direct')}</td>
+      <td>${Number(row.users || 0)}</td>
+      <td>${Number(row.opens || 0)}</td>
+      <td>${Number(row.usedOracle || 0)}</td>
+      <td>${pct(row.usedOracle, row.users)}</td>
+      <td>${Number(row.sawVenueMix || 0)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6">Пока нет данных</td></tr>';
+
+  const dailyRows = (summary.daily || []).map((row) => `
+    <tr>
+      <td>${escapeHtml(row.day)}</td>
+      <td>${Number(row.opens || 0)}</td>
+      <td>${Number(row.mixes || 0)}</td>
+      <td>${Number(row.venue_mixes || 0)}</td>
+      <td>${Number(row.community_users || 0)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="5">Пока нет данных</td></tr>';
+
+  return dashboardShell(`
+    <div class="head">
+      <div>
+        <div class="brand">VENUE ANALYTICS · ${escapeHtml(tenantId.toUpperCase())}</div>
+        <h1 class="title">Аналитика приложения</h1>
+        <div class="muted">Период: ${periodCaption} · обновлено ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div>
+      </div>
+      <div class="periods">
+        <a class="${summary.periodDays === 1 ? 'active' : ''}" href="${base}&days=1">День</a>
+        <a class="${summary.periodDays === 7 ? 'active' : ''}" href="${base}&days=7">Неделя</a>
+        <a class="${summary.periodDays === 30 ? 'active' : ''}" href="${base}&days=30">Месяц</a>
+        <a href="/venue-analytics/logout?tenant=${encodeURIComponent(tenantId)}">Выйти</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div class="kpi">${Number(f.opened || 0)}</div><div class="label">уникальных гостей</div></div>
+      <div class="card"><div class="kpi">${Number(summary.totalAppOpens || 0)}</div><div class="label">открытий приложения</div></div>
+      <div class="card"><div class="kpi">${Number(summary.totalOracleResults || 0)}</div><div class="label">подборов Оракула</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.venueMixResults || 0)}</div><div class="label">показов фирменных миксов</div></div>
+    </div>
+
+    <div class="section"><h2>Вовлечённость</h2><div class="grid">
+      <div class="card"><div class="kpi">${Number(engagement.favoriteSaves || 0)}</div><div class="label">добавлений в избранное</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.shares || 0)}</div><div class="label">нажатий «Поделиться»</div></div>
+      <div class="card"><div class="kpi">${Number(community.opened || 0)}</div><div class="label">гостей открыли Community</div></div>
+      <div class="card"><div class="kpi">${Number(community.mixesCreated || 0)}</div><div class="label">гостей публиковали миксы</div></div>
+    </div></div>
+
+    ${Number(engagement.promoViews || 0) > 0 ? `
+    <div class="section"><h2>Промо-механика</h2><div class="grid">
+      <div class="card"><div class="kpi">${Number(engagement.promoViews || 0)}</div><div class="label">показов промо</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.promoClicks || 0)}</div><div class="label">кликов по промо</div></div>
+      <div class="card"><div class="kpi">${pct(engagement.promoClicks, engagement.promoViews)}</div><div class="label">CTR промо</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.promoClickUsers || 0)}</div><div class="label">уникальных гостей кликнули</div></div>
+    </div></div>` : ''}
+
+    <div class="section"><h2>Источники гостей</h2>
+      <table><thead><tr><th>Источник</th><th>Гости</th><th>Открытия</th><th>Получили микс</th><th>Конверсия</th><th>Фирменный микс</th></tr></thead><tbody>${sourceRows}</tbody></table>
+    </div>
+
+    <div class="section"><h2>По дням</h2>
+      <table><thead><tr><th>Дата</th><th>Открытия</th><th>Миксы</th><th>Фирменные</th><th>Community</th></tr></thead><tbody>${dailyRows}</tbody></table>
+    </div>
+
+    <div class="notice muted">Панель не показывает Telegram ID, имена гостей, username, платёжные реквизиты или содержимое их персональных подборов. Статистика агрегирована для оценки использования приложения.</div>
+  `, `Venue Analytics · ${tenantId}`);
+}
+
+async function venueAnalyticsDashboard(request, env) {
+  const url = new URL(request.url);
+  const tenantId = normalizeTenantAnalyticsId(url.searchParams.get('tenant'));
+  if (!tenantId || tenantId === 'alx') {
+    return new Response(dashboardShell('<h1 class="title">Неверное заведение</h1>', 'Venue Analytics'), {
+      status: 400,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  if (!tenantAnalyticsSecret(env, tenantId)) {
+    return new Response(dashboardShell(`
+      <div class="brand">VENUE ANALYTICS</div>
+      <h1 class="title">Аналитика ещё не активирована</h1>
+      <p class="muted">Для этого заведения не настроен Business / Pro доступ к аналитике.</p>
+    `, 'Venue Analytics'), {
+      status: 503,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  const authenticated = await venueAnalyticsSession(request, env, tenantId);
+  if (!authenticated) {
+    return new Response(venueAnalyticsLoginPage(tenantId), {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  const summary = await summaryData(env, url.searchParams.get('days'), tenantId);
+  return new Response(venueDashboardPage(summary, tenantId), {
+    status: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+async function venueAnalyticsLogin(request, env) {
+  const form = await request.formData().catch(() => null);
+  const tenantId = normalizeTenantAnalyticsId(form?.get('tenant'));
+  const supplied = String(form?.get('accessKey') || '');
+  const expected = tenantAnalyticsSecret(env, tenantId);
+
+  if (!tenantId || tenantId === 'alx' || !expected) {
+    return new Response(venueAnalyticsLoginPage(tenantId || 'venue', 'Аналитика для этого заведения не настроена.'), {
+      status: 503,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  if (!safeEqualText(supplied, expected)) {
+    return new Response(venueAnalyticsLoginPage(tenantId, 'Неверный код доступа.'), {
+      status: 403,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  const session = await createVenueAnalyticsSession(env, tenantId);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: `/venue-analytics?tenant=${encodeURIComponent(tenantId)}`,
+      'Set-Cookie': `alx_venue_analytics=${session}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`,
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+function venueAnalyticsLogout(request) {
+  const url = new URL(request.url);
+  const tenantId = normalizeTenantAnalyticsId(url.searchParams.get('tenant'));
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: tenantId ? `/venue-analytics?tenant=${encodeURIComponent(tenantId)}` : '/venue-analytics',
+      'Set-Cookie': 'alx_venue_analytics=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+      'Cache-Control': 'no-store',
+    },
+  });
 }
 
 function dashboardPage(summary) {
@@ -638,8 +919,11 @@ function dashboardPage(summary) {
     </tr>
   `).join('') || '<tr><td colspan="4">Покупок через Telegram Stars пока нет</td></tr>';
 
+  const tenantQuery = summary.tenantId ? `&tenant=${encodeURIComponent(summary.tenantId)}` : '';
+  const tenantCaption = summary.tenantId ? ` · tenant: ${summary.tenantId}` : ' · все tenants';
+
   return dashboardShell(`
-    <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">${periodName}: ${periodCaption} · данные обновляются при каждом открытии · ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a class="${summary.periodDays === 1 ? 'active' : ''}" href="?days=1">День</a><a class="${summary.periodDays === 7 ? 'active' : ''}" href="?days=7">Неделя</a><a class="${summary.periodDays === 30 ? 'active' : ''}" href="?days=30">Месяц</a></div></div>
+    <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">${periodName}: ${periodCaption}${tenantCaption} · данные обновляются при каждом открытии · ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a class="${summary.periodDays === 1 ? 'active' : ''}" href="?days=1${tenantQuery}">День</a><a class="${summary.periodDays === 7 ? 'active' : ''}" href="?days=7${tenantQuery}">Неделя</a><a class="${summary.periodDays === 30 ? 'active' : ''}" href="?days=30${tenantQuery}">Месяц</a></div></div>
     <div class="grid">
       <div class="card"><div class="kpi">${f.opened}</div><div class="label">уникальных пользователей</div></div>
       <div class="card"><div class="kpi">${Number(telegramTraffic.users || 0)}</div><div class="label">пользователей открыли в Telegram</div></div>
@@ -681,7 +965,8 @@ async function analyticsDashboard(request, env) {
   if (access.status === 401) return new Response(loginPage(), { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
   if (!access.ok) return new Response(forbiddenPage(), { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
   const url = new URL(request.url);
-  const summary = await summaryData(env, url.searchParams.get('days'));
+  const tenantId = url.searchParams.get('tenant') || 'alx';
+  const summary = await summaryData(env, url.searchParams.get('days'), tenantId);
   return new Response(dashboardPage(summary), { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
@@ -722,10 +1007,13 @@ export async function handleAnalyticsRoute(request, env, ctx) {
   if (url.pathname === '/api/analytics/summary' && request.method === 'GET') {
     const access = await requireOwner(request, env);
     if (!access.ok) return json({ ok: false, error: access.status === 401 ? 'Auth required' : 'Forbidden' }, access.status);
-    return json(await summaryData(env, url.searchParams.get('days')));
+    return json(await summaryData(env, url.searchParams.get('days'), url.searchParams.get('tenant') || 'alx'));
   }
 
   if (url.pathname === '/analytics/login' && request.method === 'GET') return analyticsLogin();
   if (url.pathname === '/analytics' && request.method === 'GET') return analyticsDashboard(request, env);
+  if (url.pathname === '/venue-analytics/login' && request.method === 'POST') return venueAnalyticsLogin(request, env);
+  if (url.pathname === '/venue-analytics/logout' && request.method === 'GET') return venueAnalyticsLogout(request);
+  if (url.pathname === '/venue-analytics' && request.method === 'GET') return venueAnalyticsDashboard(request, env);
   return null;
 }

@@ -1,84 +1,49 @@
-# White-label / multi-tenant setup
+# White-label venue setup
 
-ALX Oracle can serve multiple hookah venues from one codebase. Each venue gets its own Telegram bot and public branding, while product updates remain shared.
+Одна кодовая база обслуживает ALX Oracle и брендированные версии заведений.
 
-## What changes per venue
+## Тарифная модель
 
-Only the public tenant config changes:
+- `start`: стандартная white-label версия, без фирменных миксов и клиентской аналитики.
+- `business`: до 20 фирменных миксов + приватная venue analytics + QR tracking.
+- `pro`: до 60 фирменных миксов + всё BUSINESS + промо-карточка и CTR.
 
-- venue name;
-- wordmark;
-- optional logo URL;
-- Telegram bot username;
-- contacts;
-- Community labels.
+ALX tenant использует `plan: alx` и сохраняет собственную FREE / ALX PRO модель.
 
-The visual system, layout and product logic remain standardized.
+## Tenant URL
 
-## How a venue is selected
+`https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=<tenant-id>`
 
-Configure the venue bot's Mini App URL as:
+QR source URL: `https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=<tenant-id>&src=qr`
 
-```
-https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=<tenant-id>
-```
+## Добавление клиента
 
-Example tenant IDs: `alx`, `lounge-one`, `hookah-city`.
+Использовать `scripts/add-tenant.mjs` с флагом `--plan=start|business|pro`.
 
-## Add a venue
+Новый Telegram token хранить в индивидуальном секрете `TENANT_BOT_TOKEN_<TENANT_ID>`.
 
-Preferred repeatable path:
+Для BUSINESS / PRO создать отдельный код аналитики в `TENANT_ANALYTICS_KEY_<TENANT_ID>`.
 
-1. Run the tenant helper:
+Legacy `TENANT_BOT_TOKENS` поддерживается только для ранее подключённых tenants.
 
-```bash
-node scripts/add-tenant.mjs lounge-one "Lounge One" lounge_one_bot
-```
+## Фирменные миксы
 
-2. Review the generated object in `data/tenants.json`.
-3. Create/configure the venue bot in BotFather and point its Mini App URL to the URL printed by the helper.
-4. Add the token as the individual encrypted Cloudflare Worker secret printed by the helper.
+`data/tenant-mixes.json` хранит публичные рецепты фирменных миксов по tenant ID. Лимиты применяются на клиенте и проверяются CI validator.
 
-For tenant `lounge-one` the preferred secret is:
+Фирменные рецепты входят в обычный пул Оракула и дополнительно доступны через коллекцию «Фирменные миксы». Карточка рецепта явно отмечает бренд заведения.
 
-```
-TENANT_BOT_TOKEN_LOUNGE_ONE
-```
+## Venue analytics
 
-The legacy JSON secret `TENANT_BOT_TOKENS` remains supported only for backwards compatibility with already provisioned tenants. New customers should always use one individual secret per bot, so onboarding a new venue never requires reading or replacing another customer's token.
+`https://alx-pay.alxoracle.workers.dev/venue-analytics?tenant=<tenant-id>`
 
-Never commit bot tokens to GitHub.
+Доступ защищён отдельным кодом. После успешного входа создаётся HttpOnly cookie-сессия. Код доступа не передаётся в URL.
 
-## Community Mixes isolation
+Собираются агрегированные продуктовые события: открытия, подборы, фирменные миксы, избранное, share, Community, источники и PRO-promotions. Telegram ID, username и содержимое персональных подборов в analytics_events не сохраняются.
 
-ALX keeps the existing ALX PRO requirement.
+## PRO promotions
 
-Branded venue tenants authenticate through their own Telegram bot token. Their Community Mixes are isolated by tenant prefix, so one venue does not see another venue's user recipes.
-
-Venue end users do not need ALX PRO for Community in the current white-label model: the venue's monthly B2B subscription is the commercial access layer.
-
-Official Oracle/ALX mixes and user Community Mixes remain separate datasets.
-
-## New client checklist
-
-Ask the buyer for:
-
-- venue name;
-- logo (PNG/SVG or public URL);
-- desired bot username/name;
-- Telegram contact;
-- phone/social link if needed.
-
-Do not promise custom colors, layout changes or individual feature development in the base package. Those are separate paid changes.
-
+PRO tenant может иметь объект `promotion` с `kicker`, `title`, `text`, `ctaLabel`, `url`. Показы и клики отправляются в venue analytics.
 
 ## Smoke Test
 
-Первый тестовый tenant:
-
-- tenant id: `smoke-test`
-- bot: `@smokertesterbot`
-- Mini App URL after production merge: `https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=smoke-test`
-- Smoke Test may continue using the existing legacy `TENANT_BOT_TOKENS` secret; new venues use individual `TENANT_BOT_TOKEN_<TENANT>` secrets.
-
-Before onboarding a real venue, verify ALX default mode, Smoke Test branding, unlimited Oracle access, Community auth and cross-tenant isolation.
+`smoke-test` использует @smokertesterbot и переведён в BUSINESS для демонстрации фирменных миксов. Его текущий bot token остаётся в legacy secret, чтобы не ломать работающий тест.

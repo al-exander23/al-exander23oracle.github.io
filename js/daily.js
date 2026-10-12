@@ -3,7 +3,7 @@
 // One daily mix is persisted per local calendar day and re-used until the date changes.
 
 import { getItem, setItem } from './storage.js';
-import { initMixes, getMixes, getMixById } from './mixes.js?v=1.33.0-payment-audit';
+import { initMixes, getMixes, getMixById } from './mixes.js?v=1.42.0-venue-plans';
 import { selectWeightedMix } from './personalization.js';
 import { addToHistory } from './profile.js';
 

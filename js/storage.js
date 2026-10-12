@@ -1,4 +1,4 @@
-import { tenantStorageKey } from './tenant.js?v=1.39.1-white-label';
+import { tenantStorageKey } from './tenant.js?v=1.42.0-venue-plans';
 
 // storage.js — тонкая безопасная обёртка над localStorage.
 // Ничего не знает о профиле/избранном/истории — просто хранит JSON по ключу.

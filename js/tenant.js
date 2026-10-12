@@ -18,7 +18,36 @@ const FALLBACK_TENANT = Object.freeze({
   communityKicker: 'ALX PRO COMMUNITY',
   communityIntroLabel: 'СООБЩЕСТВО ALX',
   requirePro: true,
+  plan: 'alx',
+  promotion: null,
   contacts: {},
+});
+
+const VENUE_PLAN_FEATURES = Object.freeze({
+  start: Object.freeze({
+    analytics: false,
+    advancedAnalytics: false,
+    signatureMixes: false,
+    signatureMixLimit: 0,
+    promotions: false,
+    qrTracking: false,
+  }),
+  business: Object.freeze({
+    analytics: true,
+    advancedAnalytics: false,
+    signatureMixes: true,
+    signatureMixLimit: 20,
+    promotions: false,
+    qrTracking: true,
+  }),
+  pro: Object.freeze({
+    analytics: true,
+    advancedAnalytics: true,
+    signatureMixes: true,
+    signatureMixLimit: 60,
+    promotions: true,
+    qrTracking: true,
+  }),
 });
 
 let tenant = { ...FALLBACK_TENANT };
@@ -60,6 +89,12 @@ function normalizeTenant(raw, requestedId) {
     communityKicker: String(source.communityKicker || FALLBACK_TENANT.communityKicker).trim(),
     communityIntroLabel: String(source.communityIntroLabel || FALLBACK_TENANT.communityIntroLabel).trim(),
     requirePro: source.requirePro === true,
+    plan: id === DEFAULT_TENANT_ID
+      ? 'alx'
+      : ['start', 'business', 'pro'].includes(String(source.plan || '').toLowerCase())
+        ? String(source.plan).toLowerCase()
+        : 'start',
+    promotion: source.promotion && typeof source.promotion === 'object' ? source.promotion : null,
     contacts: source.contacts && typeof source.contacts === 'object' ? source.contacts : {},
   };
 }
@@ -128,6 +163,26 @@ export function getTenantId() {
 
 export function tenantRequiresPro() {
   return tenant.requirePro === true;
+}
+
+export function getTenantPlan() {
+  return tenant.id === DEFAULT_TENANT_ID ? 'alx' : String(tenant.plan || 'start');
+}
+
+export function getTenantFeatures() {
+  if (tenant.id === DEFAULT_TENANT_ID) return Object.freeze({
+    analytics: true,
+    advancedAnalytics: true,
+    signatureMixes: false,
+    signatureMixLimit: 0,
+    promotions: false,
+    qrTracking: true,
+  });
+  return VENUE_PLAN_FEATURES[getTenantPlan()] || VENUE_PLAN_FEATURES.start;
+}
+
+export function tenantHasFeature(feature) {
+  return getTenantFeatures()?.[feature] === true;
 }
 
 export function getTenantBotUsername() {

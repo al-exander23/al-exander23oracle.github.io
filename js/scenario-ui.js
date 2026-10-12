@@ -1,7 +1,7 @@
 // scenario-ui.js — UI ситуационного режима внутри уже существующего Taste Profile.
 // Главный экран и визуал шара не меняет.
 
-import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.33.0-payment-audit';
+import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.42.0-venue-plans';
 import {
   SCENARIO_OPTIONS,
   COLLECTION_OPTIONS,
@@ -11,13 +11,13 @@ import {
   describeScenario,
   getCollectionCounts,
   hasActiveScenario,
-} from './scenario.js?v=1.33.0-payment-audit';
+} from './scenario.js?v=1.42.0-venue-plans';
 import {
   isProActive,
   isPremiumCollection,
   requestProPaywall,
 } from './pro.js?v=1.33.0-payment-audit';
-import { getTenantId } from './tenant.js?v=1.39.1-white-label';
+import { getTenantId, tenantHasFeature } from './tenant.js?v=1.42.0-venue-plans';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
@@ -38,6 +38,7 @@ function collectionButtons(selected, counts) {
   const proActive = isProActive();
   const visibleCollections = COLLECTION_OPTIONS.filter((collection) => {
     if (collection.id === 'community') return false;
+    if (collection.venueFeature && !tenantHasFeature(collection.venueFeature)) return false;
     if (IS_WHITE_LABEL) return !isPremiumCollection(collection.id);
     return !collection.hiddenUntilPro || proActive;
   });

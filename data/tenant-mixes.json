@@ -1,0 +1,76 @@
+{
+  "smoke-test": [
+    {
+      "id": "smoke-test_signature_citrus_cloud",
+      "name": "Citrus Cloud",
+      "description": "Фирменный свежий микс Smoke Test с цитрусовым стартом и прохладным финалом.",
+      "recipe": [
+        {
+          "flavor": "Грейпфрут",
+          "percent": 40
+        },
+        {
+          "flavor": "Лимонный сорбет",
+          "percent": 35
+        },
+        {
+          "flavor": "Мята",
+          "percent": 25
+        }
+      ],
+      "strength": 2,
+      "freshness": 4,
+      "sweetness": 2,
+      "sourness": 3,
+      "popularity": 88
+    },
+    {
+      "id": "smoke-test_signature_berry_noir",
+      "name": "Berry Noir",
+      "description": "Тёмная ягодная композиция с лёгкой сладостью и вечерним характером.",
+      "recipe": [
+        {
+          "flavor": "Черная смородина",
+          "percent": 45
+        },
+        {
+          "flavor": "Ежевика",
+          "percent": 35
+        },
+        {
+          "flavor": "Ваниль",
+          "percent": 20
+        }
+      ],
+      "strength": 3,
+      "freshness": 1,
+      "sweetness": 3,
+      "sourness": 2,
+      "popularity": 91
+    },
+    {
+      "id": "smoke-test_signature_tropic_silk",
+      "name": "Tropic Silk",
+      "description": "Мягкий тропический фирменный микс для спокойного вечера.",
+      "recipe": [
+        {
+          "flavor": "Манго",
+          "percent": 40
+        },
+        {
+          "flavor": "Маракуйя",
+          "percent": 35
+        },
+        {
+          "flavor": "Кокос",
+          "percent": 25
+        }
+      ],
+      "strength": 2,
+      "freshness": 1,
+      "sweetness": 4,
+      "sourness": 2,
+      "popularity": 86
+    }
+  ]
+}

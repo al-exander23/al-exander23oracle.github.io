@@ -3,6 +3,7 @@
 // защищённый API после подтверждения активного ALX PRO.
 
 import { isProActive } from './pro.js?v=1.33.0-payment-audit';
+import { getTenant, getTenantId, getTenantFeatures } from './tenant.js?v=1.42.0-venue-plans';
 
 let cache = null;
 let loadPromise = null;
@@ -11,12 +12,76 @@ let originalsLoaded = false;
 let communityPromise = null;
 let communityLoaded = false;
 
-const DATA_VERSION = '1.31.0-community-oracle';
+const DATA_VERSION = '1.42.0-venue-plans';
 const FETCH_TIMEOUT = 6000;
 const ORIGINALS_COLLECTION = 'originals';
 const COMMUNITY_COLLECTION = 'community';
 const DEFAULT_API_BASE = 'https://al-exander23oracle-github-io.vercel.app';
 const COMMUNITY_API_BASE = 'https://alx-pay.alxoracle.workers.dev';
+const TENANT_MIXES_URL = 'data/tenant-mixes.json';
+
+function normalizeVenueMix(item, tenantId, tenantName) {
+  if (!item || typeof item !== 'object') return null;
+  const rawId = String(item.id || '').trim();
+  const name = String(item.name || '').trim();
+  const recipe = Array.isArray(item.recipe)
+    ? item.recipe.map((part) => ({
+        flavor: String(part?.flavor || '').trim(),
+        percent: Number(part?.percent || 0),
+      })).filter((part) => part.flavor && Number.isFinite(part.percent) && part.percent > 0)
+    : [];
+  if (!rawId || !name || recipe.length < 2) return null;
+
+  const total = recipe.reduce((sum, part) => sum + Number(part.percent || 0), 0);
+  if (Math.abs(total - 100) > 0.01) return null;
+
+  const id = rawId.startsWith(`${tenantId}_`) ? rawId : `${tenantId}_${rawId}`;
+  return {
+    ...item,
+    id,
+    name,
+    recipe,
+    description: String(item.description || ''),
+    author: tenantName,
+    venueMix: true,
+    source: 'venue',
+    collections: [...new Set([...(Array.isArray(item.collections) ? item.collections : []), 'venue'])],
+    proOnly: false,
+    hiddenUntilPro: false,
+  };
+}
+
+async function fetchVenueMixes() {
+  const tenantId = getTenantId();
+  const features = getTenantFeatures();
+  if (tenantId === 'alx' || !features.signatureMixes) return [];
+
+  const abortCtrl = new AbortController();
+  const timer = setTimeout(() => abortCtrl.abort(), FETCH_TIMEOUT);
+  try {
+    const response = await fetch(`${TENANT_MIXES_URL}?v=${DATA_VERSION}`, {
+      cache: 'no-cache',
+      signal: abortCtrl.signal,
+    });
+    if (!response.ok) {
+      console.warn('[mixes.js] tenant signature mixes unavailable:', response.status);
+      return [];
+    }
+    const registry = await response.json();
+    const rows = Array.isArray(registry?.[tenantId]) ? registry[tenantId] : [];
+    const limit = Math.max(0, Number(features.signatureMixLimit || 0));
+    const tenantName = getTenant().displayName || 'Заведение';
+    return rows
+      .slice(0, limit || 0)
+      .map((item) => normalizeVenueMix(item, tenantId, tenantName))
+      .filter(Boolean);
+  } catch (error) {
+    console.warn('[mixes.js] tenant signature mixes load failed:', error);
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 async function fetchJson(path, { required = false } = {}) {
   const abortCtrl = new AbortController();
@@ -159,13 +224,14 @@ function mergeUnique(...layers) {
 }
 
 async function loadMixes() {
-  const [base, trend2026, proDrops2026] = await Promise.all([
+  const [base, trend2026, proDrops2026, venueMixes] = await Promise.all([
     fetchJson('data/mixes.json', { required: true }),
     fetchJson('data/mixes-2026.json'),
     fetchJson('data/pro-drops-2026.json'),
+    fetchVenueMixes(),
   ]);
 
-  const merged = mergeUnique(base, trend2026, proDrops2026);
+  const merged = mergeUnique(base, trend2026, proDrops2026, venueMixes);
   if (!merged.length) throw new Error('База миксов пуста');
   return merged;
 }

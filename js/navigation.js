@@ -3,8 +3,8 @@
 // clear four-section bottom navigation with readable labels.
 
 import { getProState } from './pro.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.39.1-white-label';
-import { getTenant, getTenantId } from './tenant.js?v=1.39.1-white-label';
+import { trackAnalytics } from './analytics.js?v=1.42.0-venue-plans';
+import { getTenant, getTenantId, tenantHasFeature } from './tenant.js?v=1.42.0-venue-plans';
 
 const VERSION = '1.30.0-community-mvp';
 const NAV_ID = 'alxBottomNav';
@@ -152,7 +152,12 @@ function renderAccess() {
   const strip = ensureAccessStrip();
   if (IS_WHITE_LABEL) {
     strip.classList.add('is-pro');
-    setHtmlIfChanged(strip, `\n      <span><b>${TENANT.displayName || 'Микс Оракул'}</b><small>Подборы без лимита · свои миксы в Community</small></span>\n      <strong>Профиль</strong>`);
+    const featureCopy = tenantHasFeature('promotions')
+      ? 'Фирменные миксы · спецпредложения · Community'
+      : tenantHasFeature('signatureMixes')
+        ? 'Фирменные миксы · безлимит · Community'
+        : 'Подборы без лимита · свои миксы в Community';
+    setHtmlIfChanged(strip, `\n      <span><b>${TENANT.displayName || 'Микс Оракул'}</b><small>${featureCopy}</small></span>\n      <strong>Профиль</strong>`);
     document.querySelector(`#${NAV_ID} [data-tab="pro"]`)?.classList.remove('is-active-plan');
     return;
   }
@@ -300,7 +305,7 @@ function enhanceMyAlx() {
   setTextIfChanged(
     statusText,
     IS_WHITE_LABEL
-      ? `Гостевой доступ ${TENANT.displayName || 'заведения'}: подборы без лимита, избранное и собственные рецепты в Community.`
+      ? `Гостевой доступ ${TENANT.displayName || 'заведения'}: подборы без лимита${tenantHasFeature('signatureMixes') ? ', фирменные миксы заведения' : ''}, избранное и Community.`
       : state.active
         ? 'Безлимит, 7 PRO-направлений и Community Mixes: публикуй свои рецепты, получай оценки и рейтинг.'
         : 'PRO снимает дневной лимит, открывает 7 направлений Оракула и Community Mixes.'
