@@ -11,8 +11,8 @@ import {
 import { getFavorites, getHistory } from './profile.js';
 import { getVisitStats } from './daily.js?v=1.33.0-payment-audit';
 import { initMixes, getAllMixes } from './mixes.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.34.0-funnel-analytics';
-import { getTenant, getTenantId } from './tenant.js?v=1.39.0-white-label';
+import { trackAnalytics } from './analytics.js?v=1.39.1-white-label';
+import { getTenant, getTenantId } from './tenant.js?v=1.39.1-white-label';
 
 const VERSION = '1.21.0-my-alx';
 const FREE_LIMIT = 5;
