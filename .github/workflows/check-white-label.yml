@@ -7,6 +7,8 @@ on:
       - 'js/**'
       - 'cloudflare/**'
       - 'data/tenants.json'
+      - 'data/tenant-mixes.json'
+      - 'scripts/**'
       - 'wrangler.toml'
       - '.github/workflows/check-white-label.yml'
   workflow_dispatch:
@@ -20,8 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Validate tenant registry
-        run: node -e "JSON.parse(require('fs').readFileSync('data/tenants.json','utf8')); console.log('tenants.json OK')"
+      - name: Validate venue configuration
+        run: node scripts/validate-venue-config.mjs
 
       - name: Parse changed JavaScript modules
         shell: bash
@@ -40,6 +42,7 @@ jobs:
             js/community.js
             js/analytics.js
             js/onboarding.js
+            js/venue-features.js
             cloudflare/community.js
             cloudflare/worker-v2.js
             scripts/add-tenant.mjs
@@ -54,6 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           cp data/tenants.json /tmp/tenants.json
-          node scripts/add-tenant.mjs ci-lounge "CI Lounge" ci_lounge_bot "" "@ci_lounge"
-          node -e "const t=JSON.parse(require('fs').readFileSync('data/tenants.json','utf8')); if(!t['ci-lounge']) process.exit(1);"
+          node scripts/add-tenant.mjs ci-lounge "CI Lounge" ci_lounge_bot "" "@ci_lounge" "" "" --plan=business
+          node -e "const t=JSON.parse(require('fs').readFileSync('data/tenants.json','utf8')); if(t['ci-lounge']?.plan !== 'business') process.exit(1);"
           mv /tmp/tenants.json data/tenants.json
+          node scripts/validate-venue-config.mjs
