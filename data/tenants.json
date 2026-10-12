@@ -12,7 +12,8 @@
     "requirePro": true,
     "contacts": {
       "telegram": "@Orcmix_bot"
-    }
+    },
+    "plan": "alx"
   },
   "smoke-test": {
     "id": "smoke-test",
@@ -27,6 +28,8 @@
     "requirePro": false,
     "contacts": {
       "telegram": "@smokertesterbot"
-    }
+    },
+    "plan": "business",
+    "promotion": null
   }
 }
