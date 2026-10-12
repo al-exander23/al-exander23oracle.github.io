@@ -63,3 +63,15 @@ Ask the buyer for:
 - phone/social link if needed.
 
 Do not promise custom colors, layout changes or individual feature development in the base package. Those are separate paid changes.
+
+
+## Smoke Test
+
+Первый тестовый tenant:
+
+- tenant id: `smoke-test`
+- bot: `@smokertesterbot`
+- Mini App URL after production merge: `https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=smoke-test`
+- `TENANT_BOT_TOKENS` must contain the `smoke-test` bot token only as a Cloudflare encrypted secret.
+
+Before onboarding a real venue, verify ALX default mode, Smoke Test branding, unlimited Oracle access, Community auth and cross-tenant isolation.
