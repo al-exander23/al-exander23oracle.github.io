@@ -1,3 +1,5 @@
+import { tenantStorageKey } from './tenant.js?v=1.39.0-white-label';
+
 // storage.js — тонкая безопасная обёртка над localStorage.
 // Ничего не знает о профиле/избранном/истории — просто хранит JSON по ключу.
 // Если localStorage недоступен (приватный режим, отключены cookies и т.п.),
@@ -16,8 +18,8 @@ try {
 
 export function getItem(key, fallback = null) {
   try {
-    if (!storageAvailable) return memoryFallback[key] ?? fallback;
-    const raw = window.localStorage.getItem(key);
+    if (!storageAvailable) return memoryFallback[tenantStorageKey(key)] ?? fallback;
+    const raw = window.localStorage.getItem(tenantStorageKey(key));
     if (raw === null) return fallback;
     return JSON.parse(raw);
   } catch (e) {
@@ -28,10 +30,10 @@ export function getItem(key, fallback = null) {
 export function setItem(key, value) {
   try {
     if (!storageAvailable) {
-      memoryFallback[key] = value;
+      memoryFallback[tenantStorageKey(key)] = value;
       return true;
     }
-    window.localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.setItem(tenantStorageKey(key), JSON.stringify(value));
     return true;
   } catch (e) {
     return false;
@@ -41,10 +43,10 @@ export function setItem(key, value) {
 export function removeItem(key) {
   try {
     if (!storageAvailable) {
-      delete memoryFallback[key];
+      delete memoryFallback[tenantStorageKey(key)];
       return true;
     }
-    window.localStorage.removeItem(key);
+    window.localStorage.removeItem(tenantStorageKey(key));
     return true;
   } catch (e) {
     return false;
