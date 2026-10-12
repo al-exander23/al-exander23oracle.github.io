@@ -7,6 +7,7 @@ import {
   requestProPaywall,
   isTelegramPaymentContext,
 } from './pro.js?v=1.33.0-payment-audit';
+import { getTenantId } from './tenant.js?v=1.39.0-white-label';
 
 const FREE_DAILY_LIMIT = 5;
 const EXTERNAL_PRICE_RUB = 299;
@@ -14,6 +15,7 @@ const USAGE_KEY = 'alx_oracle_free_daily_usage_v1';
 const TOP_BUTTON_ID = 'alxProTopButton';
 const BANNER_ID = 'alxProMainBanner';
 let lastLimitPromptAt = 0;
+const IS_WHITE_LABEL = getTenantId() !== 'alx';
 
 function isInsideTelegramApp() {
   if (isTelegramPaymentContext()) return true;
@@ -59,6 +61,7 @@ function freeState() {
 }
 
 function canUseOracle() {
+  if (IS_WHITE_LABEL) return true;
   return getProState().active || freeState().remaining > 0;
 }
 
@@ -69,7 +72,7 @@ function emitUsageChange() {
 }
 
 function recordFreeOracleResult() {
-  if (getProState().active) return;
+  if (IS_WHITE_LABEL || getProState().active) return;
   const usage = readUsage();
   if (usage.used >= FREE_DAILY_LIMIT) return;
   writeUsage({ day: usage.day, used: usage.used + 1 });
@@ -77,6 +80,7 @@ function recordFreeOracleResult() {
 }
 
 function promptLimit() {
+  if (IS_WHITE_LABEL) return;
   const now = Date.now();
   if (now - lastLimitPromptAt < 1800) return;
   lastLimitPromptAt = now;
@@ -92,6 +96,11 @@ function guardInteraction(event) {
 }
 
 function ensureMainEntry() {
+  if (IS_WHITE_LABEL) {
+    document.getElementById(TOP_BUTTON_ID)?.remove();
+    document.getElementById(BANNER_ID)?.remove();
+    return;
+  }
   const toolbar = document.getElementById('topToolbar');
   if (toolbar && !document.getElementById(TOP_BUTTON_ID)) {
     const button = document.createElement('button');
@@ -115,6 +124,7 @@ function ensureMainEntry() {
 
 function renderMainEntry() {
   ensureMainEntry();
+  if (IS_WHITE_LABEL) return;
   const state = getProState();
   const offer = getProOffer();
   const free = freeState();
@@ -162,6 +172,7 @@ function renderMainEntry() {
 }
 
 function enhancePaywall() {
+  if (IS_WHITE_LABEL) return;
   const sheet = document.querySelector('#alxProOverlay .pro-sheet');
   if (!sheet || sheet.querySelector('.pro-free-compare')) return;
   const subtitle = sheet.querySelector('.pro-subtitle');
