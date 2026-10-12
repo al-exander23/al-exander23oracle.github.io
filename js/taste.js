@@ -13,6 +13,9 @@ import {
 } from './profile.js';
 import { getOrCreateDailyMix, getVisitStats } from './daily.js?v=1.33.0-payment-audit';
 import { getAchievementState, getStreakRewardState } from './achievements.js?v=1.33.0-payment-audit';
+import { getTenant } from './tenant.js?v=1.39.0-white-label';
+
+const TENANT = getTenant();
 
 const LEVELS = [
   { max: 0, label: 'Новый профиль', note: 'Поставь ❤️ или 👎 нескольким миксам — Оракул начнёт подстраиваться.', progress: 0 },
@@ -183,7 +186,7 @@ function ensureTasteUi() {
     <section class="taste-panel" role="dialog" aria-modal="true" aria-labelledby="tasteTitle">
       <div class="taste-head">
         <div>
-          <div class="taste-kicker">ALX ORACLE</div>
+          <div class="taste-kicker">${TENANT.displayName || 'ALX ORACLE'}</div>
           <h2 id="tasteTitle">Профиль вкуса</h2>
         </div>
         <button class="taste-close" id="tasteClose" type="button" aria-label="Закрыть">✕</button>
