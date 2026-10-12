@@ -1,9 +1,9 @@
 // oracle.js — «мозг» приложения.
 // Интегрирована персонализация с безопасным откатом к случайному выбору.
 
-import { getMixes, getCollectionMixes } from './mixes.js?v=1.33.0-payment-audit';
+import { getMixes, getCollectionMixes } from './mixes.js?v=1.42.0-venue-plans';
 import { selectWeightedMix } from './personalization.js';
-import { selectScenarioMix, getScenario } from './scenario.js?v=1.33.0-payment-audit';
+import { selectScenarioMix, getScenario } from './scenario.js?v=1.42.0-venue-plans';
 
 export const oracleMessages = {
   mysterious: [
