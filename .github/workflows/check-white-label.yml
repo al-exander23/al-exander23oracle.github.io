@@ -31,6 +31,11 @@ jobs:
           set -euo pipefail
           files=(
             js/tenant.js
+            js/scenario.js
+            js/ui.js
+            js/mixes.js
+            js/scene.js
+            js/app.js
             js/storage.js
             js/pro-entry.js
             js/pro-ui.js
@@ -43,6 +48,7 @@ jobs:
             js/analytics.js
             js/onboarding.js
             js/venue-features.js
+            cloudflare/analytics.js
             cloudflare/community.js
             cloudflare/worker-v2.js
             scripts/add-tenant.mjs
