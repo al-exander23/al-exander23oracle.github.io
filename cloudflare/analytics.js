@@ -1,7 +1,7 @@
 // Privacy-minimized analytics storage + owner dashboard for ALX Oracle.
 // Data lives in the existing Cloudflare D1 database used by ALX Pay.
 
-const VERSION = '1.41.0-period-tabs';
+const VERSION = '1.42.0-venue-plans';
 const OWNER_TEST_AMOUNT_RUB = 29;
 const MAX_RETENTION_DAYS = 180;
 const enc = new TextEncoder();
@@ -56,6 +56,9 @@ const ALLOWED_EVENTS = new Set([
   'community_unlock_click',
   'community_entry_click',
   'community_oracle_select',
+  'venue_mix_result',
+  'favorite_toggle',
+  'mix_share',
 ]);
 
 function b64urlDecode(value) {
@@ -183,6 +186,64 @@ async function starsLedgerData(env) {
       error: String(error?.message || 'Telegram Stars unavailable').slice(0, 160),
     };
   }
+}
+
+function normalizeTenantAnalyticsId(value) {
+  const tenantId = String(value || '').trim().toLowerCase();
+  return /^[a-z0-9][a-z0-9-]{0,47}$/.test(tenantId) ? tenantId : '';
+}
+
+function tenantAnalyticsSecretName(tenantId) {
+  return `TENANT_ANALYTICS_KEY_${String(tenantId || '').toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
+}
+
+function tenantAnalyticsSecret(env, tenantId) {
+  const normalized = normalizeTenantAnalyticsId(tenantId);
+  if (!normalized || normalized === 'alx') return '';
+  return String(env?.[tenantAnalyticsSecretName(normalized)] || '').trim();
+}
+
+function safeEqualText(a, b) {
+  const left = String(a || '');
+  const right = String(b || '');
+  if (!left || !right || left.length !== right.length) return false;
+  let diff = 0;
+  for (let i = 0; i < left.length; i += 1) diff |= left.charCodeAt(i) ^ right.charCodeAt(i);
+  return diff === 0;
+}
+
+async function createVenueAnalyticsSession(env, tenantId) {
+  const secret = tenantAnalyticsSecret(env, tenantId);
+  if (!secret) return '';
+  const payload = b64urlEncode(enc.encode(JSON.stringify({
+    tenant: tenantId,
+    exp: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+  })));
+  const sig = await hmacHex(secret, payload);
+  return `${payload}.${sig}`;
+}
+
+async function venueAnalyticsSession(request, env, tenantId) {
+  const expectedTenant = normalizeTenantAnalyticsId(tenantId);
+  const secret = tenantAnalyticsSecret(env, expectedTenant);
+  if (!expectedTenant || !secret) return false;
+  const token = getCookie(request, 'alx_venue_analytics');
+  const [payload, sig] = String(token || '').split('.');
+  if (!payload || !sig) return false;
+  const expectedSig = await hmacHex(secret, payload);
+  if (!safeEqualText(expectedSig, sig)) return false;
+  try {
+    const object = JSON.parse(dec.decode(b64urlDecode(payload)));
+    return object?.tenant === expectedTenant && Number(object?.exp || 0) >= Math.floor(Date.now() / 1000);
+  } catch (error) {
+    return false;
+  }
+}
+
+function tenantEventClause(tenantId, alias = '') {
+  if (!tenantId) return '';
+  const prefix = alias ? `${alias}.` : '';
+  return ` AND json_extract(${prefix}props_json, '$.tenant') = ?`;
 }
 
 function getCookie(request, name) {
