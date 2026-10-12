@@ -1,7 +1,7 @@
 // scenario-ui.js — UI ситуационного режима внутри уже существующего Taste Profile.
 // Главный экран и визуал шара не меняет.
 
-import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.33.0-payment-audit';
+import { initMixes, initOriginals, getMixes, getAllMixes } from './mixes.js?v=1.42.0-venue-plans';
 import {
   SCENARIO_OPTIONS,
   COLLECTION_OPTIONS,
