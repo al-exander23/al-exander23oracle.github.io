@@ -4,7 +4,7 @@
 
 import { getProState } from './pro.js?v=1.33.0-payment-audit';
 import { trackAnalytics } from './analytics.js?v=1.42.0-venue-plans';
-import { getTenant, getTenantId, getTenantPlan, tenantHasFeature } from './tenant.js?v=1.42.0-venue-plans';
+import { getTenant, getTenantId, tenantHasFeature } from './tenant.js?v=1.42.0-venue-plans';
 
 const VERSION = '1.30.0-community-mvp';
 const NAV_ID = 'alxBottomNav';
@@ -13,7 +13,6 @@ const FREE_LIMIT = 5;
 const USAGE_KEY = 'alx_oracle_free_daily_usage_v1';
 const TENANT = getTenant();
 const IS_WHITE_LABEL = getTenantId() !== 'alx';
-const VENUE_PLAN = getTenantPlan();
 
 function dayKey(date = new Date()) {
   const y = date.getFullYear();
@@ -340,22 +339,6 @@ function enhanceMyAlx() {
       trackAnalytics('nav_help_open', { navigationVersion: VERSION, source: 'my_alx' });
     });
   });
-
-  if (IS_WHITE_LABEL && !document.getElementById('venuePlanInfo')) {
-    const planLabel = VENUE_PLAN === 'pro' ? 'PRO' : VENUE_PLAN === 'business' ? 'BUSINESS' : 'START';
-    addAccountRow(
-      section,
-      'venuePlanInfo',
-      `${TENANT.displayName || 'Заведение'} · ${planLabel}`,
-      tenantHasFeature('signatureMixes') ? 'фирменные миксы подключены' : 'стандартная гостевая версия',
-      () => {},
-    );
-    const info = document.getElementById('venuePlanInfo');
-    if (info) {
-      info.disabled = true;
-      info.setAttribute('aria-disabled', 'true');
-    }
-  }
 
   addVenueContactRows(section);
 }
