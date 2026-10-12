@@ -17,9 +17,11 @@ import {
   isPremiumCollection,
   requestProPaywall,
 } from './pro.js?v=1.33.0-payment-audit';
+import { getTenantId } from './tenant.js?v=1.39.0-white-label';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
+const IS_WHITE_LABEL = getTenantId() !== 'alx';
 
 function optionButtons(group, options, selected) {
   return options.map((option) => `
@@ -34,7 +36,11 @@ function optionButtons(group, options, selected) {
 
 function collectionButtons(selected, counts) {
   const proActive = isProActive();
-  const visibleCollections = COLLECTION_OPTIONS.filter((collection) => collection.id !== 'community' && (!collection.hiddenUntilPro || proActive));
+  const visibleCollections = COLLECTION_OPTIONS.filter((collection) => {
+    if (collection.id === 'community') return false;
+    if (IS_WHITE_LABEL) return !isPremiumCollection(collection.id);
+    return !collection.hiddenUntilPro || proActive;
+  });
 
   return visibleCollections.map((collection) => {
     const premium = isPremiumCollection(collection.id);
