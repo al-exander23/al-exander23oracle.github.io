@@ -17,7 +17,7 @@ import {
   isPremiumCollection,
   requestProPaywall,
 } from './pro.js?v=1.33.0-payment-audit';
-import { getTenantId } from './tenant.js?v=1.39.1-white-label';
+import { getTenantId, tenantHasFeature } from './tenant.js?v=1.42.0-venue-plans';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
@@ -38,6 +38,7 @@ function collectionButtons(selected, counts) {
   const proActive = isProActive();
   const visibleCollections = COLLECTION_OPTIONS.filter((collection) => {
     if (collection.id === 'community') return false;
+    if (collection.venueFeature && !tenantHasFeature(collection.venueFeature)) return false;
     if (IS_WHITE_LABEL) return !isPremiumCollection(collection.id);
     return !collection.hiddenUntilPro || proActive;
   });
