@@ -44,7 +44,7 @@
 
 /* A thin travelling gold highlight makes the lettering feel metallic instead of flat. */
 .brand-text::after{
-  content:'МИКС ОРАКУЛ';
+  content:attr(data-text);
   position:absolute;
   inset:0;
   color:transparent;
@@ -185,6 +185,21 @@
     opacity:.28;
     filter:blur(10px);
   }
+}
+
+.tenant-brand-logo{
+  width:30px;
+  height:30px;
+  object-fit:contain;
+  flex:0 0 auto;
+  margin-right:9px;
+  border-radius:7px;
+}
+
+.brand--with-logo .brand-text{
+  max-width:min(72vw,340px);
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .brand-divider{
