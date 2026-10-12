@@ -3,9 +3,9 @@
 // then let the Oracle reveal a concrete mix through the orb.
 
 import { getProState, requestProPaywall } from './pro.js?v=1.33.0-payment-audit';
-import { initMixes, initOriginals, initCommunityMixes, getAllMixes } from './mixes.js?v=1.33.0-payment-audit';
+import { initMixes, initOriginals, initCommunityMixes, getAllMixes } from './mixes.js?v=1.42.0-venue-plans';
 import { getScenario, setScenario, getCollectionCounts } from './scenario.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.39.1-white-label';
+import { trackAnalytics } from './analytics.js?v=1.42.0-venue-plans';
 
 const VERSION = '1.31.0-community-oracle';
 const OVERLAY_ID = 'alxProLibrary';
