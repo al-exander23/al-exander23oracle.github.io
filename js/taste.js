@@ -1,7 +1,7 @@
 // taste.js — отдельная UI-панель профиля вкуса.
 // Не вмешивается в SceneController, Orb lifecycle или механизм вывода текста.
 
-import { initMixes, getMixes } from './mixes.js?v=1.33.0-payment-audit';
+import { initMixes, getMixes } from './mixes.js?v=1.42.0-venue-plans';
 import { buildDerivedProfile } from './personalization.js';
 import {
   getTasteProfile,
@@ -13,7 +13,7 @@ import {
 } from './profile.js';
 import { getOrCreateDailyMix, getVisitStats } from './daily.js?v=1.33.0-payment-audit';
 import { getAchievementState, getStreakRewardState } from './achievements.js?v=1.33.0-payment-audit';
-import { getTenant } from './tenant.js?v=1.39.1-white-label';
+import { getTenant } from './tenant.js?v=1.42.0-venue-plans';
 
 const TENANT = getTenant();
 
