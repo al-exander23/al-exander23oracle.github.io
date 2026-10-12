@@ -1,10 +1,12 @@
 // home-direction.js — compact home indicator for the active Oracle direction.
 
 import { COLLECTION_OPTIONS, getScenario, setScenario } from './scenario.js?v=1.33.0-payment-audit';
+import { getTenantId } from './tenant.js?v=1.39.1-white-label';
 
 const ROOT_ID = 'alxHomeDirection';
 const VERSION = '1.31.0-community-oracle';
 let renderQueued = false;
+const IS_WHITE_LABEL = getTenantId() !== 'alx';
 
 function collectionMeta(id) {
   return COLLECTION_OPTIONS.find((item) => item.id === id) || COLLECTION_OPTIONS[0];
@@ -33,6 +35,15 @@ function ensureRoot() {
 }
 
 function openChooser(collectionId) {
+  if (IS_WHITE_LABEL) {
+    if (collectionId === 'community') {
+      document.querySelector('#alxBottomNav [data-tab="pro"]')?.click();
+      return;
+    }
+    document.getElementById('tasteBtnTop')?.click();
+    return;
+  }
+
   if (collectionId === 'any' || isPremium(collectionId)) {
     const pro = document.querySelector('#alxBottomNav [data-tab="pro"]');
     if (pro) {

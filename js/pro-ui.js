@@ -12,6 +12,7 @@ import {
   createStarsInvoice,
   waitForProActivation,
 } from './pro.js?v=1.33.0-payment-audit';
+import { getTenantId } from './tenant.js?v=1.39.1-white-label';
 
 const CARD_ID = 'alxProCard';
 const OVERLAY_ID = 'alxProOverlay';
@@ -19,6 +20,7 @@ const EXTERNAL_PAY_URL = 'https://alx-pay.alxoracle.workers.dev/';
 const EXTERNAL_PRICE_RUB = 299;
 let renderQueued = false;
 let checkoutBusy = false;
+const IS_WHITE_LABEL = getTenantId() !== 'alx';
 
 function isInsideTelegramApp() {
   if (isTelegramPaymentContext()) return true;
@@ -354,6 +356,7 @@ async function beginStarsCheckout(overlay) {
 }
 
 export function openProPaywall(feature = 'ALX PRO') {
+  if (IS_WHITE_LABEL) return;
   const overlay = ensurePaywall();
   const featureText = overlay.querySelector('#proFeatureText');
 
@@ -382,6 +385,10 @@ export function closeProPaywall() {
 }
 
 function renderCard() {
+  if (IS_WHITE_LABEL) {
+    document.getElementById(CARD_ID)?.remove();
+    return;
+  }
   const content = document.getElementById('tasteContent');
   if (!content) return;
 
@@ -424,6 +431,11 @@ function syncOnReturn() {
 }
 
 function initProUi() {
+  if (IS_WHITE_LABEL) {
+    document.getElementById(CARD_ID)?.remove();
+    document.getElementById(OVERLAY_ID)?.remove();
+    return;
+  }
   ensurePaywall();
 
   window.addEventListener('alx-pro-paywall', (event) => {

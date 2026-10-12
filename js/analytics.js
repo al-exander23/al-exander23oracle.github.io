@@ -3,6 +3,7 @@
 // No Telegram ids, usernames, mix contents or payment identifiers are collected here.
 
 import { getProState, isTelegramPaymentContext } from './pro.js?v=1.33.0-payment-audit';
+import { getTenantId, tenantStorageKey } from './tenant.js?v=1.39.1-white-label';
 
 const ENDPOINT = 'https://alx-pay.alxoracle.workers.dev/api/analytics/event';
 const INSTALL_KEY = 'alx_analytics_install_v1';
@@ -25,10 +26,10 @@ function makeId() {
 
 function installId() {
   try {
-    let value = localStorage.getItem(INSTALL_KEY);
+    let value = localStorage.getItem(tenantStorageKey(INSTALL_KEY));
     if (!value) {
       value = makeId();
-      localStorage.setItem(INSTALL_KEY, value);
+      localStorage.setItem(tenantStorageKey(INSTALL_KEY), value);
     }
     return value;
   } catch (error) {
@@ -63,10 +64,10 @@ export function getAcquisitionAttribution() {
 
   let firstSource = '';
   try {
-    firstSource = cleanSource(localStorage.getItem(ACQUISITION_KEY));
+    firstSource = cleanSource(localStorage.getItem(tenantStorageKey(ACQUISITION_KEY)));
     if (!firstSource && currentSource !== 'direct') {
       firstSource = currentSource;
-      localStorage.setItem(ACQUISITION_KEY, firstSource);
+      localStorage.setItem(tenantStorageKey(ACQUISITION_KEY), firstSource);
     }
   } catch (error) {
     firstSource = currentSource !== 'direct' ? currentSource : '';
@@ -98,7 +99,7 @@ export function trackAnalytics(event, props = {}) {
     event: String(event || '').slice(0, 64),
     context: telegramContext() ? 'telegram' : 'browser',
     appVersion: APP_VERSION,
-    props: cleanProps(props),
+    props: cleanProps({ tenant: getTenantId(), ...props }),
   };
 
   if (!payload.event) return;
@@ -137,8 +138,8 @@ function markLimitOnce(detail = {}) {
   if (Number(detail.remaining) !== 0) return;
   const key = `${LIMIT_KEY_PREFIX}${dayKey()}`;
   try {
-    if (localStorage.getItem(key) === '1') return;
-    localStorage.setItem(key, '1');
+    if (localStorage.getItem(tenantStorageKey(key)) === '1') return;
+    localStorage.setItem(tenantStorageKey(key), '1');
   } catch (error) { /* still record once per runtime when storage is unavailable */ }
   trackAnalytics('free_limit_reached', {
     used: Number(detail.used) || 0,
@@ -218,8 +219,8 @@ function wireEvents() {
 
     const marker = `${state.source || 'unknown'}:${Number(state.expiresAt || 0)}`;
     try {
-      if (localStorage.getItem(ACTIVATION_KEY) === marker) return;
-      localStorage.setItem(ACTIVATION_KEY, marker);
+      if (localStorage.getItem(tenantStorageKey(ACTIVATION_KEY)) === marker) return;
+      localStorage.setItem(tenantStorageKey(ACTIVATION_KEY), marker);
     } catch (error) { /* non-fatal */ }
 
     trackAnalytics('pro_activated', {

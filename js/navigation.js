@@ -3,13 +3,16 @@
 // clear four-section bottom navigation with readable labels.
 
 import { getProState } from './pro.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.34.0-funnel-analytics';
+import { trackAnalytics } from './analytics.js?v=1.39.1-white-label';
+import { getTenant, getTenantId } from './tenant.js?v=1.39.1-white-label';
 
 const VERSION = '1.30.0-community-mvp';
 const NAV_ID = 'alxBottomNav';
 const ACCESS_ID = 'alxAccessStrip';
 const FREE_LIMIT = 5;
 const USAGE_KEY = 'alx_oracle_free_daily_usage_v1';
+const TENANT = getTenant();
+const IS_WHITE_LABEL = getTenantId() !== 'alx';
 
 function dayKey(date = new Date()) {
   const y = date.getFullYear();
@@ -84,6 +87,11 @@ function openAccount() {
 
 function openPro() {
   setActive('pro');
+  if (IS_WHITE_LABEL) {
+    trackAnalytics('nav_community_open', { navigationVersion: VERSION, source: 'bottom_nav' });
+    window.dispatchEvent(new CustomEvent('alx-community-open', { detail: { view: 'top' } }));
+    return;
+  }
   trackAnalytics('nav_pro_open', { navigationVersion: VERSION });
   clickExisting('alxProTopButton');
 }
@@ -104,10 +112,10 @@ function ensureBottomNav() {
       <span class="alx-bottom-nav-label">Избранное</span>
     </button>
     <button class="alx-bottom-nav-btn" type="button" data-tab="account" aria-current="false">
-      <span class="alx-bottom-nav-label">Мой ALX</span>
+      <span class="alx-bottom-nav-label">${IS_WHITE_LABEL ? 'Профиль' : 'Мой ALX'}</span>
     </button>
     <button class="alx-bottom-nav-btn alx-bottom-nav-btn--pro" type="button" data-tab="pro" aria-current="false">
-      <span class="alx-bottom-nav-label">PRO</span>
+      <span class="alx-bottom-nav-label">${IS_WHITE_LABEL ? 'Community' : 'PRO'}</span>
       <span class="alx-bottom-nav-dot" aria-hidden="true"></span>
     </button>`;
   document.body.appendChild(nav);
@@ -128,7 +136,7 @@ function ensureAccessStrip() {
   strip.className = 'alx-access-strip';
   strip.type = 'button';
   strip.addEventListener('click', () => {
-    if (getProState().active) openAccount();
+    if (IS_WHITE_LABEL || getProState().active) openAccount();
     else openPro();
   });
 
@@ -142,6 +150,12 @@ function ensureAccessStrip() {
 
 function renderAccess() {
   const strip = ensureAccessStrip();
+  if (IS_WHITE_LABEL) {
+    strip.classList.add('is-pro');
+    setHtmlIfChanged(strip, `\n      <span><b>${TENANT.displayName || 'Микс Оракул'}</b><small>Подборы без лимита · свои миксы в Community</small></span>\n      <strong>Профиль</strong>`);
+    document.querySelector(`#${NAV_ID} [data-tab="pro"]`)?.classList.remove('is-active-plan');
+    return;
+  }
   const state = getProState();
   const free = freeState();
   const proButton = document.querySelector(`#${NAV_ID} [data-tab="pro"]`);
@@ -199,21 +213,29 @@ function enhanceMyAlx() {
   const close = document.getElementById('myAlxClose');
   if (close) {
     setTextIfChanged(close, 'Закрыть');
-    if (close.getAttribute('aria-label') !== 'Закрыть Мой ALX') close.setAttribute('aria-label', 'Закрыть Мой ALX');
+    const closeLabel = IS_WHITE_LABEL ? 'Закрыть профиль' : 'Закрыть Мой ALX';
+    if (close.getAttribute('aria-label') !== closeLabel) close.setAttribute('aria-label', closeLabel);
   }
 
   setTextIfChanged(content.querySelector('#myAlxTaste span'), 'Профиль вкуса');
-  setTextIfChanged(content.querySelector('#myAlxRestore span'), 'Восстановить PRO');
-  setTextIfChanged(content.querySelector('#myAlxProDetails span'), 'Возможности ALX PRO');
-  setTextIfChanged(content.querySelector('#myAlxProDetails small'), '7 PRO-направлений, Community и безлимит');
+  if (IS_WHITE_LABEL) {
+    content.querySelector('#myAlxRestore')?.remove();
+    content.querySelector('#myAlxProDetails')?.remove();
+  } else {
+    setTextIfChanged(content.querySelector('#myAlxRestore span'), 'Восстановить PRO');
+    setTextIfChanged(content.querySelector('#myAlxProDetails span'), 'Возможности ALX PRO');
+    setTextIfChanged(content.querySelector('#myAlxProDetails small'), '7 PRO-направлений, Community и безлимит');
+  }
 
   const state = getProState();
   const statusText = content.querySelector('.my-alx-status p');
   setTextIfChanged(
     statusText,
-    state.active
-      ? 'Безлимит, 7 PRO-направлений и Community Mixes: публикуй свои рецепты, получай оценки и рейтинг.'
-      : 'PRO снимает дневной лимит, открывает 7 направлений Оракула и Community Mixes.'
+    IS_WHITE_LABEL
+      ? `Гостевой доступ ${TENANT.displayName || 'заведения'}: подборы без лимита, избранное и собственные рецепты в Community.`
+      : state.active
+        ? 'Безлимит, 7 PRO-направлений и Community Mixes: публикуй свои рецепты, получай оценки и рейтинг.'
+        : 'PRO снимает дневной лимит, открывает 7 направлений Оракула и Community Mixes.'
   );
 
   const section = content.querySelector('.my-alx-section');
@@ -237,7 +259,7 @@ function enhanceMyAlx() {
     openTaste('.taste-daily-card');
   });
 
-  addAccountRow(section, 'myAlxHelp', 'Как пользоваться ALX Oracle', 'что такое Оракул, FREE/PRO и как выбирать направления', () => {
+  addAccountRow(section, 'myAlxHelp', IS_WHITE_LABEL ? `Как пользоваться ${TENANT.displayName || 'приложением'}` : 'Как пользоваться ALX Oracle', IS_WHITE_LABEL ? 'Оракул, избранное, профиль и Community' : 'что такое Оракул, FREE/PRO и как выбирать направления', () => {
     closeAccountThen(() => {
       setActive('home');
       clickExisting('onboardingHelpBtn');

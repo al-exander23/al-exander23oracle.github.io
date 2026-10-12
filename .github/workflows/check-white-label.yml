@@ -1,0 +1,49 @@
+name: Check white-label build
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'js/**'
+      - 'cloudflare/**'
+      - 'data/tenants.json'
+      - 'wrangler.toml'
+      - '.github/workflows/check-white-label.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate tenant registry
+        run: node -e "JSON.parse(require('fs').readFileSync('data/tenants.json','utf8')); console.log('tenants.json OK')"
+
+      - name: Parse changed JavaScript modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            js/tenant.js
+            js/storage.js
+            js/pro-entry.js
+            js/pro-ui.js
+            js/navigation.js
+            js/my-alx.js
+            js/taste.js
+            js/scenario-ui.js
+            js/home-direction.js
+            js/community.js
+            js/analytics.js
+            js/onboarding.js
+            cloudflare/community.js
+            cloudflare/worker-v2.js
+          )
+          for file in "${files[@]}"; do
+            echo "Checking $file"
+            node --input-type=module --check < "$file"
+          done
