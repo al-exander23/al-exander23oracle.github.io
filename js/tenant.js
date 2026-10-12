@@ -134,4 +134,10 @@ export function getTenantBotUsername() {
   return String(tenant.botUsername || FALLBACK_TENANT.botUsername).replace(/^@+/, '');
 }
 
+export function tenantStorageKey(key) {
+  const raw = String(key || '');
+  if (!raw || getTenantId() === DEFAULT_TENANT_ID) return raw;
+  return `${raw}__tenant_${getTenantId()}`;
+}
+
 await initTenant();
