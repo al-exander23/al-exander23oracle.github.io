@@ -389,7 +389,8 @@ async function saveMix(id) {
 function shareMix(id) {
   const mix = mixes.find((item) => item.id === id);
   if (!mix) return;
-  const deepLink = `https://t.me/${encodeURIComponent(getTenantBotUsername())}?startapp=community_${encodeURIComponent(id)}`;
+  const startParam = TENANT_ID === 'alx' ? `community_${id}` : `tenant_${TENANT_ID}_community_${id}`;
+  const deepLink = `https://t.me/${encodeURIComponent(getTenantBotUsername())}?startapp=${encodeURIComponent(startParam)}`;
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(deepLink)}&text=${encodeURIComponent(`Community Mix · ${mix.title} · ${mix.author}`)}`;
   if (window.Telegram?.WebApp?.openTelegramLink) {
     window.Telegram.WebApp.openTelegramLink(shareUrl);
@@ -792,8 +793,10 @@ function sharedStartId() {
     || new URLSearchParams(window.location.search).get('startapp')
     || '',
   ).trim();
-  if (!raw.startsWith('community_')) return '';
-  return raw.slice('community_'.length);
+  if (raw.startsWith('community_')) return raw.slice('community_'.length);
+  const tenantPrefix = `tenant_${TENANT_ID}_community_`;
+  if (raw.startsWith(tenantPrefix)) return raw.slice(tenantPrefix.length);
+  return '';
 }
 
 function enhanceMyAlx() {
