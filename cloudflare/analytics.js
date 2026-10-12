@@ -919,8 +919,11 @@ function dashboardPage(summary) {
     </tr>
   `).join('') || '<tr><td colspan="4">Покупок через Telegram Stars пока нет</td></tr>';
 
+  const tenantQuery = summary.tenantId ? `&tenant=${encodeURIComponent(summary.tenantId)}` : '';
+  const tenantCaption = summary.tenantId ? ` · tenant: ${summary.tenantId}` : ' · все tenants';
+
   return dashboardShell(`
-    <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">${periodName}: ${periodCaption} · данные обновляются при каждом открытии · ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a class="${summary.periodDays === 1 ? 'active' : ''}" href="?days=1">День</a><a class="${summary.periodDays === 7 ? 'active' : ''}" href="?days=7">Неделя</a><a class="${summary.periodDays === 30 ? 'active' : ''}" href="?days=30">Месяц</a></div></div>
+    <div class="head"><div><div class="brand">ALX ORACLE · OWNER</div><h1 class="title">Продуктовая аналитика</h1><div class="muted">${periodName}: ${periodCaption}${tenantCaption} · данные обновляются при каждом открытии · ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div></div><div class="periods"><a class="${summary.periodDays === 1 ? 'active' : ''}" href="?days=1${tenantQuery}">День</a><a class="${summary.periodDays === 7 ? 'active' : ''}" href="?days=7${tenantQuery}">Неделя</a><a class="${summary.periodDays === 30 ? 'active' : ''}" href="?days=30${tenantQuery}">Месяц</a></div></div>
     <div class="grid">
       <div class="card"><div class="kpi">${f.opened}</div><div class="label">уникальных пользователей</div></div>
       <div class="card"><div class="kpi">${Number(telegramTraffic.users || 0)}</div><div class="label">пользователей открыли в Telegram</div></div>
@@ -962,7 +965,8 @@ async function analyticsDashboard(request, env) {
   if (access.status === 401) return new Response(loginPage(), { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
   if (!access.ok) return new Response(forbiddenPage(), { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
   const url = new URL(request.url);
-  const summary = await summaryData(env, url.searchParams.get('days'), url.searchParams.get('tenant'));
+  const tenantId = url.searchParams.get('tenant') || 'alx';
+  const summary = await summaryData(env, url.searchParams.get('days'), tenantId);
   return new Response(dashboardPage(summary), { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
@@ -1003,7 +1007,7 @@ export async function handleAnalyticsRoute(request, env, ctx) {
   if (url.pathname === '/api/analytics/summary' && request.method === 'GET') {
     const access = await requireOwner(request, env);
     if (!access.ok) return json({ ok: false, error: access.status === 401 ? 'Auth required' : 'Forbidden' }, access.status);
-    return json(await summaryData(env, url.searchParams.get('days'), url.searchParams.get('tenant')));
+    return json(await summaryData(env, url.searchParams.get('days'), url.searchParams.get('tenant') || 'alx'));
   }
 
   if (url.pathname === '/analytics/login' && request.method === 'GET') return analyticsLogin();
