@@ -3,7 +3,7 @@
 // No Telegram ids, usernames, mix contents or payment identifiers are collected here.
 
 import { getProState, isTelegramPaymentContext } from './pro.js?v=1.33.0-payment-audit';
-import { getTenantId, tenantStorageKey } from './tenant.js?v=1.39.0-white-label';
+import { getTenantId, tenantStorageKey } from './tenant.js?v=1.39.1-white-label';
 
 const ENDPOINT = 'https://alx-pay.alxoracle.workers.dev/api/analytics/event';
 const INSTALL_KEY = 'alx_analytics_install_v1';
