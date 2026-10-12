@@ -435,7 +435,9 @@ async function summaryData(env, days = 30, tenantRaw = '') {
       COUNT(DISTINCT CASE WHEN event_name = 'app_open' THEN install_id END) AS opens,
       SUM(CASE WHEN event_name = 'oracle_result' THEN 1 ELSE 0 END) AS mixes,
       SUM(CASE WHEN event_name = 'venue_mix_result' THEN 1 ELSE 0 END) AS venue_mixes,
-      COUNT(DISTINCT CASE WHEN event_name = 'community_open' THEN install_id END) AS community_users
+      COUNT(DISTINCT CASE WHEN event_name = 'community_open' THEN install_id END) AS community_users,
+      COUNT(DISTINCT CASE WHEN event_name = 'pro_paywall_open' THEN install_id END) AS paywalls,
+      COUNT(DISTINCT CASE WHEN event_name = 'pro_activated' THEN install_id END) AS activations
     FROM analytics_events
     WHERE created_at >= ?${tenantClause}
     GROUP BY day
@@ -491,7 +493,9 @@ async function summaryData(env, days = 30, tenantRaw = '') {
       s.source AS source,
       COUNT(DISTINCT CASE WHEN e.event_name = 'oracle_result' THEN s.install_id END) AS used_oracle,
       COUNT(DISTINCT CASE WHEN e.event_name = 'community_open' THEN s.install_id END) AS opened_community,
-      COUNT(DISTINCT CASE WHEN e.event_name = 'venue_mix_result' THEN s.install_id END) AS saw_venue_mix
+      COUNT(DISTINCT CASE WHEN e.event_name = 'venue_mix_result' THEN s.install_id END) AS saw_venue_mix,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'pro_paywall_open' THEN s.install_id END) AS opened_pro,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'pro_activated' THEN s.install_id END) AS activated
     FROM install_sources s
     LEFT JOIN analytics_events e
       ON e.install_id = s.install_id AND e.created_at >= ?
@@ -504,6 +508,8 @@ async function summaryData(env, days = 30, tenantRaw = '') {
       usedOracle: Number(row.used_oracle || 0),
       openedCommunity: Number(row.opened_community || 0),
       sawVenueMix: Number(row.saw_venue_mix || 0),
+      openedPro: Number(row.opened_pro || 0),
+      activated: Number(row.activated || 0),
     },
   ]));
 
@@ -513,7 +519,7 @@ async function summaryData(env, days = 30, tenantRaw = '') {
       source,
       users: Number(row.users || 0),
       opens: Number(row.opens || 0),
-      ...(sourceFunnelMap[source] || { usedOracle: 0, openedCommunity: 0, sawVenueMix: 0 }),
+      ...(sourceFunnelMap[source] || { usedOracle: 0, openedCommunity: 0, sawVenueMix: 0, openedPro: 0, activated: 0 }),
     };
   });
 
