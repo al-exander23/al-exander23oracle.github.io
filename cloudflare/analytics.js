@@ -411,32 +411,35 @@ function clampDays(value) {
   return Math.max(1, Math.min(180, Math.floor(days)));
 }
 
-async function summaryData(env, days = 30) {
+async function summaryData(env, days = 30, tenantRaw = '') {
   await ensureSchema(env);
   const periodDays = clampDays(days);
   const since = Date.now() - periodDays * 24 * 60 * 60 * 1000;
+  const tenantId = normalizeTenantAnalyticsId(tenantRaw);
+  const tenantClause = tenantEventClause(tenantId);
+  const tenantBindings = tenantId ? [tenantId] : [];
 
   const events = await env.DB.prepare(`
     SELECT event_name, COUNT(*) AS events, COUNT(DISTINCT install_id) AS users
     FROM analytics_events
-    WHERE created_at >= ?
+    WHERE created_at >= ?${tenantClause}
     GROUP BY event_name
     ORDER BY users DESC, events DESC
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const daily = await env.DB.prepare(`
     SELECT
       date(created_at / 1000, 'unixepoch') AS day,
       COUNT(DISTINCT CASE WHEN event_name = 'app_open' THEN install_id END) AS opens,
       SUM(CASE WHEN event_name = 'oracle_result' THEN 1 ELSE 0 END) AS mixes,
-      COUNT(DISTINCT CASE WHEN event_name = 'pro_paywall_open' THEN install_id END) AS paywalls,
-      COUNT(DISTINCT CASE WHEN event_name = 'pro_activated' THEN install_id END) AS activations
+      SUM(CASE WHEN event_name = 'venue_mix_result' THEN 1 ELSE 0 END) AS venue_mixes,
+      COUNT(DISTINCT CASE WHEN event_name = 'community_open' THEN install_id END) AS community_users
     FROM analytics_events
-    WHERE created_at >= ?
+    WHERE created_at >= ?${tenantClause}
     GROUP BY day
     ORDER BY day DESC
     LIMIT 31
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const sourceOpens = await env.DB.prepare(`
     SELECT
@@ -448,10 +451,10 @@ async function summaryData(env, days = 30) {
       COUNT(*) AS opens,
       COUNT(DISTINCT install_id) AS users
     FROM analytics_events
-    WHERE created_at >= ? AND event_name = 'app_open'
+    WHERE created_at >= ? AND event_name = 'app_open'${tenantClause}
     GROUP BY source
     ORDER BY users DESC, opens DESC
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const contextOpens = await env.DB.prepare(`
     SELECT
@@ -459,10 +462,10 @@ async function summaryData(env, days = 30) {
       COUNT(*) AS opens,
       COUNT(DISTINCT install_id) AS users
     FROM analytics_events
-    WHERE created_at >= ? AND event_name = 'app_open'
+    WHERE created_at >= ? AND event_name = 'app_open'${tenantClause}
     GROUP BY context
     ORDER BY users DESC, opens DESC
-  `).bind(since).all();
+  `).bind(since, ...tenantBindings).all();
 
   const trafficContexts = Object.fromEntries((contextOpens.results || []).map((row) => [
     String(row.context || 'unknown'),
@@ -479,26 +482,26 @@ async function summaryData(env, days = 30) {
           'direct'
         ) AS source
       FROM analytics_events
-      WHERE created_at >= ? AND event_name = 'app_open'
+      WHERE created_at >= ? AND event_name = 'app_open'${tenantClause}
       GROUP BY install_id
     )
     SELECT
       s.source AS source,
       COUNT(DISTINCT CASE WHEN e.event_name = 'oracle_result' THEN s.install_id END) AS used_oracle,
-      COUNT(DISTINCT CASE WHEN e.event_name = 'pro_paywall_open' THEN s.install_id END) AS opened_pro,
-      COUNT(DISTINCT CASE WHEN e.event_name = 'pro_activated' THEN s.install_id END) AS activated
+      COUNT(DISTINCT CASE WHEN e.event_name = 'community_open' THEN s.install_id END) AS opened_community,
+      COUNT(DISTINCT CASE WHEN e.event_name = 'venue_mix_result' THEN s.install_id END) AS saw_venue_mix
     FROM install_sources s
     LEFT JOIN analytics_events e
       ON e.install_id = s.install_id AND e.created_at >= ?
     GROUP BY s.source
-  `).bind(since, since).all();
+  `).bind(since, ...tenantBindings, since).all();
 
   const sourceFunnelMap = Object.fromEntries((sourceFunnel.results || []).map((row) => [
     String(row.source || 'direct'),
     {
       usedOracle: Number(row.used_oracle || 0),
-      openedPro: Number(row.opened_pro || 0),
-      activated: Number(row.activated || 0),
+      openedCommunity: Number(row.opened_community || 0),
+      sawVenueMix: Number(row.saw_venue_mix || 0),
     },
   ]));
 
@@ -508,7 +511,7 @@ async function summaryData(env, days = 30) {
       source,
       users: Number(row.users || 0),
       opens: Number(row.opens || 0),
-      ...(sourceFunnelMap[source] || { usedOracle: 0, openedPro: 0, activated: 0 }),
+      ...(sourceFunnelMap[source] || { usedOracle: 0, openedCommunity: 0, sawVenueMix: 0 }),
     };
   });
 
@@ -517,33 +520,56 @@ async function summaryData(env, days = 30) {
     users: Number(row.users || 0),
   }]));
 
-  const usersFor = (...names) => {
-    const values = names.map((name) => map[name]?.users || 0);
-    return names.length === 1 ? values[0] : null;
+  const usersFor = (name) => map[name]?.users || 0;
+
+  const favoriteSavesRow = await env.DB.prepare(`
+    SELECT COUNT(*) AS events, COUNT(DISTINCT install_id) AS users
+    FROM analytics_events
+    WHERE created_at >= ?
+      AND event_name = 'favorite_toggle'
+      AND json_extract(props_json, '$.saved') = 1
+      ${tenantClause}
+  `).bind(since, ...tenantBindings).first();
+
+  let checkoutUsersRow = { users: 0 };
+  let activationChannelsRow = { stars: 0, yookassa: 0 };
+  let externalPaymentsRow = { created: 0, succeeded: 0 };
+  let starsLedger = {
+    available: true,
+    purchases: 0,
+    refunds: 0,
+    activeSubscriptions: 0,
+    grossStars: 0,
+    recent: [],
   };
 
-  const checkoutUsersRow = await env.DB.prepare(`
-    SELECT COUNT(DISTINCT install_id) AS users
-    FROM analytics_events
-    WHERE created_at >= ? AND event_name IN ('stars_checkout_start', 'external_checkout_open')
-  `).bind(since).first();
+  // Consumer payment analytics belong only to ALX Oracle, not to B2B venue dashboards.
+  if (!tenantId || tenantId === 'alx') {
+    checkoutUsersRow = await env.DB.prepare(`
+      SELECT COUNT(DISTINCT install_id) AS users
+      FROM analytics_events
+      WHERE created_at >= ? AND event_name IN ('stars_checkout_start', 'external_checkout_open')${tenantClause}
+    `).bind(since, ...tenantBindings).first();
 
-  const activationChannelsRow = await env.DB.prepare(`
-    SELECT
-      COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"telegram-stars"%' THEN install_id END) AS stars,
-      COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"yookassa"%' THEN install_id END) AS yookassa
-    FROM analytics_events
-    WHERE created_at >= ? AND event_name = 'pro_activated'
-  `).bind(since).first();
+    activationChannelsRow = await env.DB.prepare(`
+      SELECT
+        COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"telegram-stars"%' THEN install_id END) AS stars,
+        COUNT(DISTINCT CASE WHEN props_json LIKE '%"source":"yookassa"%' THEN install_id END) AS yookassa
+      FROM analytics_events
+      WHERE created_at >= ? AND event_name = 'pro_activated'${tenantClause}
+    `).bind(since, ...tenantBindings).first();
 
-  const livePrice = Math.max(1, Math.round(Number(env.ALX_LIVE_PRICE_RUB || env.ALX_EXTERNAL_PRICE_RUB || 299) || 299));
-  const externalPaymentsRow = await env.DB.prepare(`
-    SELECT
-      COUNT(*) AS created,
-      SUM(CASE WHEN status = 'succeeded' THEN 1 ELSE 0 END) AS succeeded
-    FROM payments
-    WHERE created_at >= ? AND provider = 'yookassa' AND amount_rub = ?
-  `).bind(since, livePrice).first();
+    const livePrice = Math.max(1, Math.round(Number(env.ALX_LIVE_PRICE_RUB || env.ALX_EXTERNAL_PRICE_RUB || 299) || 299));
+    externalPaymentsRow = await env.DB.prepare(`
+      SELECT
+        COUNT(*) AS created,
+        SUM(CASE WHEN status = 'succeeded' THEN 1 ELSE 0 END) AS succeeded
+      FROM payments
+      WHERE created_at >= ? AND provider = 'yookassa' AND amount_rub = ?
+    `).bind(since, livePrice).first();
+
+    starsLedger = await starsLedgerData(env);
+  }
 
   const funnel = {
     opened: usersFor('app_open'),
@@ -573,16 +599,25 @@ async function summaryData(env, days = 30) {
     shares: usersFor('community_share'),
   };
 
-  const starsLedger = await starsLedgerData(env);
+  const engagement = {
+    venueMixResults: Number(map.venue_mix_result?.events || 0),
+    venueMixUsers: Number(map.venue_mix_result?.users || 0),
+    favoriteSaves: Number(favoriteSavesRow?.events || 0),
+    favoriteUsers: Number(favoriteSavesRow?.users || 0),
+    shares: Number(map.mix_share?.events || 0),
+    shareUsers: Number(map.mix_share?.users || 0),
+  };
 
   return {
     ok: true,
     version: VERSION,
     generatedAt: Date.now(),
     periodDays,
+    tenantId: tenantId || null,
     funnel,
     paymentChannels,
     community,
+    engagement,
     starsLedger,
     trafficContexts,
     totalAppOpens: map.app_open?.events || 0,
