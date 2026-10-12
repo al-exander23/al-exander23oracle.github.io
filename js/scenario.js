@@ -5,6 +5,7 @@
 import { getItem, setItem } from './storage.js';
 import { buildDerivedProfile, calculateMixScore } from './personalization.js';
 import { isPremiumCollection, isProActive } from './pro.js?v=1.33.0-payment-audit';
+import { tenantHasFeature } from './tenant.js?v=1.42.0-venue-plans';
 
 const KEY = 'alx_oracle_scenario';
 
@@ -47,6 +48,7 @@ export const COLLECTION_OPTIONS = [
   { id: 'tropical', label: 'Тропические' },
   { id: 'sour', label: 'С кислинкой' },
   { id: 'strong', label: 'Крепкие' },
+  { id: 'venue', label: 'Фирменные миксы', venueFeature: 'signatureMixes' },
   { id: 'originals', label: 'ALX Originals', pro: true, hiddenUntilPro: true },
   { id: 'community', label: 'Community Mixes', pro: true, hiddenUntilPro: true },
   { id: 'signature', label: 'ALX Signature', pro: true },
@@ -116,7 +118,7 @@ export function collectionMatches(mix, collectionId) {
 
   // Строго кураторские коллекции: туда не попадают старые миксы только
   // из-за совпадения отдельных вкусовых или числовых характеристик.
-  if (['parfum', 'limited', 'originals', 'community'].includes(normalizedCollection)) return false;
+  if (['parfum', 'limited', 'originals', 'community', 'venue'].includes(normalizedCollection)) return false;
 
   switch (normalizedCollection) {
     case 'fresh':
@@ -157,7 +159,10 @@ function validCollection(value) {
 }
 
 function collectionAllowed(value) {
-  return validCollection(value) && (!isPremiumCollection(value) || isProActive());
+  if (!validCollection(value)) return false;
+  const meta = COLLECTION_OPTIONS.find((item) => item.id === value);
+  if (meta?.venueFeature && !tenantHasFeature(meta.venueFeature)) return false;
+  return !isPremiumCollection(value) || isProActive();
 }
 
 export function getScenario() {
@@ -302,6 +307,7 @@ function scenarioBonus(mix, scenario) {
   if (scenario.collection === 'limited' && explicitCollections(mix).includes('limited')) bonus += 4;
   if (scenario.collection === 'originals' && normalize(mix.exclusiveCollection) === 'originals') bonus += 5;
   if (scenario.collection === 'community' && normalize(mix.exclusiveCollection) === 'community') bonus += 5;
+  if (scenario.collection === 'venue' && explicitCollections(mix).includes('venue')) bonus += 6;
 
   return bonus;
 }
