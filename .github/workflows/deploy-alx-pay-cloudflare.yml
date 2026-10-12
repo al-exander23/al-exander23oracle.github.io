@@ -1,0 +1,38 @@
+name: Deploy ALX Pay Cloudflare
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/**'
+      - 'wrangler.toml'
+      - '.github/workflows/deploy-alx-pay-cloudflare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Deploy ALX Pay Worker
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "latest"
+          command: deploy
+
+      - name: Verify Community API
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 4
+          BODY="$(curl --fail-with-body --retry 4 --retry-all-errors 'https://alx-pay.alxoracle.workers.dev/api/community/health')"
+          echo "$BODY"
+          echo "$BODY" | grep -q '"ok":true'
+          echo "$BODY" | grep -q '"version":"1.39.0-white-label"'
