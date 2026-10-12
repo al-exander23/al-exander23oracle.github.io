@@ -206,6 +206,74 @@ function addAccountRow(section, id, title, note, handler) {
   section.appendChild(button);
 }
 
+function safeHttpUrl(value) {
+  try {
+    const url = new URL(String(value || '').trim());
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+  } catch (error) {
+    return '';
+  }
+}
+
+function telegramUsername(value) {
+  const raw = String(value || '').trim()
+    .replace(/^https?:\/\/t\.me\//i, '')
+    .replace(/^@+/, '')
+    .split(/[/?#]/)[0];
+  return /^[A-Za-z0-9_]{5,32}$/.test(raw) ? raw : '';
+}
+
+function openExternal(url) {
+  if (!url) return;
+  const tg = window.Telegram?.WebApp;
+  if (typeof tg?.openLink === 'function') {
+    try { tg.openLink(url); return; } catch (error) { /* browser fallback */ }
+  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function addVenueContactRows(section) {
+  if (!IS_WHITE_LABEL || !section) return;
+  const contacts = TENANT.contacts && typeof TENANT.contacts === 'object' ? TENANT.contacts : {};
+
+  const tgUser = telegramUsername(contacts.telegram);
+  if (tgUser) {
+    addAccountRow(
+      section,
+      'venueContactTelegram',
+      `Связаться с ${TENANT.displayName || 'заведением'}`,
+      `Telegram · @${tgUser}`,
+      () => {
+        const url = `https://t.me/${tgUser}`;
+        const tg = window.Telegram?.WebApp;
+        if (typeof tg?.openTelegramLink === 'function') {
+          try { tg.openTelegramLink(url); return; } catch (error) { /* browser fallback */ }
+        }
+        openExternal(url);
+      },
+    );
+  }
+
+  const phone = String(contacts.phone || '').trim();
+  const callable = phone.replace(/[^+0-9]/g, '');
+  if (/^\+?\d{7,15}$/.test(callable)) {
+    addAccountRow(section, 'venueContactPhone', 'Позвонить в заведение', phone, () => {
+      window.location.href = `tel:${callable}`;
+    });
+  }
+
+  const links = [
+    ['website', 'venueContactWebsite', 'Сайт заведения', contacts.website],
+    ['instagram', 'venueContactInstagram', 'Instagram', contacts.instagram],
+    ['vk', 'venueContactVk', 'VK', contacts.vk],
+  ];
+  links.forEach(([kind, id, title, value]) => {
+    const url = safeHttpUrl(value);
+    if (!url) return;
+    addAccountRow(section, id, title, kind === 'website' ? 'открыть сайт' : 'открыть профиль', () => openExternal(url));
+  });
+}
+
 function enhanceMyAlx() {
   const content = document.getElementById('myAlxContent');
   if (!content || !content.children.length) return;
@@ -266,6 +334,8 @@ function enhanceMyAlx() {
       trackAnalytics('nav_help_open', { navigationVersion: VERSION, source: 'my_alx' });
     });
   });
+
+  addVenueContactRows(section);
 }
 
 function observeAccount() {
