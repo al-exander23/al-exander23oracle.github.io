@@ -13,5 +13,20 @@
     "contacts": {
       "telegram": "@Orcmix_bot"
     }
+  },
+  "smoke-test": {
+    "id": "smoke-test",
+    "displayName": "Smoke Test",
+    "wordmark": "SMOKE TEST",
+    "pageTitle": "Smoke Test — Микс Оракул",
+    "logoUrl": "",
+    "botUsername": "smokertesterbot",
+    "communityName": "Community Mixes",
+    "communityKicker": "SMOKE TEST COMMUNITY",
+    "communityIntroLabel": "СООБЩЕСТВО SMOKE TEST",
+    "requirePro": false,
+    "contacts": {
+      "telegram": "@smokertesterbot"
+    }
   }
 }
