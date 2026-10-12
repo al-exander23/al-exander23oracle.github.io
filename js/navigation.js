@@ -3,7 +3,7 @@
 // clear four-section bottom navigation with readable labels.
 
 import { getProState } from './pro.js?v=1.33.0-payment-audit';
-import { trackAnalytics } from './analytics.js?v=1.39.1-white-label';
+import { trackAnalytics } from './analytics.js?v=1.42.0-venue-plans';
 import { getTenant, getTenantId, getTenantPlan, tenantHasFeature } from './tenant.js?v=1.42.0-venue-plans';
 
 const VERSION = '1.30.0-community-mvp';
