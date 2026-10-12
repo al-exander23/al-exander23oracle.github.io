@@ -1,6 +1,6 @@
 // home-direction.js — compact home indicator for the active Oracle direction.
 
-import { COLLECTION_OPTIONS, getScenario, setScenario } from './scenario.js?v=1.33.0-payment-audit';
+import { COLLECTION_OPTIONS, getScenario, setScenario } from './scenario.js?v=1.42.0-venue-plans';
 import { getTenantId } from './tenant.js?v=1.42.0-venue-plans';
 
 const ROOT_ID = 'alxHomeDirection';
