@@ -17,7 +17,7 @@ import {
   isPremiumCollection,
   requestProPaywall,
 } from './pro.js?v=1.33.0-payment-audit';
-import { getTenantId } from './tenant.js?v=1.39.0-white-label';
+import { getTenantId } from './tenant.js?v=1.39.1-white-label';
 
 const SECTION_ID = 'scenarioOracleSection';
 let renderQueued = false;
