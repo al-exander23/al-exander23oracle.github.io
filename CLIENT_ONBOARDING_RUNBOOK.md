@@ -1,91 +1,64 @@
 # Venue onboarding runbook
 
-Это внутренний стандарт запуска каждой новой кальянной на общей ALX Oracle platform.
+## 1. Тарифы
 
-## 1. Продажа и данные
+- START — 9 900 ₽ + 2 990 ₽ / месяц.
+- BUSINESS — 14 900 ₽ + 4 990 ₽ / месяц.
+- PRO — 24 900 ₽ + 7 990 ₽ / месяц.
 
-Стандартная цена:
+По умолчанию продавать BUSINESS. START — входной вариант. PRO — для промо, «Микса недели» и расширенного фирменного контента.
 
-- запуск: 9 900 ₽;
-- обслуживание: 2 990 ₽ / месяц.
+## 2. Данные клиента
 
-Получить от клиента название, логотип, username Telegram-бота, Telegram-контакт и дополнительные контакты. Бот создаёт сам клиент через BotFather, чтобы бот оставался в его собственности.
+Получить название, логотип, username бота, Telegram заведения, дополнительные контакты. Для BUSINESS / PRO — фирменные рецепты. Для PRO — текст и CTA промо.
 
-## 2. Добавить tenant
+## 3. Добавить tenant
 
-Использовать:
+START:
+    node scripts/add-tenant.mjs lounge-one "Lounge One" lounge_one_bot "" "@lounge_one" "+79990000000" "https://example.com" --plan=start
 
-```bash
-node scripts/add-tenant.mjs lounge-one "Lounge One" lounge_one_bot "https://..." "@lounge_one" "+79990000000" "https://..."
-```
+BUSINESS:
+    node scripts/add-tenant.mjs lounge-one "Lounge One" lounge_one_bot "" "@lounge_one" "+79990000000" "https://example.com" --plan=business
 
-Скрипт изменяет только публичный `data/tenants.json`. Токен он никогда не принимает и не записывает.
+PRO:
+    node scripts/add-tenant.mjs lounge-one "Lounge One" lounge_one_bot "" "@lounge_one" "+79990000000" "https://example.com" --plan=pro
 
-После запуска он выводит:
+## 4. Cloudflare Secrets
 
-- tenant ID;
-- Mini App URL;
-- индивидуальное имя Cloudflare Secret.
+Для каждого клиента: `TENANT_BOT_TOKEN_<TENANT_ID>`.
 
-## 3. Подключить токен
+Для BUSINESS / PRO дополнительно: `TENANT_ANALYTICS_KEY_<TENANT_ID>`.
 
-Для каждого нового заведения использовать **отдельный Secret**:
+Код аналитики должен быть уникальным и длинным. Не размещать секреты в GitHub, issue или публичной переписке.
 
-```
-TENANT_BOT_TOKEN_<TENANT_ID>
-```
+## 5. Фирменные миксы
 
-Дефисы заменяются на подчёркивания, имя переводится в верхний регистр.
+BUSINESS / PRO рецепты добавляются в `data/tenant-mixes.json` в массив соответствующего tenant.
 
-Пример:
+Лимиты: START — 0, BUSINESS — 20, PRO — 60. Сумма процентов каждого рецепта должна быть ровно 100.
 
-```
-tenant id: lounge-one
-secret: TENANT_BOT_TOKEN_LOUNGE_ONE
-```
+## 6. PRO-промо
 
-В значение вставляется BotFather token. Не добавлять его в GitHub, документацию, issue или pull request.
+В `data/tenants.json` у PRO tenant можно заполнить объект `promotion` с полями `kicker`, `title`, `text`, `ctaLabel`, `url`.
 
-Старый `TENANT_BOT_TOKENS` JSON поддерживается только для обратной совместимости существующих тестов.
+## 7. BotFather и QR
 
-## 4. BotFather
+Mini App URL: `https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=<tenant-id>`
 
-Menu Button / Mini App URL:
+QR tracking URL: `https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=<tenant-id>&src=qr`
 
-```
-https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=<tenant-id>
-```
+## 8. Аналитика BUSINESS / PRO
 
-Название кнопки: `Открыть <название заведения>`.
+Панель: `https://alx-pay.alxoracle.workers.dev/venue-analytics?tenant=<tenant-id>`
 
-## 5. Smoke test
+Клиент вводит отдельный код аналитики. После входа используется HttpOnly-сессия; код не передаётся в URL.
 
-Перед передачей клиенту проверить:
+## 9. Smoke test
 
-- открывается правильный бренд;
-- логотип и название правильные;
-- нет ALX PRO и оплаты;
-- шар выдаёт больше 5 миксов подряд;
-- избранное сохраняется;
-- история сохраняется;
-- профиль открывается;
-- контакты заведения работают;
-- Community открывается через бот клиента;
-- можно создать Community-микс;
-- миксы другого tenant не отображаются;
-- ALX Oracle продолжает открываться в обычном режиме.
+Проверить бренд, отсутствие ALX PRO, безлимит, избранное, историю, контакты, Community и изоляцию tenants.
 
-## 6. Передача клиенту
+Для BUSINESS / PRO дополнительно проверить фирменные миксы и панель аналитики. Для PRO — промо-карточку и CTA.
 
-Передать:
+## 10. Передача
 
-- ссылку на Telegram-бот;
-- короткую инструкцию для персонала;
-- QR-код на бот при необходимости;
-- дату следующего платежа.
-
-Не передавать GitHub/Cloudflare/source code.
-
-## 7. Остановка обслуживания
-
-При неоплате сначала уведомить клиента. Для технического отключения удалить/заменить индивидуальный Cloudflare Secret клиента и затем, при необходимости, удалить tenant из публичного registry. Бот остаётся у клиента.
+Передать ссылку на бот, QR-ссылку, инструкцию персоналу, дату оплаты; BUSINESS / PRO — ссылку и код аналитики. Исходный код и инфраструктурные аккаунты не передаются.
