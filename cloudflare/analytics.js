@@ -672,6 +672,171 @@ function forbiddenPage() {
   `, 'ALX Analytics · Access denied');
 }
 
+function venueAnalyticsLoginPage(tenantId, message = '') {
+  const safeTenant = normalizeTenantAnalyticsId(tenantId);
+  return dashboardShell(`
+    <div class="brand">VENUE ANALYTICS · ${escapeHtml(safeTenant.toUpperCase())}</div>
+    <h1 class="title">Аналитика заведения</h1>
+    <p class="muted">Введите код доступа, выданный вместе с Business / Pro подключением.</p>
+    ${message ? `<div class="notice">${escapeHtml(message)}</div>` : ''}
+    <form method="post" action="/venue-analytics/login" style="margin-top:22px;display:grid;gap:12px;max-width:420px">
+      <input type="hidden" name="tenant" value="${escapeHtml(safeTenant)}">
+      <input name="accessKey" type="password" autocomplete="current-password" required placeholder="Код доступа" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid #493b2b;background:#15101b;color:#eee7da">
+      <button class="btn" type="submit" style="cursor:pointer;width:max-content">Открыть аналитику</button>
+    </form>
+  `, 'Venue Analytics');
+}
+
+function venueDashboardPage(summary, tenantId) {
+  const f = summary.funnel || {};
+  const community = summary.community || {};
+  const engagement = summary.engagement || {};
+  const acquisition = summary.acquisition || [];
+  const periodCaption = summary.periodDays === 1 ? '24 часа' : summary.periodDays === 7 ? '7 дней' : '30 дней';
+  const base = `/venue-analytics?tenant=${encodeURIComponent(tenantId)}`;
+
+  const sourceRows = acquisition.map((row) => `
+    <tr>
+      <td>${escapeHtml(row.source || 'direct')}</td>
+      <td>${Number(row.users || 0)}</td>
+      <td>${Number(row.opens || 0)}</td>
+      <td>${Number(row.usedOracle || 0)}</td>
+      <td>${pct(row.usedOracle, row.users)}</td>
+      <td>${Number(row.sawVenueMix || 0)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6">Пока нет данных</td></tr>';
+
+  const dailyRows = (summary.daily || []).map((row) => `
+    <tr>
+      <td>${escapeHtml(row.day)}</td>
+      <td>${Number(row.opens || 0)}</td>
+      <td>${Number(row.mixes || 0)}</td>
+      <td>${Number(row.venue_mixes || 0)}</td>
+      <td>${Number(row.community_users || 0)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="5">Пока нет данных</td></tr>';
+
+  return dashboardShell(`
+    <div class="head">
+      <div>
+        <div class="brand">VENUE ANALYTICS · ${escapeHtml(tenantId.toUpperCase())}</div>
+        <h1 class="title">Аналитика приложения</h1>
+        <div class="muted">Период: ${periodCaption} · обновлено ${new Date(summary.generatedAt).toLocaleString('ru-RU')}</div>
+      </div>
+      <div class="periods">
+        <a class="${summary.periodDays === 1 ? 'active' : ''}" href="${base}&days=1">День</a>
+        <a class="${summary.periodDays === 7 ? 'active' : ''}" href="${base}&days=7">Неделя</a>
+        <a class="${summary.periodDays === 30 ? 'active' : ''}" href="${base}&days=30">Месяц</a>
+        <a href="/venue-analytics/logout?tenant=${encodeURIComponent(tenantId)}">Выйти</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div class="kpi">${Number(f.opened || 0)}</div><div class="label">уникальных гостей</div></div>
+      <div class="card"><div class="kpi">${Number(summary.totalAppOpens || 0)}</div><div class="label">открытий приложения</div></div>
+      <div class="card"><div class="kpi">${Number(summary.totalOracleResults || 0)}</div><div class="label">подборов Оракула</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.venueMixResults || 0)}</div><div class="label">показов фирменных миксов</div></div>
+    </div>
+
+    <div class="section"><h2>Вовлечённость</h2><div class="grid">
+      <div class="card"><div class="kpi">${Number(engagement.favoriteSaves || 0)}</div><div class="label">добавлений в избранное</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.shares || 0)}</div><div class="label">нажатий «Поделиться»</div></div>
+      <div class="card"><div class="kpi">${Number(community.opened || 0)}</div><div class="label">гостей открыли Community</div></div>
+      <div class="card"><div class="kpi">${Number(community.mixesCreated || 0)}</div><div class="label">гостей публиковали миксы</div></div>
+    </div></div>
+
+    <div class="section"><h2>Источники гостей</h2>
+      <table><thead><tr><th>Источник</th><th>Гости</th><th>Открытия</th><th>Получили микс</th><th>Конверсия</th><th>Фирменный микс</th></tr></thead><tbody>${sourceRows}</tbody></table>
+    </div>
+
+    <div class="section"><h2>По дням</h2>
+      <table><thead><tr><th>Дата</th><th>Открытия</th><th>Миксы</th><th>Фирменные</th><th>Community</th></tr></thead><tbody>${dailyRows}</tbody></table>
+    </div>
+
+    <div class="notice muted">Панель не показывает Telegram ID, имена гостей, username, платёжные реквизиты или содержимое их персональных подборов. Статистика агрегирована для оценки использования приложения.</div>
+  `, `Venue Analytics · ${tenantId}`);
+}
+
+async function venueAnalyticsDashboard(request, env) {
+  const url = new URL(request.url);
+  const tenantId = normalizeTenantAnalyticsId(url.searchParams.get('tenant'));
+  if (!tenantId || tenantId === 'alx') {
+    return new Response(dashboardShell('<h1 class="title">Неверное заведение</h1>', 'Venue Analytics'), {
+      status: 400,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  if (!tenantAnalyticsSecret(env, tenantId)) {
+    return new Response(dashboardShell(`
+      <div class="brand">VENUE ANALYTICS</div>
+      <h1 class="title">Аналитика ещё не активирована</h1>
+      <p class="muted">Для этого заведения не настроен Business / Pro доступ к аналитике.</p>
+    `, 'Venue Analytics'), {
+      status: 503,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  const authenticated = await venueAnalyticsSession(request, env, tenantId);
+  if (!authenticated) {
+    return new Response(venueAnalyticsLoginPage(tenantId), {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  const summary = await summaryData(env, url.searchParams.get('days'), tenantId);
+  return new Response(venueDashboardPage(summary, tenantId), {
+    status: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+async function venueAnalyticsLogin(request, env) {
+  const form = await request.formData().catch(() => null);
+  const tenantId = normalizeTenantAnalyticsId(form?.get('tenant'));
+  const supplied = String(form?.get('accessKey') || '');
+  const expected = tenantAnalyticsSecret(env, tenantId);
+
+  if (!tenantId || tenantId === 'alx' || !expected) {
+    return new Response(venueAnalyticsLoginPage(tenantId || 'venue', 'Аналитика для этого заведения не настроена.'), {
+      status: 503,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  if (!safeEqualText(supplied, expected)) {
+    return new Response(venueAnalyticsLoginPage(tenantId, 'Неверный код доступа.'), {
+      status: 403,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+
+  const session = await createVenueAnalyticsSession(env, tenantId);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: `/venue-analytics?tenant=${encodeURIComponent(tenantId)}`,
+      'Set-Cookie': `alx_venue_analytics=${session}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}`,
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+function venueAnalyticsLogout(request) {
+  const url = new URL(request.url);
+  const tenantId = normalizeTenantAnalyticsId(url.searchParams.get('tenant'));
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: tenantId ? `/venue-analytics?tenant=${encodeURIComponent(tenantId)}` : '/venue-analytics',
+      'Set-Cookie': 'alx_venue_analytics=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
 function dashboardPage(summary) {
   const f = summary.funnel;
   const payment = summary.paymentChannels || {};
@@ -777,7 +942,7 @@ async function analyticsDashboard(request, env) {
   if (access.status === 401) return new Response(loginPage(), { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
   if (!access.ok) return new Response(forbiddenPage(), { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
   const url = new URL(request.url);
-  const summary = await summaryData(env, url.searchParams.get('days'));
+  const summary = await summaryData(env, url.searchParams.get('days'), url.searchParams.get('tenant'));
   return new Response(dashboardPage(summary), { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
@@ -818,10 +983,13 @@ export async function handleAnalyticsRoute(request, env, ctx) {
   if (url.pathname === '/api/analytics/summary' && request.method === 'GET') {
     const access = await requireOwner(request, env);
     if (!access.ok) return json({ ok: false, error: access.status === 401 ? 'Auth required' : 'Forbidden' }, access.status);
-    return json(await summaryData(env, url.searchParams.get('days')));
+    return json(await summaryData(env, url.searchParams.get('days'), url.searchParams.get('tenant')));
   }
 
   if (url.pathname === '/analytics/login' && request.method === 'GET') return analyticsLogin();
   if (url.pathname === '/analytics' && request.method === 'GET') return analyticsDashboard(request, env);
+  if (url.pathname === '/venue-analytics/login' && request.method === 'POST') return venueAnalyticsLogin(request, env);
+  if (url.pathname === '/venue-analytics/logout' && request.method === 'GET') return venueAnalyticsLogout(request);
+  if (url.pathname === '/venue-analytics' && request.method === 'GET') return venueAnalyticsDashboard(request, env);
   return null;
 }
