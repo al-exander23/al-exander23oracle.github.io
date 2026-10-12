@@ -58,6 +58,15 @@ jobs:
             node --input-type=module --check < "$file"
           done
 
+      - name: Check Oracle module version alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R "mixes.js?v=1.33.0-payment-audit\|scenario.js?v=1.33.0-payment-audit" js/oracle.js; then
+            echo "oracle.js is importing stale module URLs and would create a second ESM cache instance"
+            exit 1
+          fi
+
       - name: Test tenant onboarding helper
         shell: bash
         run: |
