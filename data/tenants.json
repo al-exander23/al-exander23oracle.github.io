@@ -1,0 +1,17 @@
+{
+  "default": {
+    "id": "alx",
+    "appName": "ALX Oracle",
+    "shortBrand": "ALX",
+    "brandText": "МИКС ОРАКУЛ",
+    "proName": "ALX PRO",
+    "originalsName": "ALX Originals",
+    "signatureName": "ALX Signature",
+    "communityName": "СООБЩЕСТВО ALX",
+    "pageTitle": "ALX Oracle — Микс Оракул",
+    "logoUrl": "",
+    "botUrl": "https://t.me/Orcmix_bot",
+    "contactUrl": "",
+    "contactLabel": ""
+  }
+}
