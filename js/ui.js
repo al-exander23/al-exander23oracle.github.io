@@ -132,10 +132,15 @@ export function renderCard(cardEl, mix) {
   head.appendChild(title);
   head.appendChild(actionsWrap);
 
-  const provenance = mix?.communityMix === true ? document.createElement('div') : null;
+  const provenance = mix?.communityMix === true || mix?.venueMix === true ? document.createElement('div') : null;
   if (provenance) {
-    provenance.className = 'mix-card-community-badge';
-    provenance.textContent = `Микс участника Community · ${mix.author || 'участник сообщества'}`;
+    if (mix?.venueMix === true) {
+      provenance.className = 'mix-card-venue-badge';
+      provenance.textContent = `Фирменный микс · ${mix.author || 'заведение'}`;
+    } else {
+      provenance.className = 'mix-card-community-badge';
+      provenance.textContent = `Микс участника Community · ${mix.author || 'участник сообщества'}`;
+    }
   }
 
   const communityChoice = isCommunityChoice(mix) ? document.createElement('div') : null;
@@ -186,6 +191,14 @@ export function renderCard(cardEl, mix) {
   cardEl.replaceChildren(...cardParts);
   cardEl.classList.add('show');
 
+  window.dispatchEvent(new CustomEvent('alx-mix-rendered', {
+    detail: {
+      source: mix?.venueMix === true ? 'venue' : mix?.communityMix === true ? 'community' : 'official',
+      venueMix: mix?.venueMix === true,
+      communityMix: mix?.communityMix === true,
+    },
+  }));
+
   favBtn.addEventListener('click', () => {
     const nowFav = toggleFavorite(mix.id);
     favBtn.classList.toggle('active', nowFav);
@@ -199,6 +212,9 @@ export function renderCard(cardEl, mix) {
       disBtn.setAttribute('aria-pressed', 'false');
     }
     showToast(nowFav ? 'Добавлено в избранное' : 'Убрано из избранного');
+    window.dispatchEvent(new CustomEvent('alx-favorite-toggle', {
+      detail: { saved: nowFav, venueMix: mix?.venueMix === true },
+    }));
   });
 
   disBtn.addEventListener('click', () => {
@@ -216,7 +232,12 @@ export function renderCard(cardEl, mix) {
     showToast(nowDis ? 'Больше не предлагаем' : 'Снята отметка');
   });
 
-  shareBtn.addEventListener('click', () => shareMix(mix));
+  shareBtn.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('alx-mix-share', {
+      detail: { venueMix: mix?.venueMix === true, communityMix: mix?.communityMix === true },
+    }));
+    shareMix(mix);
+  });
 }
 
 export function prepareOrbText(screenContentEl, mix, sceneId) {
