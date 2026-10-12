@@ -1,7 +1,7 @@
 // onboarding.js — first-run guide for the current ALX Oracle experience.
 // Pure presentation layer: it does not change Oracle, profile or payment logic.
 
-import { getTenant, getTenantId, tenantStorageKey } from './tenant.js?v=1.39.1-white-label';
+import { getTenant, getTenantId, tenantStorageKey } from './tenant.js?v=1.42.0-venue-plans';
 
 const TENANT = getTenant();
 const IS_WHITE_LABEL = getTenantId() !== 'alx';
