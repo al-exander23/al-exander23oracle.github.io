@@ -288,7 +288,7 @@ function publicAuthorName(requested, user) {
   const username = cleanText(user?.username, 28);
   if (username) return `@${username.replace(/^@+/, '')}`;
   const firstName = cleanText(user?.first_name, 28, { minLength: 2 });
-  return firstName || 'ALX user';
+  return firstName || 'Community user';
 }
 
 function validateRecipe(raw) {
@@ -343,7 +343,7 @@ async function loadComponents(env, ids) {
     FROM community_mix_components
     WHERE mix_id IN (${placeholders})
     ORDER BY mix_id ASC, position ASC
-  `).bind(`${communityMixPrefix(tenantId)}%`, ...ids).all();
+  `).bind(...ids).all();
 
   const map = new Map();
   for (const row of result?.results || []) {
@@ -361,7 +361,7 @@ function toMix(row, recipe, userId) {
     id: String(row.id),
     title: String(row.title),
     description: String(row.description || ''),
-    author: String(row.author_name || 'ALX user'),
+    author: String(row.author_name || 'Community user'),
     strength: Number(row.strength || 0) || null,
     recipe: Array.isArray(recipe) ? recipe : [],
     rating: ratingAverage(row),
@@ -397,7 +397,7 @@ async function rankPositions(env, ids, tenantId) {
     SELECT id, rank_position
     FROM ranked
     WHERE id IN (${placeholders})
-  `).bind(...ids).all();
+  `).bind(`${communityMixPrefix(tenantId)}%`, ...ids).all();
   return new Map((result?.results || []).map((row) => [String(row.id), Number(row.rank_position)]));
 }
 
