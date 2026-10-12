@@ -2,7 +2,7 @@
 // User recipes are isolated from the official Oracle/ALX Originals pool.
 
 const DEFAULT_PRO_STATUS_API = 'https://al-exander23oracle-github-io.vercel.app/api/stars-status';
-const VERSION = '1.31.0-community-oracle';
+const VERSION = '1.39.0-white-label';
 const UPSTREAM_TIMEOUT_MS = 8000;
 const MAX_CREATE_PER_24H = 5;
 const enc = new TextEncoder();
@@ -52,8 +52,40 @@ function safeEqualHex(a, b) {
   return diff === 0;
 }
 
-async function validateInitData(initData, env) {
-  if (!env.TELEGRAM_BOT_TOKEN) throw new Error('BOT_TOKEN_NOT_CONFIGURED');
+function normalizeTenantId(value) {
+  const tenantId = String(value || 'alx').trim().toLowerCase();
+  return /^[a-z0-9][a-z0-9-]{0,47}$/.test(tenantId) ? tenantId : 'alx';
+}
+
+function communityMixPrefix(tenantId) {
+  const normalized = normalizeTenantId(tenantId);
+  return normalized === 'alx' ? 'cm_' : `${normalized}_cm_`;
+}
+
+function mixBelongsToTenant(id, tenantId) {
+  return String(id || '').startsWith(communityMixPrefix(tenantId));
+}
+
+function tenantBotToken(env, tenantId) {
+  const normalized = normalizeTenantId(tenantId);
+  if (normalized === 'alx') return String(env.TELEGRAM_BOT_TOKEN || '').trim();
+
+  try {
+    const registry = JSON.parse(String(env.TENANT_BOT_TOKENS || '{}'));
+    return String(registry?.[normalized] || '').trim();
+  } catch (error) {
+    console.error('[Community tenant tokens] invalid TENANT_BOT_TOKENS JSON', error);
+    return '';
+  }
+}
+
+function tenantRequiresPro(tenantId) {
+  return normalizeTenantId(tenantId) === 'alx';
+}
+
+async function validateInitData(initData, env, tenantId) {
+  const botToken = tenantBotToken(env, tenantId);
+  if (!botToken) throw new Error('TENANT_BOT_TOKEN_NOT_CONFIGURED');
   const params = new URLSearchParams(String(initData || ''));
   const receivedHash = params.get('hash') || '';
   params.delete('hash');
@@ -71,7 +103,7 @@ async function validateInitData(initData, env) {
     ['sign'],
   );
   const secretKey = new Uint8Array(
-    await crypto.subtle.sign('HMAC', secretKeyMaterial, enc.encode(env.TELEGRAM_BOT_TOKEN)),
+    await crypto.subtle.sign('HMAC', secretKeyMaterial, enc.encode(botToken)),
   );
   const hmacKey = await crypto.subtle.importKey(
     'raw',
@@ -129,19 +161,22 @@ async function hasUnifiedPro(initData, env) {
 
 async function authorize(body, env) {
   const initData = String(body?.initData || '').trim();
+  const tenantId = normalizeTenantId(body?.tenantId);
   if (!initData) {
     const error = new Error('Telegram initData is missing');
     error.status = 401;
     throw error;
   }
-  const user = await validateInitData(initData, env);
-  const proActive = await hasUnifiedPro(initData, env);
-  if (!proActive) {
-    const error = new Error('ALX PRO required');
-    error.status = 403;
-    throw error;
+  const user = await validateInitData(initData, env, tenantId);
+  if (tenantRequiresPro(tenantId)) {
+    const proActive = await hasUnifiedPro(initData, env);
+    if (!proActive) {
+      const error = new Error('ALX PRO required');
+      error.status = 403;
+      throw error;
+    }
   }
-  return { user, initData };
+  return { user, initData, tenantId };
 }
 
 async function ensureSchema(env) {
@@ -308,7 +343,7 @@ async function loadComponents(env, ids) {
     FROM community_mix_components
     WHERE mix_id IN (${placeholders})
     ORDER BY mix_id ASC, position ASC
-  `).bind(...ids).all();
+  `).bind(`${communityMixPrefix(tenantId)}%`, ...ids).all();
 
   const map = new Map();
   for (const row of result?.results || []) {
@@ -342,7 +377,7 @@ function toMix(row, recipe, userId) {
   };
 }
 
-async function rankPositions(env, ids) {
+async function rankPositions(env, ids, tenantId) {
   if (!ids.length) return new Map();
   const placeholders = ids.map(() => '?').join(',');
   const result = await env.DB.prepare(`
@@ -357,7 +392,7 @@ async function rankPositions(env, ids) {
             created_at DESC
         ) AS rank_position
       FROM community_mixes
-      WHERE status = 'published' AND rating_count > 0
+      WHERE id LIKE ? AND status = 'published' AND rating_count > 0
     )
     SELECT id, rank_position
     FROM ranked
@@ -380,8 +415,8 @@ function baseSelect() {
   `;
 }
 
-async function listMixes(env, userId, mode) {
-  let where = "m.status = 'published'";
+async function listMixes(env, userId, mode, tenantId) {
+  let where = "m.status = 'published' AND m.id LIKE ?";
   let order = 'm.created_at DESC';
   if (mode === 'mine') where += ' AND m.telegram_user_id = ?';
   if (mode === 'saved') where += ' AND (s.telegram_user_id IS NOT NULL OR m.telegram_user_id = ?)';
@@ -396,7 +431,7 @@ async function listMixes(env, userId, mode) {
     `;
   }
 
-  const bindings = [String(userId), String(userId)];
+  const bindings = [String(userId), String(userId), `${communityMixPrefix(tenantId)}%`];
   if (mode === 'mine' || mode === 'saved') bindings.push(String(userId));
   const limit = mode === 'oracle' ? 200 : 50;
 
@@ -411,7 +446,7 @@ async function listMixes(env, userId, mode) {
   const ids = rows.map((row) => String(row.id));
   const [components, positions] = await Promise.all([
     loadComponents(env, ids),
-    rankPositions(env, ids),
+    rankPositions(env, ids, tenantId),
   ]);
   return rows.map((row) => ({
     ...toMix(row, components.get(String(row.id)), userId),
@@ -419,7 +454,8 @@ async function listMixes(env, userId, mode) {
   }));
 }
 
-async function getMix(env, userId, mixId) {
+async function getMix(env, userId, mixId, tenantId) {
+  if (!mixBelongsToTenant(mixId, tenantId)) return null;
   const row = await env.DB.prepare(`
     ${baseSelect()}
     WHERE m.status = 'published' AND m.id = ?
@@ -429,7 +465,7 @@ async function getMix(env, userId, mixId) {
   const id = String(row.id);
   const [components, positions] = await Promise.all([
     loadComponents(env, [id]),
-    rankPositions(env, [id]),
+    rankPositions(env, [id], tenantId),
   ]);
   return {
     ...toMix(row, components.get(id), userId),
@@ -462,8 +498,9 @@ async function health(request, env) {
 
 async function preview(request, env, url) {
   await ensureSchema(env);
+  const tenantId = normalizeTenantId(url.searchParams.get('tenant'));
   const id = cleanText(url.searchParams.get('id'), 80, { minLength: 3 });
-  if (!id) return json(request, env, { ok: false, error: 'Mix not found' }, 404);
+  if (!id || !mixBelongsToTenant(id, tenantId)) return json(request, env, { ok: false, error: 'Mix not found' }, 404);
   const row = await env.DB.prepare(`
     SELECT id, author_name, title, description, strength, rating_count, rating_sum, save_count, view_count, created_at
     FROM community_mixes
@@ -479,7 +516,7 @@ async function preview(request, env, url) {
       id: String(row.id),
       title: String(row.title),
       description: String(row.description || ''),
-      author: String(row.author_name || 'ALX user'),
+      author: String(row.author_name || 'Community user'),
       strength: Number(row.strength || 0) || null,
       rating: ratingAverage(row),
       ratingCount: Number(row.rating_count || 0),
@@ -491,25 +528,25 @@ async function preview(request, env, url) {
 }
 
 async function list(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
   const requested = String(body?.view || 'top').toLowerCase();
   const mode = ['top', 'new', 'mine', 'saved', 'oracle'].includes(requested) ? requested : 'top';
-  const mixes = await listMixes(env, user.id, mode);
+  const mixes = await listMixes(env, user.id, mode, tenantId);
   return json(request, env, { ok: true, version: VERSION, view: mode, mixes });
 }
 
 async function getOne(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
   const id = cleanText(body?.id, 80, { minLength: 3 });
-  const mix = id ? await getMix(env, user.id, id) : null;
+  const mix = id ? await getMix(env, user.id, id, tenantId) : null;
   if (!mix) return json(request, env, { ok: false, error: 'Микс не найден.' }, 404);
   return json(request, env, { ok: true, version: VERSION, mix });
 }
 
 async function create(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
 
   const title = cleanText(body?.title, 60, { minLength: 2 });
@@ -529,8 +566,8 @@ async function create(request, env, body) {
   const recent = await env.DB.prepare(`
     SELECT COUNT(*) AS count
     FROM community_mixes
-    WHERE telegram_user_id = ? AND created_at >= ?
-  `).bind(String(user.id), now - 24 * 60 * 60 * 1000).first();
+    WHERE telegram_user_id = ? AND id LIKE ? AND created_at >= ?
+  `).bind(String(user.id), `${communityMixPrefix(tenantId)}%`, now - 24 * 60 * 60 * 1000).first();
   if (Number(recent?.count || 0) >= MAX_CREATE_PER_24H) {
     return json(request, env, { ok: false, error: 'Лимит Community: не более 5 публикаций за 24 часа.' }, 429);
   }
@@ -539,14 +576,14 @@ async function create(request, env, body) {
   const duplicate = await env.DB.prepare(`
     SELECT id
     FROM community_mixes
-    WHERE telegram_user_id = ? AND fingerprint = ? AND status = 'published'
+    WHERE telegram_user_id = ? AND id LIKE ? AND fingerprint = ? AND status = 'published'
     LIMIT 1
-  `).bind(String(user.id), fingerprint).first();
+  `).bind(String(user.id), `${communityMixPrefix(tenantId)}%`, fingerprint).first();
   if (duplicate?.id) {
     return json(request, env, { ok: false, error: 'Такой состав уже опубликован в ваших миксах.' }, 409);
   }
 
-  const id = `cm_${crypto.randomUUID().replaceAll('-', '')}`;
+  const id = `${communityMixPrefix(tenantId)}${crypto.randomUUID().replaceAll('-', '')}`;
   const statements = [
     env.DB.prepare(`
       INSERT INTO community_mixes (
@@ -572,17 +609,17 @@ async function create(request, env, body) {
   ];
   await env.DB.batch(statements);
 
-  const mix = await getMix(env, user.id, id);
+  const mix = await getMix(env, user.id, id, tenantId);
   return json(request, env, { ok: true, version: VERSION, mix }, 201);
 }
 
 async function rate(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
 
   const id = cleanText(body?.id, 80, { minLength: 3 });
   const rating = Math.round(Number(body?.rating));
-  if (!id || rating < 1 || rating > 5) {
+  if (!id || !mixBelongsToTenant(id, tenantId) || rating < 1 || rating > 5) {
     return json(request, env, { ok: false, error: 'Оценка должна быть от 1 до 5.' }, 400);
   }
 
@@ -613,7 +650,7 @@ async function rate(request, env, body) {
     `).bind(id, id, id),
   ]);
 
-  const mix = await getMix(env, user.id, id);
+  const mix = await getMix(env, user.id, id, tenantId);
   return json(request, env, {
     ok: true,
     version: VERSION,
@@ -625,11 +662,12 @@ async function rate(request, env, body) {
 }
 
 async function save(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
 
   const id = cleanText(body?.id, 80, { minLength: 3 });
   const desired = body?.saved !== false;
+  if (!mixBelongsToTenant(id, tenantId)) return json(request, env, { ok: false, error: 'Микс не найден.' }, 404);
   const exists = id ? await env.DB.prepare(
     "SELECT id FROM community_mixes WHERE id = ? AND status = 'published' LIMIT 1",
   ).bind(id).first() : null;
@@ -652,7 +690,7 @@ async function save(request, env, body) {
     WHERE id = ?
   `).bind(id, id).run();
 
-  const mix = await getMix(env, user.id, id);
+  const mix = await getMix(env, user.id, id, tenantId);
   return json(request, env, {
     ok: true,
     version: VERSION,
@@ -662,10 +700,11 @@ async function save(request, env, body) {
 }
 
 async function view(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
 
   const id = cleanText(body?.id, 80, { minLength: 3 });
+  if (!mixBelongsToTenant(id, tenantId)) return json(request, env, { ok: false, error: 'Микс не найден.' }, 404);
   const exists = id ? await env.DB.prepare(
     "SELECT id FROM community_mixes WHERE id = ? AND status = 'published' LIMIT 1",
   ).bind(id).first() : null;
@@ -688,10 +727,11 @@ async function view(request, env, body) {
 }
 
 async function report(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
 
   const id = cleanText(body?.id, 80, { minLength: 3 });
+  if (!mixBelongsToTenant(id, tenantId)) return json(request, env, { ok: false, error: 'Микс не найден.' }, 404);
   const allowedReasons = new Set(['spam', 'offensive', 'duplicate', 'other']);
   const reason = allowedReasons.has(String(body?.reason || '')) ? String(body.reason) : 'other';
   const owner = id ? await env.DB.prepare(
@@ -718,10 +758,10 @@ async function report(request, env, body) {
 }
 
 async function remove(request, env, body) {
-  const { user } = await authorize(body, env);
+  const { user, tenantId } = await authorize(body, env);
   await ensureSchema(env);
   const id = cleanText(body?.id, 80, { minLength: 3 });
-  if (!id) return json(request, env, { ok: false, error: 'Микс не найден.' }, 404);
+  if (!id || !mixBelongsToTenant(id, tenantId)) return json(request, env, { ok: false, error: 'Микс не найден.' }, 404);
 
   const result = await env.DB.prepare(`
     UPDATE community_mixes
