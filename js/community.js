@@ -3,8 +3,9 @@
 
 import { getProState, requestProPaywall, syncProEntitlement } from './pro.js?v=1.33.0-payment-audit';
 import { trackAnalytics } from './analytics.js?v=1.34.0-funnel-analytics';
+import { getTenant, tenantReady } from './tenant.js?v=1.40.0-multitenant';
 
-const VERSION = '1.32.0-community-choice';
+const VERSION = '1.40.0-multitenant-community';
 const API_BASE = 'https://alx-pay.alxoracle.workers.dev';
 const OVERLAY_ID = 'alxCommunity';
 const CONTENT_ID = 'alxCommunityContent';
@@ -39,19 +40,21 @@ function defaultAuthor() {
   const user = telegramUser();
   if (user?.username) return `@${String(user.username).replace(/^@+/, '').slice(0, 28)}`;
   if (user?.first_name) return String(user.first_name).slice(0, 28);
-  return 'ALX user';
+  return `${getTenant().shortBrand} user`;
 }
 
 async function apiPost(action, payload = {}, timeoutMs = 12000) {
+  await tenantReady;
+  const tenant = getTenant();
   const initData = telegramInitData();
-  if (!initData) throw new Error('Открой ALX Oracle внутри Telegram, чтобы использовать Community Mixes.');
+  if (!initData) throw new Error(`Открой ${tenant.appName} внутри Telegram, чтобы использовать Community Mixes.`);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${API_BASE}/api/community/${action}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, initData }),
+      body: JSON.stringify({ ...payload, initData, tenantId: tenant.id }),
       cache: 'no-store',
       signal: controller.signal,
     });
@@ -68,7 +71,9 @@ async function apiPost(action, payload = {}, timeoutMs = 12000) {
 }
 
 async function apiPreview(id) {
-  const response = await fetch(`${API_BASE}/api/community/preview?id=${encodeURIComponent(id)}`, {
+  await tenantReady;
+  const tenant = getTenant();
+  const response = await fetch(`${API_BASE}/api/community/preview?id=${encodeURIComponent(id)}&tenant=${encodeURIComponent(tenant.id)}`, {
     cache: 'no-store',
   });
   const data = await response.json().catch(() => ({}));
@@ -301,6 +306,17 @@ async function loadView(view = currentView) {
       return;
     }
 
+    if (error?.status === 403 && getTenant().id !== 'alx') {
+      root.innerHTML = `
+        <section class="community-access-block">
+          <span>COMMUNITY НЕДОСТУПЕН</span>
+          <h3>Бот заведения ещё не подключён</h3>
+          <p>${esc(error.message || 'Для Community нужно завершить серверную настройку Telegram-бота этого заведения.')}</p>
+          <b>Основное приложение продолжает работать. Community включится после добавления серверного токена бота.</b>
+        </section>`;
+      return;
+    }
+
     if (error?.status === 403) {
       root.innerHTML = `
         <section class="community-access-block">
@@ -383,7 +399,8 @@ async function saveMix(id) {
 function shareMix(id) {
   const mix = mixes.find((item) => item.id === id);
   if (!mix) return;
-  const deepLink = `https://t.me/Orcmix_bot?startapp=community_${encodeURIComponent(id)}`;
+  const botUrl = String(getTenant().botUrl || 'https://t.me/Orcmix_bot').replace(/\/$/, '');
+  const deepLink = `${botUrl}?startapp=community_${encodeURIComponent(id)}`;
   const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(deepLink)}&text=${encodeURIComponent(`Community Mix · ${mix.title} · ${mix.author}`)}`;
   if (window.Telegram?.WebApp?.openTelegramLink) {
     window.Telegram.WebApp.openTelegramLink(shareUrl);
@@ -647,7 +664,7 @@ function renderCreateForm() {
     submit.disabled = true;
     submit.textContent = 'Публикую…';
     message.className = 'community-form-message is-pending';
-    message.innerHTML = '<b>ПУБЛИКАЦИЯ…</b><span>Проверяю Telegram, PRO и сохраняю рецепт в Community.</span>';
+    message.innerHTML = `<b>ПУБЛИКАЦИЯ…</b><span>${getTenant().id === 'alx' ? 'Проверяю Telegram, PRO и сохраняю рецепт в Community.' : 'Проверяю Telegram и сохраняю рецепт в Community заведения.'}</span>`;
 
     try {
       const data = await apiPost('create', {
@@ -696,7 +713,9 @@ function toast(message) {
 }
 
 export async function openCommunity(view = 'top') {
-  if (!getProState().active) {
+  await tenantReady;
+  const tenant = getTenant();
+  if (tenant.id === 'alx' && !getProState().active) {
     requestProPaywall('Community Mixes');
     return;
   }
@@ -732,7 +751,8 @@ async function openSharedPreview(id) {
 
   try {
     const preview = await apiPreview(id);
-    const pro = getProState().active;
+    const tenant = getTenant();
+    const pro = tenant.id !== 'alx' || getProState().active;
     root.innerHTML = `
       <section class="community-shared-preview">
         <span>COMMUNITY MIX</span>
@@ -755,7 +775,7 @@ async function openSharedPreview(id) {
       </section>`;
 
     root.querySelector('[data-shared-open]')?.addEventListener('click', async () => {
-      if (!getProState().active) {
+      if (getTenant().id === 'alx' && !getProState().active) {
         closeCommunity();
         requestProPaywall('Community Mixes');
         return;
@@ -799,18 +819,19 @@ function enhanceMyAlx() {
   button.type = 'button';
   button.innerHTML = `
     <span>Community Mixes</span>
-    <small>${getProState().active ? 'мои рецепты, оценки и рейтинг' : 'создание и рейтинг миксов · ALX PRO'}</small>`;
+    <small>${getTenant().id !== 'alx' || getProState().active ? 'мои рецепты, оценки и рейтинг' : 'создание и рейтинг миксов · ALX PRO'}</small>`;
   button.addEventListener('click', () => {
     document.getElementById('myAlxClose')?.click();
     setTimeout(() => {
-      if (getProState().active) openCommunity('mine');
+      if (getTenant().id !== 'alx' || getProState().active) openCommunity('mine');
       else requestProPaywall('Community Mixes');
     }, 90);
   });
   section.appendChild(button);
 }
 
-function init() {
+async function init() {
+  await tenantReady;
   ensureOverlay();
 
   window.addEventListener('alx-community-open', (event) => {
