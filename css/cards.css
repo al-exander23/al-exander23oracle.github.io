@@ -104,6 +104,24 @@
   letter-spacing:.04em;
 }
 
+.mix-card-venue-badge{
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  max-width:100%;
+  margin:7px 0 2px;
+  padding:6px 9px;
+  border-radius:999px;
+  border:1px solid rgba(217,184,120,.34);
+  background:rgba(217,184,120,.09);
+  color:#f3d49a;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:.04em;
+}
+
 .mix-card-desc{
   font-size: 12.5px;
   line-height: 1.55;
