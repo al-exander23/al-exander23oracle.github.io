@@ -27,18 +27,25 @@ Example tenant IDs: `alx`, `lounge-one`, `hookah-city`.
 
 ## Add a venue
 
-1. Add a new object to `data/tenants.json`.
-2. Create/configure the venue bot in BotFather and point its Mini App URL to the URL above.
-3. Add the bot token to the Cloudflare Worker secret `TENANT_BOT_TOKENS` as a JSON object.
+Preferred repeatable path:
 
-Example secret value:
+1. Run the tenant helper:
 
-```json
-{
-  "lounge-one": "<telegram-bot-token>",
-  "hookah-city": "<telegram-bot-token>"
-}
+```bash
+node scripts/add-tenant.mjs lounge-one "Lounge One" lounge_one_bot
 ```
+
+2. Review the generated object in `data/tenants.json`.
+3. Create/configure the venue bot in BotFather and point its Mini App URL to the URL printed by the helper.
+4. Add the token as the individual encrypted Cloudflare Worker secret printed by the helper.
+
+For tenant `lounge-one` the preferred secret is:
+
+```
+TENANT_BOT_TOKEN_LOUNGE_ONE
+```
+
+The legacy JSON secret `TENANT_BOT_TOKENS` remains supported only for backwards compatibility with already provisioned tenants. New customers should always use one individual secret per bot, so onboarding a new venue never requires reading or replacing another customer's token.
 
 Never commit bot tokens to GitHub.
 
@@ -72,6 +79,6 @@ Do not promise custom colors, layout changes or individual feature development i
 - tenant id: `smoke-test`
 - bot: `@smokertesterbot`
 - Mini App URL after production merge: `https://al-exander23.github.io/al-exander23oracle.github.io/?tenant=smoke-test`
-- `TENANT_BOT_TOKENS` must contain the `smoke-test` bot token only as a Cloudflare encrypted secret.
+- Smoke Test may continue using the existing legacy `TENANT_BOT_TOKENS` secret; new venues use individual `TENANT_BOT_TOKEN_<TENANT>` secrets.
 
 Before onboarding a real venue, verify ALX default mode, Smoke Test branding, unlimited Oracle access, Community auth and cross-tenant isolation.

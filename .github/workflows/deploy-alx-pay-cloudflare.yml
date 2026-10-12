@@ -35,4 +35,4 @@ jobs:
           BODY="$(curl --fail-with-body --retry 4 --retry-all-errors 'https://alx-pay.alxoracle.workers.dev/api/community/health')"
           echo "$BODY"
           echo "$BODY" | grep -q '"ok":true'
-          echo "$BODY" | grep -q '"version":"1.39.0-white-label"'
+          echo "$BODY" | grep -q '"version":"1.40.0-commercial"'

@@ -42,8 +42,18 @@ jobs:
             js/onboarding.js
             cloudflare/community.js
             cloudflare/worker-v2.js
+            scripts/add-tenant.mjs
           )
           for file in "${files[@]}"; do
             echo "Checking $file"
             node --input-type=module --check < "$file"
           done
+
+      - name: Test tenant onboarding helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp data/tenants.json /tmp/tenants.json
+          node scripts/add-tenant.mjs ci-lounge "CI Lounge" ci_lounge_bot "" "@ci_lounge"
+          node -e "const t=JSON.parse(require('fs').readFileSync('data/tenants.json','utf8')); if(!t['ci-lounge']) process.exit(1);"
+          mv /tmp/tenants.json data/tenants.json

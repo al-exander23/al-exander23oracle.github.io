@@ -2,7 +2,7 @@
 // User recipes are isolated from the official Oracle/ALX Originals pool.
 
 const DEFAULT_PRO_STATUS_API = 'https://al-exander23oracle-github-io.vercel.app/api/stars-status';
-const VERSION = '1.39.0-white-label';
+const VERSION = '1.40.0-commercial';
 const UPSTREAM_TIMEOUT_MS = 8000;
 const MAX_CREATE_PER_24H = 5;
 const enc = new TextEncoder();
@@ -66,10 +66,22 @@ function mixBelongsToTenant(id, tenantId) {
   return String(id || '').startsWith(communityMixPrefix(tenantId));
 }
 
+function tenantSecretName(tenantId) {
+  const normalized = normalizeTenantId(tenantId);
+  return `TENANT_BOT_TOKEN_${normalized.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
+}
+
 function tenantBotToken(env, tenantId) {
   const normalized = normalizeTenantId(tenantId);
   if (normalized === 'alx') return String(env.TELEGRAM_BOT_TOKEN || '').trim();
 
+  // Preferred commercial onboarding path: one encrypted Worker secret per venue.
+  // This avoids ever needing to re-open or replace a JSON registry containing
+  // tokens for other customers.
+  const individual = String(env?.[tenantSecretName(normalized)] || '').trim();
+  if (individual) return individual;
+
+  // Backwards-compatible fallback for already provisioned tenants.
   try {
     const registry = JSON.parse(String(env.TENANT_BOT_TOKENS || '{}'));
     return String(registry?.[normalized] || '').trim();
