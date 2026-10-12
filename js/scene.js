@@ -16,7 +16,7 @@
 
 import { initMixes, initCommunityMixes, hasMixes } from './mixes.js?v=1.42.0-venue-plans';
 import { oracleChooseMix } from './oracle.js?v=1.33.0-payment-audit';
-import { getScenario } from './scenario.js?v=1.33.0-payment-audit';
+import { getScenario } from './scenario.js?v=1.42.0-venue-plans';
 import { createGlobeRotator, spawnSmoke } from './effects.js';
 import { prepareOrbText, typeOrbText, prepareOraclePhrase, typeOraclePhrase, renderCard, showToast } from './ui.js?v=1.42.0-venue-plans';
 import { addToHistory } from './profile.js';
