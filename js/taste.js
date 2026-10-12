@@ -13,7 +13,7 @@ import {
 } from './profile.js';
 import { getOrCreateDailyMix, getVisitStats } from './daily.js?v=1.33.0-payment-audit';
 import { getAchievementState, getStreakRewardState } from './achievements.js?v=1.33.0-payment-audit';
-import { getTenant } from './tenant.js?v=1.39.0-white-label';
+import { getTenant } from './tenant.js?v=1.39.1-white-label';
 
 const TENANT = getTenant();
 
