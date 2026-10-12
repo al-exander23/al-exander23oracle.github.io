@@ -1,12 +1,16 @@
 // onboarding.js — first-run guide for the current ALX Oracle experience.
 // Pure presentation layer: it does not change Oracle, profile or payment logic.
 
-const DONE_KEY = 'alx_oracle_onboarding_v2';
-const HISTORY_KEY = 'alx_oracle_history';
+import { getTenant, getTenantId, tenantStorageKey } from './tenant.js?v=1.39.0-white-label';
+
+const TENANT = getTenant();
+const IS_WHITE_LABEL = getTenantId() !== 'alx';
+const DONE_KEY = tenantStorageKey('alx_oracle_onboarding_v2');
+const HISTORY_KEY = tenantStorageKey('alx_oracle_history');
 const OVERLAY_ID = 'alxOnboarding';
 const HELP_ID = 'onboardingHelpBtn';
 
-const STEPS = [
+const ALX_STEPS = [
   {
     target: '#orbWrap',
     kicker: '01 · ДОБРО ПОЖАЛОВАТЬ',
@@ -86,6 +90,64 @@ const STEPS = [
   },
 ];
 
+const WHITE_LABEL_STEPS = [
+  {
+    target: '#orbWrap',
+    kicker: '01 · ДОБРО ПОЖАЛОВАТЬ',
+    icon: '✦',
+    title: `${TENANT.displayName} — твой Микс Оракул`,
+    text: 'Не нужно листать каталог. Коснись шара — Оракул сам подберёт один готовый микс с составом и точными пропорциями.',
+    chips: ['шар', 'готовый микс', 'точные пропорции'],
+  },
+  {
+    target: '#orbWrap',
+    kicker: '02 · ГЛАВНОЕ ДЕЙСТВИЕ',
+    icon: '✦',
+    title: 'Коснись шара',
+    text: 'Нажми на шар или встряхни телефон. Можно пользоваться без дневного лимита — приложение подготовлено для гостей заведения.',
+    chips: ['тап по шару', 'встряхивание', 'без дневного лимита'],
+  },
+  {
+    target: '#alxBottomNav',
+    kicker: '03 · НАВИГАЦИЯ',
+    icon: '☰',
+    title: 'Четыре основных раздела',
+    text: 'Главная открывает Оракул, Избранное хранит понравившиеся рецепты, Профиль собирает историю и вкусовые предпочтения, а Community открывает миксы участников.',
+    legend: [
+      ['Главная', 'шар и подбор микса'],
+      ['Избранное', 'сохранённые рецепты'],
+      ['Профиль', 'история и предпочтения'],
+      ['Community', 'миксы участников'],
+    ],
+  },
+  {
+    target: '#alxAccessStrip',
+    kicker: '04 · ГОСТЕВОЙ ДОСТУП',
+    icon: '∞',
+    title: 'Подборы без лимита',
+    text: `В версии ${TENANT.displayName} нет экрана ALX PRO и платной подписки для гостя. Основной Оракул, профиль, избранное и Community доступны сразу.`,
+    chips: ['без ALX PRO', 'без дневного лимита', 'готово для гостей'],
+  },
+  {
+    target: '#alxBottomNav',
+    kicker: '05 · COMMUNITY',
+    icon: '★',
+    title: 'Можно добавить свой микс',
+    text: 'В Community можно публиковать собственные сочетания, оценивать рецепты других участников, сохранять понравившиеся и делиться ими.',
+    chips: ['создать микс', 'оценить', 'сохранить', 'поделиться'],
+  },
+  {
+    target: '#orbWrap',
+    kicker: '06 · ГОТОВО',
+    icon: '✦',
+    title: 'Можно начинать',
+    text: 'Вернись на Главную и коснись шара. Оракул покажет первый микс.',
+    chips: ['Главная', 'коснись шара', 'получи рецепт'],
+  },
+];
+
+const STEPS = IS_WHITE_LABEL ? WHITE_LABEL_STEPS : ALX_STEPS;
+
 let stepIndex = 0;
 let currentTarget = null;
 let manualOpen = false;
@@ -121,7 +183,7 @@ function ensureHelpButton() {
   button.className = 'icon-btn onboarding-help-btn';
   button.type = 'button';
   button.textContent = '?';
-  button.setAttribute('aria-label', 'Как пользоваться ALX Oracle');
+  button.setAttribute('aria-label', IS_WHITE_LABEL ? `Как пользоваться ${TENANT.displayName}` : 'Как пользоваться ALX Oracle');
   button.addEventListener('click', () => openOnboarding(true));
   toolbar.appendChild(button);
 }
