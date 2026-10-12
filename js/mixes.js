@@ -12,7 +12,7 @@ let originalsLoaded = false;
 let communityPromise = null;
 let communityLoaded = false;
 
-const DATA_VERSION = '1.31.0-community-oracle';
+const DATA_VERSION = '1.42.0-venue-plans';
 const FETCH_TIMEOUT = 6000;
 const ORIGINALS_COLLECTION = 'originals';
 const COMMUNITY_COLLECTION = 'community';
