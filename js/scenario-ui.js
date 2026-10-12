@@ -11,7 +11,7 @@ import {
   describeScenario,
   getCollectionCounts,
   hasActiveScenario,
-} from './scenario.js?v=1.33.0-payment-audit';
+} from './scenario.js?v=1.42.0-venue-plans';
 import {
   isProActive,
   isPremiumCollection,
