@@ -59,6 +59,8 @@ const ALLOWED_EVENTS = new Set([
   'venue_mix_result',
   'favorite_toggle',
   'mix_share',
+  'venue_promo_view',
+  'venue_promo_click',
 ]);
 
 function b64urlDecode(value) {
@@ -606,6 +608,10 @@ async function summaryData(env, days = 30, tenantRaw = '') {
     favoriteUsers: Number(favoriteSavesRow?.users || 0),
     shares: Number(map.mix_share?.events || 0),
     shareUsers: Number(map.mix_share?.users || 0),
+    promoViews: Number(map.venue_promo_view?.events || 0),
+    promoViewUsers: Number(map.venue_promo_view?.users || 0),
+    promoClicks: Number(map.venue_promo_click?.events || 0),
+    promoClickUsers: Number(map.venue_promo_click?.users || 0),
   };
 
   return {
@@ -744,6 +750,14 @@ function venueDashboardPage(summary, tenantId) {
       <div class="card"><div class="kpi">${Number(community.opened || 0)}</div><div class="label">гостей открыли Community</div></div>
       <div class="card"><div class="kpi">${Number(community.mixesCreated || 0)}</div><div class="label">гостей публиковали миксы</div></div>
     </div></div>
+
+    ${Number(engagement.promoViews || 0) > 0 ? `
+    <div class="section"><h2>Промо-механика</h2><div class="grid">
+      <div class="card"><div class="kpi">${Number(engagement.promoViews || 0)}</div><div class="label">показов промо</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.promoClicks || 0)}</div><div class="label">кликов по промо</div></div>
+      <div class="card"><div class="kpi">${pct(engagement.promoClicks, engagement.promoViews)}</div><div class="label">CTR промо</div></div>
+      <div class="card"><div class="kpi">${Number(engagement.promoClickUsers || 0)}</div><div class="label">уникальных гостей кликнули</div></div>
+    </div></div>` : ''}
 
     <div class="section"><h2>Источники гостей</h2>
       <table><thead><tr><th>Источник</th><th>Гости</th><th>Открытия</th><th>Получили микс</th><th>Конверсия</th><th>Фирменный микс</th></tr></thead><tbody>${sourceRows}</tbody></table>
