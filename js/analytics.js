@@ -3,7 +3,7 @@
 // No Telegram ids, usernames, mix contents or payment identifiers are collected here.
 
 import { getProState, isTelegramPaymentContext } from './pro.js?v=1.33.0-payment-audit';
-import { getTenantId, tenantStorageKey } from './tenant.js?v=1.39.1-white-label';
+import { getTenantId, getTenantPlan, tenantStorageKey } from './tenant.js?v=1.42.0-venue-plans';
 
 const ENDPOINT = 'https://alx-pay.alxoracle.workers.dev/api/analytics/event';
 const INSTALL_KEY = 'alx_analytics_install_v1';
@@ -195,6 +195,31 @@ function observeOnboarding() {
   bodyObserver.observe(document.body, { childList: true, subtree: true });
 }
 
+function wireVenueEvents() {
+  window.addEventListener('alx-mix-rendered', (event) => {
+    const detail = event.detail || {};
+    if (detail.venueMix === true) {
+      trackAnalytics('venue_mix_result', { source: 'venue' });
+    }
+  });
+
+  window.addEventListener('alx-favorite-toggle', (event) => {
+    const detail = event.detail || {};
+    trackAnalytics('favorite_toggle', {
+      saved: detail.saved === true,
+      venueMix: detail.venueMix === true,
+    });
+  });
+
+  window.addEventListener('alx-mix-share', (event) => {
+    const detail = event.detail || {};
+    trackAnalytics('mix_share', {
+      venueMix: detail.venueMix === true,
+      communityMix: detail.communityMix === true,
+    });
+  });
+}
+
 function wireEvents() {
   window.addEventListener('alx-free-usage-change', (event) => {
     const detail = event.detail || {};
@@ -282,6 +307,7 @@ function wireEvents() {
 
 function init() {
   wireEvents();
+  wireVenueEvents();
   observeOracleCounter();
   observeOnboarding();
 
@@ -291,6 +317,7 @@ function init() {
     acquisitionSource: acquisition.source,
     firstAcquisitionSource: acquisition.firstSource,
     startParam: acquisition.startParam,
+    venuePlan: getTenantPlan(),
     language: String(document.documentElement.lang || navigator.language || '').slice(0, 16),
   });
 }
